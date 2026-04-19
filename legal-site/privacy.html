@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy – Shift-Right</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      line-height: 1.7;
+    }
+    header {
+      background: linear-gradient(135deg, #1a2d4f 0%, #243560 100%);
+      border-bottom: 3px solid #bf1f3a;
+      padding: 28px 24px;
+      text-align: center;
+    }
+    header h1 { color: #fff; font-size: 1.6rem; font-weight: 800; letter-spacing: -0.3px; }
+    header p  { color: rgba(255,255,255,0.65); font-size: 0.85rem; margin-top: 6px; }
+    .container { max-width: 760px; margin: 40px auto; padding: 0 24px 80px; }
+    h2 {
+      font-size: 1.05rem; font-weight: 700; color: #1a2d4f;
+      margin: 36px 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    p  { margin: 10px 0; font-size: 0.95rem; color: #334155; }
+    ul { margin: 10px 0 10px 20px; }
+    li { margin: 6px 0; font-size: 0.95rem; color: #334155; }
+    a  { color: #1a2d4f; text-decoration: underline; }
+    .last-updated {
+      display: inline-block;
+      background: #e0e7ff;
+      color: #3730a3;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 99px;
+      margin-bottom: 28px;
+    }
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      border-top: 1px solid #e2e8f0;
+      margin-top: 60px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Shift-Right</h1>
+  <p>Privacy Policy</p>
+</header>
+
+<div class="container">
+  <span class="last-updated">Last updated: April 19, 2026</span>
+
+  <p>Shift-Right ("we", "our", or "us") operates the Shift-Right mobile application (the "App"). This Privacy Policy explains how we collect, use, disclose, and protect your information when you use our App. By using the App, you agree to the practices described here.</p>
+
+  <h2>1. Information We Collect</h2>
+  <p>We collect the following types of information:</p>
+  <ul>
+    <li><strong>Account information:</strong> Name, email address, and role (manager or worker) provided during registration.</li>
+    <li><strong>Profile photo:</strong> Optionally uploaded by you. Stored securely via Cloudflare R2.</li>
+    <li><strong>Organizational data:</strong> Shift schedules, availability, swap requests, and coverage blocks created within your organization.</li>
+    <li><strong>Billing information:</strong> Subscription plan and payment status. Payment transactions are processed by Lemon Squeezy — we never store your card details.</li>
+    <li><strong>Device information:</strong> Push notification token, device type, and OS version, collected to deliver notifications.</li>
+    <li><strong>Usage data:</strong> App activity logs collected via Sentry for error monitoring and crash reporting.</li>
+  </ul>
+
+  <h2>2. How We Use Your Information</h2>
+  <ul>
+    <li>To provide and operate the Shift-Right service</li>
+    <li>To send shift reminders and scheduling notifications</li>
+    <li>To process subscription payments via Lemon Squeezy</li>
+    <li>To send transactional emails (invites, password resets) via Resend</li>
+    <li>To detect and fix errors via Sentry crash reporting</li>
+    <li>To respond to your support requests</li>
+  </ul>
+
+  <h2>3. Information Sharing</h2>
+  <p>We do not sell your personal data. We share data only with the following trusted service providers, solely to operate the App:</p>
+  <ul>
+    <li><strong>Lemon Squeezy</strong> — payment processing and subscription management</li>
+    <li><strong>Cloudflare</strong> — CDN, media storage (R2), and DDoS protection</li>
+    <li><strong>Expo / EAS</strong> — push notification delivery</li>
+    <li><strong>Resend</strong> — transactional email delivery</li>
+    <li><strong>Sentry</strong> — error and crash monitoring</li>
+    <li><strong>Railway</strong> — cloud infrastructure and database hosting</li>
+  </ul>
+  <p>Each provider is bound by their own privacy policy and data processing agreements.</p>
+
+  <h2>4. Data Retention</h2>
+  <ul>
+    <li>Account data is retained while your account is active.</li>
+    <li>Shift and scheduling data is retained for 12 months after creation, then automatically deleted.</li>
+    <li>After account deletion, all personal data is removed within 30 days.</li>
+  </ul>
+
+  <h2>5. Data Security</h2>
+  <p>We use industry-standard security measures including:</p>
+  <ul>
+    <li>TLS/HTTPS encryption for all data in transit</li>
+    <li>Encrypted storage for authentication tokens on your device (via Expo SecureStore)</li>
+    <li>HMAC-SHA256 verification for all webhook payloads</li>
+    <li>JWT access tokens with short expiry and rotating refresh tokens</li>
+  </ul>
+  <p>No method of transmission over the internet is 100% secure. We strive to use commercially acceptable means to protect your data but cannot guarantee absolute security.</p>
+
+  <h2>6. Children's Privacy</h2>
+  <p>Shift-Right is not directed to children under 13. We do not knowingly collect personal information from children under 13. If you believe a child has provided us with personal data, please contact us and we will delete it promptly.</p>
+
+  <h2>7. Your Rights</h2>
+  <p>Depending on your location, you may have the right to:</p>
+  <ul>
+    <li>Access the personal data we hold about you</li>
+    <li>Request correction of inaccurate data</li>
+    <li>Request deletion of your account and associated data</li>
+    <li>Object to or restrict certain processing</li>
+  </ul>
+  <p>To exercise any of these rights, contact us at <a href="mailto:support@shiftright.app">support@shiftright.app</a>.</p>
+
+  <h2>8. International Transfers</h2>
+  <p>Shift-Right is operated from Israel. Your data may be processed in countries where our service providers operate (including the United States). By using the App, you consent to this transfer.</p>
+
+  <h2>9. Changes to This Policy</h2>
+  <p>We may update this Privacy Policy from time to time. We will notify you of significant changes via the App or by email. Continued use of the App after changes constitutes acceptance of the updated policy.</p>
+
+  <h2>10. Contact Us</h2>
+  <p>If you have any questions about this Privacy Policy, please contact us at:</p>
+  <p><strong>Shift-Right</strong><br />
+  Israel<br />
+  <a href="mailto:support@shiftright.app">support@shiftright.app</a></p>
+</div>
+
+<footer>
+  &copy; 2026 Shift-Right. All rights reserved.
+  &nbsp;·&nbsp; <a href="/terms">Terms of Service</a>
+</footer>
+
+</body>
+</html>
