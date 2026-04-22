@@ -3,85 +3,414 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shift-Right – Smart Shift Scheduling</title>
+  <title>Shift-Right – Smart Shift Scheduling for Teams</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #1a2d4f;
+      --navy-deep: #111e36;
+      --red: #bf1f3a;
+      --red-light: #e8253f;
+      --bg: #f8fafc;
+      --white: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #f8fafc;
-      color: #1e293b;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    header {
-      background: linear-gradient(135deg, #1a2d4f 0%, #243560 100%);
-      border-bottom: 3px solid #bf1f3a;
-      padding: 60px 24px;
-      text-align: center;
-    }
-    header h1 { color: #fff; font-size: 2.2rem; font-weight: 800; letter-spacing: -0.5px; }
-    header p  { color: rgba(255,255,255,0.7); font-size: 1.05rem; margin-top: 10px; }
-    .container {
-      max-width: 600px;
-      margin: 60px auto;
-      padding: 0 24px;
-      text-align: center;
-      flex: 1;
-    }
-    .tagline {
-      font-size: 1.1rem;
-      color: #475569;
-      margin-bottom: 40px;
+      background: var(--bg);
+      color: var(--text);
       line-height: 1.6;
     }
-    .links {
+
+    /* NAV */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--navy);
+      padding: 16px 24px;
       display: flex;
-      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--red); }
+    .nav-cta {
+      background: var(--red);
+      color: #fff;
+      border: none;
+      padding: 9px 20px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .nav-cta:hover { background: var(--red-light); }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, var(--navy) 0%, #243560 60%, #1a3060 100%);
+      padding: 80px 24px 100px;
+      text-align: center;
+      color: #fff;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(191, 31, 58, 0.2);
+      border: 1px solid rgba(191, 31, 58, 0.5);
+      color: #ff8a96;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+      line-height: 1.2;
+      max-width: 700px;
+      margin: 0 auto 20px;
+      letter-spacing: -1px;
+    }
+    .hero h1 em { color: #ff8a96; font-style: normal; }
+    .hero p {
+      color: rgba(255,255,255,0.72);
+      font-size: 1.1rem;
+      max-width: 520px;
+      margin: 0 auto 36px;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 12px;
       justify-content: center;
       flex-wrap: wrap;
     }
-    .link-card {
-      display: block;
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 20px 32px;
-      text-decoration: none;
-      color: #1a2d4f;
+    .btn-primary {
+      background: var(--red);
+      color: #fff;
+      padding: 14px 32px;
+      border-radius: 10px;
+      font-size: 1rem;
       font-weight: 700;
-      font-size: 0.95rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-      transition: box-shadow 0.15s;
+      text-decoration: none;
+      transition: background 0.15s, transform 0.1s;
+      display: inline-block;
     }
-    .link-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    footer {
+    .btn-primary:hover { background: var(--red-light); transform: translateY(-1px); }
+    .btn-secondary {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.25);
+      padding: 14px 32px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.15s;
+      display: inline-block;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.18); }
+
+    /* SECTIONS */
+    .section { padding: 80px 24px; }
+    .section-inner { max-width: 1000px; margin: 0 auto; }
+    .section-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 10px;
+    }
+    .section-title {
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 800;
+      color: var(--navy);
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+    }
+    .section-sub {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 500px;
+      margin-bottom: 48px;
+    }
+
+    /* FEATURES */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .feature-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      transition: box-shadow 0.15s, transform 0.15s;
+    }
+    .feature-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.08); transform: translateY(-2px); }
+    .feature-icon { font-size: 1.8rem; margin-bottom: 14px; }
+    .feature-card h3 { font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+    .feature-card p { font-size: 0.88rem; color: var(--muted); line-height: 1.6; }
+
+    /* PRICING */
+    .pricing-section { background: var(--navy); color: #fff; }
+    .pricing-section .section-title { color: #fff; }
+    .pricing-section .section-sub { color: rgba(255,255,255,0.55); }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 20px;
+      align-items: start;
+    }
+    .pricing-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 32px 28px;
+      position: relative;
+    }
+    .pricing-card.popular {
+      background: var(--white);
+      color: var(--text);
+      border-color: transparent;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+    }
+    .popular-badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--red);
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 14px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+    .pricing-tier {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 8px;
+    }
+    .pricing-card.popular .pricing-tier { color: var(--muted); }
+    .pricing-price {
+      font-size: 2.6rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .pricing-card.popular .pricing-price { color: var(--navy); }
+    .pricing-price span { font-size: 1rem; font-weight: 500; opacity: 0.55; }
+    .pricing-desc { font-size: 0.85rem; color: rgba(255,255,255,0.45); margin-bottom: 24px; }
+    .pricing-card.popular .pricing-desc { color: var(--muted); }
+    .pricing-features { list-style: none; margin-bottom: 28px; }
+    .pricing-features li {
+      font-size: 0.88rem;
+      color: rgba(255,255,255,0.78);
+      padding: 7px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .pricing-features li:last-child { border-bottom: none; }
+    .pricing-card.popular .pricing-features li { color: var(--text); border-bottom-color: var(--border); }
+    .pricing-features li::before { content: "✓"; color: #4ade80; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+    .pricing-cta {
+      display: block;
       text-align: center;
-      padding: 24px;
-      font-size: 0.8rem;
-      color: #94a3b8;
-      border-top: 1px solid #e2e8f0;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .pricing-cta-outline { border: 1px solid rgba(255,255,255,0.25); color: #fff; }
+    .pricing-cta-outline:hover { background: rgba(255,255,255,0.1); }
+    .pricing-cta-solid { background: var(--red); color: #fff; }
+    .pricing-cta-solid:hover { background: var(--red-light); }
+
+    /* CTA STRIP */
+    .cta-strip { background: var(--red); padding: 64px 24px; text-align: center; color: #fff; }
+    .cta-strip h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); font-weight: 800; margin-bottom: 12px; }
+    .cta-strip p { color: rgba(255,255,255,0.8); font-size: 1rem; margin-bottom: 28px; }
+    .btn-white {
+      background: #fff;
+      color: var(--red);
+      padding: 14px 36px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 800;
+      text-decoration: none;
+      display: inline-block;
+      transition: transform 0.1s, box-shadow 0.15s;
+    }
+    .btn-white:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+
+    /* FOOTER */
+    footer { background: var(--navy-deep); color: rgba(255,255,255,0.45); padding: 32px 24px; text-align: center; }
+    .footer-links { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+    .footer-links a { color: rgba(255,255,255,0.45); text-decoration: none; font-size: 0.875rem; transition: color 0.15s; }
+    .footer-links a:hover { color: #fff; }
+    footer p { font-size: 0.8rem; }
+
+    @media (max-width: 500px) {
+      .pricing-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-<header>
-  <h1>Shift-Right</h1>
-  <p>Smart shift scheduling for modern teams</p>
-</header>
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="/">Shift<span>Right</span></a>
+  <a class="nav-cta" href="#pricing">Get Started</a>
+</nav>
 
-<div class="container">
-  <p class="tagline">Shift-Right helps managers and workers coordinate schedules, manage availability, and handle shift swaps — all in one place.</p>
-  <div class="links">
-    <a class="link-card" href="/privacy">Privacy Policy</a>
-    <a class="link-card" href="/terms">Terms of Service</a>
-    <a class="link-card" href="mailto:support@shiftright.app">Contact Support</a>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">Shift Management for Teams</div>
+  <h1>Stop scrambling.<br>Start <em>scheduling</em> smarter.</h1>
+  <p>Shift-Right helps managers build coverage, automate schedules, and coordinate their teams — all in one app.</p>
+  <div class="hero-actions">
+    <a class="btn-primary" href="#pricing">Download Free</a>
+    <a class="btn-secondary" href="#features">See Features</a>
   </div>
-</div>
+</section>
 
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="section-inner">
+    <p class="section-label">Features</p>
+    <h2 class="section-title">Everything your team needs</h2>
+    <p class="section-sub">Built for shift-based teams — from small cafes to multi-location operations.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>Auto-Scheduling</h3>
+        <p>Generate full-week schedules in seconds. Shift-Right factors in availability, roles, and coverage requirements automatically.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🗺️</div>
+        <h3>Coverage Builder</h3>
+        <p>Define how many people you need per role, per shift. Gaps are flagged before they become a problem on the floor.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📍</div>
+        <h3>Multi-Location</h3>
+        <p>Manage schedules across multiple sites from one dashboard. Each location stays independent or shares your team.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔄</div>
+        <h3>Shift Swaps</h3>
+        <p>Workers request swaps directly in the app. Managers approve in one tap — no more group texts or last-minute scrambles.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Reports &amp; Analytics</h3>
+        <p>Track hours worked, coverage gaps, and overtime trends. Make smarter scheduling decisions every week.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📅</div>
+        <h3>Availability Management</h3>
+        <p>Workers set their availability once. Schedules always respect it — and managers see the full picture at a glance.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section pricing-section" id="pricing">
+  <div class="section-inner">
+    <p class="section-label" style="color:rgba(255,255,255,0.4)">Pricing</p>
+    <h2 class="section-title">Simple, transparent pricing</h2>
+    <p class="section-sub">Start free. Upgrade when your team grows.</p>
+    <div class="pricing-grid">
+
+      <div class="pricing-card">
+        <p class="pricing-tier">Free</p>
+        <p class="pricing-price">$0 <span>/ forever</span></p>
+        <p class="pricing-desc">Perfect for small teams getting started.</p>
+        <ul class="pricing-features">
+          <li>Manual scheduling</li>
+          <li>Reports &amp; analytics</li>
+          <li>Up to 5 workers</li>
+          <li>1 location</li>
+        </ul>
+        <a class="pricing-cta pricing-cta-outline" href="#">Download Free</a>
+      </div>
+
+      <div class="pricing-card popular">
+        <div class="popular-badge">Most Popular</div>
+        <p class="pricing-tier">Pro</p>
+        <p class="pricing-price">$29 <span>/ month</span></p>
+        <p class="pricing-desc">For growing teams that need more power.</p>
+        <ul class="pricing-features">
+          <li>Everything in Free</li>
+          <li>Up to 50 workers</li>
+          <li>Unlimited locations</li>
+          <li>Coverage builder</li>
+          <li>Auto-scheduling</li>
+        </ul>
+        <a class="pricing-cta pricing-cta-solid" href="#">Get Pro</a>
+      </div>
+
+      <div class="pricing-card">
+        <p class="pricing-tier">Business</p>
+        <p class="pricing-price">$59 <span>/ month</span></p>
+        <p class="pricing-desc">For large or complex operations.</p>
+        <ul class="pricing-features">
+          <li>Everything in Pro</li>
+          <li>Unlimited workers</li>
+          <li>Priority support</li>
+        </ul>
+        <a class="pricing-cta pricing-cta-outline" href="#">Get Business</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CTA STRIP -->
+<section class="cta-strip">
+  <h2>Ready to fix your scheduling?</h2>
+  <p>Download Shift-Right free — no credit card required.</p>
+  <a class="btn-white" href="#">Download on the App Store</a>
+</section>
+
+<!-- FOOTER -->
 <footer>
-  &copy; 2026 Shift-Right. All rights reserved.
+  <div class="footer-links">
+    <a href="/privacy">Privacy Policy</a>
+    <a href="/terms">Terms of Service</a>
+    <a href="mailto:support@shiftright.app">Contact Support</a>
+  </div>
+  <p>&copy; 2026 Shift-Right. All rights reserved.</p>
 </footer>
 
 </body>
