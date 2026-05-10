@@ -268,18 +268,11 @@
       <div id="error-msg"></div>
     </div>
 
-    <!-- Success state -->
+    <!-- Success state (briefly shown while redirecting) -->
     <div class="success-card" id="success-state">
       <div class="success-icon">✓</div>
-      <h2>You're connected!</h2>
-      <p class="org-name" id="org-name"></p>
-      <div class="user-badge">
-        <span id="user-name"></span>
-        <span class="role-chip" id="user-role"></span>
-      </div>
-      <div class="coming-soon">
-        The full web experience is on its way. Your session is active and ready for when it launches.
-      </div>
+      <h2>Opening ShiftRight…</h2>
+      <p class="org-name">Taking you to the web app.</p>
     </div>
 
   </div>
@@ -370,18 +363,13 @@
   }
 
   function onScanned(data) {
-    // Store session in localStorage for future web app use
-    localStorage.setItem('shiftright_token', data.token)
-    localStorage.setItem('shiftright_refresh_token', data.refreshToken)
-    localStorage.setItem('shiftright_user', JSON.stringify(data.user))
-    localStorage.setItem('shiftright_org', JSON.stringify(data.organization))
+    // Store session in localStorage — same domain as /web/ so it's shared
+    localStorage.setItem('shiftflow_token', data.token)
+    localStorage.setItem('shiftflow_refresh_token', data.refreshToken)
+    localStorage.setItem('shiftflow_user', JSON.stringify(data.user))
+    localStorage.setItem('shiftflow_org', JSON.stringify(data.organization))
 
-    // Show success UI
-    document.getElementById('qr-state').style.display = 'none'
-    document.getElementById('success-state').style.display = 'block'
-    document.getElementById('user-name').textContent = data.user.name
-    document.getElementById('user-role').textContent = data.user.role
-    document.getElementById('org-name').textContent = data.organization.name
+    window.location.href = '/web/'
   }
 
   function showError(msg) {

@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ShiftRight</title>
+  <style>
+    :root {
+      --navy: #1a2d4f;
+      --navy-mid: #223660;
+      --navy-deep: #111e36;
+      --red: #bf1f3a;
+      --bg: #f1f5f9;
+      --white: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --sidebar: 272px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; }
+
+    /* ── Loading ── */
+    #loading { position: fixed; inset: 0; background: var(--navy-deep); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; z-index: 100; }
+    #loading .logo { font-size: 1.6rem; font-weight: 800; color: white; } #loading .logo span { color: var(--red); }
+    .spinner { width: 32px; height: 32px; border: 3px solid rgba(255,255,255,0.2); border-top-color: var(--red); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Layout ── */
+    #app { display: none; width: 100%; height: 100vh; }
+
+    /* ── Sidebar ── */
+    aside {
+      width: var(--sidebar); min-width: var(--sidebar);
+      background: var(--navy-deep);
+      display: flex; flex-direction: column;
+      height: 100vh; overflow: hidden;
+    }
+    .sidebar-header { padding: 24px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .logo { font-size: 1.2rem; font-weight: 800; color: white; } .logo span { color: var(--red); }
+
+    .user-card { padding: 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--red); display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; font-size: 0.9rem; flex-shrink: 0; }
+    .user-info { overflow: hidden; }
+    .user-name { font-size: 0.875rem; font-weight: 600; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-org  { font-size: 0.75rem; color: rgba(255,255,255,0.45); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+    .plan-badge { display: inline-block; font-size: 0.6rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; margin-top: 3px; }
+    .plan-FREE     { background: rgba(148,163,184,0.2); color: #94a3b8; }
+    .plan-PRO      { background: rgba(191,31,58,0.25); color: #f87171; }
+    .plan-BUSINESS { background: rgba(217,119,6,0.25); color: #fbbf24; }
+
+    nav { flex: 1; padding: 12px 10px; overflow-y: auto; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 10px; cursor: pointer; color: rgba(255,255,255,0.55); font-size: 0.875rem; font-weight: 500; transition: all 0.15s; margin-bottom: 2px; }
+    .nav-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); }
+    .nav-item.active { background: rgba(255,255,255,0.1); color: white; }
+    .nav-item svg { flex-shrink: 0; opacity: 0.7; }
+    .nav-item.active svg { opacity: 1; }
+
+    .sidebar-footer { padding: 16px 10px; border-top: 1px solid rgba(255,255,255,0.07); }
+    .sign-out-btn { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; cursor: pointer; color: rgba(255,255,255,0.4); font-size: 0.8rem; transition: all 0.15s; width: 100%; background: none; border: none; }
+    .sign-out-btn:hover { color: #f87171; background: rgba(248,113,113,0.08); }
+
+    /* ── Main ── */
+    main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* ── Top bar ── */
+    .topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 28px; height: 58px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .topbar-title { font-size: 1rem; font-weight: 700; color: var(--navy); }
+    .week-nav { display: flex; align-items: center; gap: 8px; }
+    .week-label { font-size: 0.875rem; font-weight: 600; color: var(--text); min-width: 180px; text-align: center; }
+    .week-btn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border); background: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); transition: all 0.15s; }
+    .week-btn:hover { border-color: var(--navy); color: var(--navy); }
+
+    /* ── Day tabs ── */
+    .day-tabs { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 28px; display: flex; gap: 4px; flex-shrink: 0; }
+    .day-tab { padding: 12px 16px; font-size: 0.8rem; font-weight: 600; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.15s; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .day-tab:hover { color: var(--navy); }
+    .day-tab.active { color: var(--navy); border-bottom-color: var(--red); }
+    .day-tab .day-num { font-size: 1rem; font-weight: 700; }
+    .day-tab.today .day-num { color: var(--red); }
+
+    /* ── Shifts list ── */
+    .content-area { flex: 1; overflow-y: auto; padding: 24px 28px; }
+
+    .shifts-grid { display: flex; flex-direction: column; gap: 12px; }
+
+    .empty-state { text-align: center; padding: 64px 24px; color: var(--muted); }
+    .empty-state svg { margin-bottom: 16px; opacity: 0.3; }
+    .empty-state p { font-size: 0.9rem; }
+
+    /* ── Shift card ── */
+    .shift-card { background: var(--white); border-radius: 14px; padding: 18px 20px; border: 1px solid var(--border); display: flex; gap: 16px; align-items: flex-start; transition: box-shadow 0.15s; }
+    .shift-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+
+    .shift-time-col { display: flex; flex-direction: column; align-items: center; min-width: 72px; }
+    .shift-time { font-size: 0.8rem; font-weight: 700; color: var(--navy); }
+    .shift-time-sep { width: 1px; height: 20px; background: var(--border); margin: 4px 0; }
+
+    .shift-body { flex: 1; }
+    .shift-top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+    .shift-dept { font-size: 0.9rem; font-weight: 700; color: var(--text); }
+    .shift-template { font-size: 0.75rem; color: var(--muted); }
+
+    .status-pill { font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.03em; }
+    .status-DRAFT     { background: #f1f5f9; color: #94a3b8; }
+    .status-PUBLISHED { background: #ede9fe; color: #6d28d9; }
+    .status-ACTIVE    { background: #dcfce7; color: #16a34a; }
+    .status-COMPLETED { background: #f1f5f9; color: #64748b; }
+    .status-CANCELLED { background: #fee2e2; color: #dc2626; }
+
+    .understaffed-badge { font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 100px; background: #fff7ed; color: #c2410c; }
+
+    .shift-workers { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+    .worker-chip { display: flex; align-items: center; gap: 5px; background: var(--bg); border-radius: 100px; padding: 3px 10px 3px 3px; font-size: 0.75rem; color: var(--text); }
+    .worker-avatar { width: 20px; height: 20px; border-radius: 50%; background: var(--navy); display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 700; color: white; flex-shrink: 0; }
+    .workers-count { font-size: 0.8rem; color: var(--muted); font-weight: 500; margin-left: 4px; }
+    .workers-empty { font-size: 0.8rem; color: #cbd5e1; font-style: italic; }
+
+    /* ── Profile view ── */
+    .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 860px; }
+    .profile-card { background: var(--white); border-radius: 16px; padding: 24px; border: 1px solid var(--border); }
+    .profile-card h3 { font-size: 0.7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px; }
+    .profile-avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--navy); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 12px; }
+    .profile-name { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+    .profile-email { font-size: 0.85rem; color: var(--muted); margin-bottom: 10px; }
+    .profile-role-badge { display: inline-block; font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 6px; background: #ede9fe; color: #6d28d9; text-transform: uppercase; }
+    .info-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.875rem; }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { color: var(--muted); }
+    .info-value { font-weight: 600; color: var(--text); }
+    .invite-code { font-family: monospace; font-size: 1rem; font-weight: 700; color: var(--navy); letter-spacing: 0.12em; background: var(--bg); padding: 6px 12px; border-radius: 8px; cursor: pointer; border: 1px solid var(--border); transition: all 0.15s; }
+    .invite-code:hover { border-color: var(--navy); }
+    .copy-hint { font-size: 0.7rem; color: var(--muted); margin-top: 6px; }
+
+    .loader-inline { display: flex; align-items: center; justify-content: center; padding: 60px; }
+    .loader-inline .spinner { border-color: rgba(0,0,0,0.1); border-top-color: var(--navy); }
+  </style>
+</head>
+<body>
+
+<!-- Loading screen -->
+<div id="loading">
+  <div class="logo">Shift<span>Right</span></div>
+  <div class="spinner"></div>
+</div>
+
+<!-- App shell -->
+<div id="app">
+  <!-- Sidebar -->
+  <aside>
+    <div class="sidebar-header">
+      <div class="logo">Shift<span>Right</span></div>
+    </div>
+
+    <div class="user-card">
+      <div class="avatar" id="sb-avatar"></div>
+      <div class="user-info">
+        <div class="user-name" id="sb-name"></div>
+        <div class="user-org"  id="sb-org"></div>
+        <div class="plan-badge" id="sb-plan"></div>
+      </div>
+    </div>
+
+    <nav>
+      <div class="nav-item active" id="nav-shifts" onclick="showView('shifts')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Shifts
+      </div>
+      <div class="nav-item" id="nav-profile" onclick="showView('profile')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Profile
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="sign-out-btn" onclick="signOut()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign out
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main>
+    <!-- Shifts view -->
+    <div id="view-shifts">
+      <div class="topbar">
+        <span class="topbar-title">Shifts</span>
+        <div class="week-nav">
+          <button class="week-btn" onclick="changeWeek(-1)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <span class="week-label" id="week-label"></span>
+          <button class="week-btn" onclick="changeWeek(1)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="day-tabs" id="day-tabs"></div>
+
+      <div class="content-area">
+        <div id="shifts-content"><div class="loader-inline"><div class="spinner"></div></div></div>
+      </div>
+    </div>
+
+    <!-- Profile view -->
+    <div id="view-profile" style="display:none">
+      <div class="topbar">
+        <span class="topbar-title">Profile</span>
+      </div>
+      <div class="content-area">
+        <div id="profile-content"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  const API = 'https://shift-right-production.up.railway.app/api'
+  const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+
+  let currentUser = null
+  let currentOrg  = null
+  let currentWeek = null   // Date — Monday of displayed week
+  let selectedDay = null   // Date — currently selected day
+  let shiftsCache = {}     // weekKey → shifts array
+
+  // ── Storage ──────────────────────────────────────────────────────────────
+
+  function getToken()        { return localStorage.getItem('shiftflow_token') }
+  function getRefreshToken() { return localStorage.getItem('shiftflow_refresh_token') }
+
+  function saveTokens(token, refresh) {
+    localStorage.setItem('shiftflow_token', token)
+    localStorage.setItem('shiftflow_refresh_token', refresh)
+  }
+
+  function clearSession() {
+    ['shiftflow_token','shiftflow_refresh_token','shiftflow_user','shiftflow_org'].forEach(k => localStorage.removeItem(k))
+  }
+
+  // ── API ───────────────────────────────────────────────────────────────────
+
+  let _retrying = false
+  async function apiFetch(path, opts = {}) {
+    const token = getToken()
+    const res = await fetch(API + path, {
+      ...opts,
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, ...(opts.headers || {}) },
+    })
+
+    if (res.status === 401 && !_retrying) {
+      _retrying = true
+      const refresh = getRefreshToken()
+      if (refresh) {
+        const rRes = await fetch(API + '/auth/refresh', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken: refresh }),
+        })
+        if (rRes.ok) {
+          const { token: t, refreshToken: r } = await rRes.json()
+          saveTokens(t, r)
+          _retrying = false
+          return apiFetch(path, opts)
+        }
+      }
+      _retrying = false
+      clearSession()
+      window.location.href = '/app/'
+      return null
+    }
+
+    _retrying = false
+    return res
+  }
+
+  // ── Date helpers ──────────────────────────────────────────────────────────
+
+  function getMondayOf(date) {
+    const d = new Date(date)
+    const day = d.getDay()
+    d.setDate(d.getDate() - (day === 0 ? 6 : day - 1))
+    d.setHours(0, 0, 0, 0)
+    return d
+  }
+
+  function addDays(date, n) {
+    const d = new Date(date)
+    d.setDate(d.getDate() + n)
+    return d
+  }
+
+  function isSameDay(a, b) {
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
+  }
+
+  function toYMD(date) {
+    return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`
+  }
+
+  function fmtDate(date) {
+    return `${DAYS[date.getDay()]} ${date.getDate()} ${MONTHS[date.getMonth()]}`
+  }
+
+  // ── Init ─────────────────────────────────────────────────────────────────
+
+  async function init() {
+    if (!getToken()) { window.location.href = '/app/'; return }
+
+    try {
+      const res = await apiFetch('/auth/me')
+      if (!res) return
+      const me = await res.json()
+
+      currentUser = me
+      currentOrg  = me.organization
+
+      // Persist fresh user/org
+      localStorage.setItem('shiftflow_user', JSON.stringify(currentUser))
+      localStorage.setItem('shiftflow_org',  JSON.stringify(currentOrg))
+
+      renderSidebar()
+
+      const today = new Date()
+      currentWeek = getMondayOf(today)
+      selectedDay = today
+
+      renderDayTabs()
+      renderWeekLabel()
+      await loadShifts()
+
+      document.getElementById('loading').style.display = 'none'
+      document.getElementById('app').style.display = 'flex'
+    } catch {
+      window.location.href = '/app/'
+    }
+  }
+
+  // ── Sidebar ───────────────────────────────────────────────────────────────
+
+  function renderSidebar() {
+    const initials = (currentUser.name || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase()
+    document.getElementById('sb-avatar').textContent = initials
+    document.getElementById('sb-name').textContent = currentUser.name
+    document.getElementById('sb-org').textContent = currentOrg.name
+
+    const plan = getEffectivePlan(currentOrg)
+    const planEl = document.getElementById('sb-plan')
+    planEl.textContent = plan
+    planEl.className = `plan-badge plan-${plan}`
+  }
+
+  function getEffectivePlan(org) {
+    if (!org) return 'FREE'
+    if (org.trialEndsAt && new Date(org.trialEndsAt) > new Date()) return 'PRO'
+    return org.plan || 'FREE'
+  }
+
+  // ── Views ─────────────────────────────────────────────────────────────────
+
+  function showView(view) {
+    document.getElementById('view-shifts').style.display  = view === 'shifts'  ? 'flex' : 'none'
+    document.getElementById('view-profile').style.display = view === 'profile' ? 'flex' : 'none'
+    document.getElementById('view-shifts').style.flexDirection  = 'column'
+
+    document.getElementById('nav-shifts').classList.toggle('active',  view === 'shifts')
+    document.getElementById('nav-profile').classList.toggle('active', view === 'profile')
+
+    if (view === 'profile') renderProfile()
+  }
+
+  // ── Week navigation ───────────────────────────────────────────────────────
+
+  function changeWeek(dir) {
+    currentWeek = addDays(currentWeek, dir * 7)
+    // If navigating to current week, select today; otherwise select first day
+    const today = new Date()
+    const weekEnd = addDays(currentWeek, 6)
+    selectedDay = (today >= currentWeek && today <= weekEnd) ? today : new Date(currentWeek)
+    renderWeekLabel()
+    renderDayTabs()
+    loadShifts()
+  }
+
+  function renderWeekLabel() {
+    const end = addDays(currentWeek, 6)
+    document.getElementById('week-label').textContent =
+      `${currentWeek.getDate()} ${MONTHS[currentWeek.getMonth()]} – ${end.getDate()} ${MONTHS[end.getMonth()]} ${end.getFullYear()}`
+  }
+
+  function renderDayTabs() {
+    const today = new Date()
+    const container = document.getElementById('day-tabs')
+    container.innerHTML = ''
+    for (let i = 0; i < 7; i++) {
+      const day = addDays(currentWeek, i)
+      const isToday   = isSameDay(day, today)
+      const isActive  = isSameDay(day, selectedDay)
+      const tab = document.createElement('div')
+      tab.className = `day-tab${isActive ? ' active' : ''}${isToday ? ' today' : ''}`
+      tab.innerHTML = `<span>${DAYS[day.getDay()]}</span><span class="day-num">${day.getDate()}</span>`
+      tab.onclick = () => { selectedDay = day; renderDayTabs(); renderShiftsForDay() }
+      container.appendChild(tab)
+    }
+  }
+
+  // ── Shifts ────────────────────────────────────────────────────────────────
+
+  async function loadShifts() {
+    const key = toYMD(currentWeek)
+    document.getElementById('shifts-content').innerHTML = '<div class="loader-inline"><div class="spinner"></div></div>'
+    try {
+      if (!shiftsCache[key]) {
+        const res = await apiFetch(`/shifts?weekOf=${key}`)
+        if (!res) return
+        shiftsCache[key] = await res.json()
+      }
+      renderShiftsForDay()
+    } catch {
+      document.getElementById('shifts-content').innerHTML = '<div class="empty-state"><p>Failed to load shifts.</p></div>'
+    }
+  }
+
+  function renderShiftsForDay() {
+    const key = toYMD(currentWeek)
+    const all = shiftsCache[key] || []
+    const dayShifts = all
+      .filter(s => isSameDay(new Date(s.date), selectedDay) && s.status !== 'CANCELLED')
+      .sort((a, b) => a.startTime.localeCompare(b.startTime))
+
+    const el = document.getElementById('shifts-content')
+
+    if (dayShifts.length === 0) {
+      el.innerHTML = `
+        <div class="empty-state">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <p>No shifts scheduled for ${fmtDate(selectedDay)}</p>
+        </div>`
+      return
+    }
+
+    el.innerHTML = `<div class="shifts-grid">${dayShifts.map(shiftCard).join('')}</div>`
+  }
+
+  function shiftCard(shift) {
+    const assigned = shift.assignments || []
+    const count = assigned.length
+    const required = shift.requiredWorkers
+
+    const workersHtml = count === 0
+      ? '<span class="workers-empty">No workers assigned</span>'
+      : assigned.map(a => {
+          const initials = (a.worker?.name || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase()
+          return `<div class="worker-chip"><div class="worker-avatar">${initials}</div>${a.worker?.name || 'Unknown'}</div>`
+        }).join('')
+
+    const understaffed = shift.understaffed
+      ? '<span class="understaffed-badge">⚠ Understaffed</span>' : ''
+
+    const templateName = shift.template?.name || shift.department?.name || ''
+
+    return `
+      <div class="shift-card">
+        <div class="shift-time-col">
+          <span class="shift-time">${shift.startTime}</span>
+          <div class="shift-time-sep"></div>
+          <span class="shift-time">${shift.endTime}</span>
+        </div>
+        <div class="shift-body">
+          <div class="shift-top">
+            <span class="shift-dept">${shift.department?.name || 'Unknown'}</span>
+            ${templateName !== shift.department?.name ? `<span class="shift-template">${templateName}</span>` : ''}
+            <span class="status-pill status-${shift.status}">${shift.status}</span>
+            ${understaffed}
+            <span class="workers-count">${count}/${required} workers</span>
+          </div>
+          <div class="shift-workers">${workersHtml}</div>
+        </div>
+      </div>`
+  }
+
+  // ── Profile ───────────────────────────────────────────────────────────────
+
+  function renderProfile() {
+    const plan = getEffectivePlan(currentOrg)
+    const planLabels = { FREE: 'Free', PRO: 'Pro', BUSINESS: 'Business' }
+    const initials = (currentUser.name || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase()
+
+    document.getElementById('profile-content').innerHTML = `
+      <div class="profile-grid">
+        <div class="profile-card">
+          <h3>Your account</h3>
+          <div class="profile-avatar">${initials}</div>
+          <div class="profile-name">${currentUser.name}</div>
+          <div class="profile-email">${currentUser.email}</div>
+          <div class="profile-role-badge">Manager</div>
+        </div>
+
+        <div class="profile-card">
+          <h3>Organization</h3>
+          <div class="info-row">
+            <span class="info-label">Name</span>
+            <span class="info-value">${currentOrg.name}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Plan</span>
+            <span class="info-value">${planLabels[plan] || plan}</span>
+          </div>
+          ${currentOrg.timezone ? `
+          <div class="info-row">
+            <span class="info-label">Timezone</span>
+            <span class="info-value">${currentOrg.timezone}</span>
+          </div>` : ''}
+          ${currentOrg.inviteCode ? `
+          <div class="info-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+            <span class="info-label">Invite code</span>
+            <div>
+              <div class="invite-code" onclick="copyInvite('${currentOrg.inviteCode}')" title="Click to copy">${currentOrg.inviteCode}</div>
+              <div class="copy-hint" id="copy-hint">Click to copy</div>
+            </div>
+          </div>` : ''}
+        </div>
+      </div>`
+  }
+
+  function copyInvite(code) {
+    navigator.clipboard.writeText(code).then(() => {
+      const hint = document.getElementById('copy-hint')
+      if (hint) { hint.textContent = 'Copied!'; setTimeout(() => { hint.textContent = 'Click to copy' }, 2000) }
+    }).catch(() => {})
+  }
+
+  // ── Sign out ──────────────────────────────────────────────────────────────
+
+  function signOut() {
+    const refresh = getRefreshToken()
+    if (refresh) {
+      fetch(API + '/auth/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: refresh }),
+      }).catch(() => {})
+    }
+    clearSession()
+    window.location.href = '/app/'
+  }
+
+  // ── Boot ──────────────────────────────────────────────────────────────────
+  init()
+</script>
+
+</body>
+</html>
