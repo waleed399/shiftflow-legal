@@ -52,7 +52,6 @@ function renderSidebar() {
 function showView(view) {
   document.getElementById('view-shifts').style.display  = view === 'shifts'  ? 'flex' : 'none'
   document.getElementById('view-profile').style.display = view === 'profile' ? 'flex' : 'none'
-  document.getElementById('view-shifts').style.flexDirection = 'column'
   document.getElementById('nav-shifts').classList.toggle('active',  view === 'shifts')
   document.getElementById('nav-profile').classList.toggle('active', view === 'profile')
   if (view === 'profile') renderProfile()
