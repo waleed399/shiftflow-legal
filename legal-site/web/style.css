@@ -133,10 +133,11 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
 /* Corner cell */
 .dt-corner { width: 108px; min-width: 108px; position: sticky; left: 0; z-index: 3; background: #f8fafc; border-right: 2px solid var(--border); border-bottom: 2px solid var(--border); padding: 0; overflow: hidden; }
-.dt-corner-line { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom right, transparent calc(50% - 0.5px), #cbd5e1 calc(50%), transparent calc(50% + 0.5px)); pointer-events: none; }
+.dt-corner-inner { position: relative; width: 100%; height: 100%; min-height: 52px; display: block; }
+.dt-corner-line { position: absolute; inset: 0; background: linear-gradient(to bottom right, transparent calc(50% - 0.5px), #cbd5e1 50%, transparent calc(50% + 0.5px)); pointer-events: none; }
 .dt-corner-label { position: absolute; font-size: 0.6rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
-.dt-corner-top    { top: 7px; right: 7px; }
-.dt-corner-bottom { bottom: 7px; left: 7px; }
+.dt-corner-top    { top: 6px; right: 6px; }
+.dt-corner-bottom { bottom: 6px; left: 6px; }
 
 /* Worker header columns */
 .dt-worker-th { width: 88px; min-width: 88px; padding: 8px 4px; text-align: center; background: #f8fafc; border-left: 1px solid var(--border); border-bottom: 2px solid var(--border); vertical-align: middle; }

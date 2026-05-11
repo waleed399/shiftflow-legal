@@ -351,9 +351,11 @@ export async function renderTableView() {
           <thead>
             <tr>
               <th class="dt-corner">
-                <span class="dt-corner-label dt-corner-top">Workers</span>
-                <div class="dt-corner-line"></div>
-                <span class="dt-corner-label dt-corner-bottom">Shifts</span>
+                <div class="dt-corner-inner">
+                  <span class="dt-corner-label dt-corner-top">Workers</span>
+                  <div class="dt-corner-line"></div>
+                  <span class="dt-corner-label dt-corner-bottom">Shifts</span>
+                </div>
               </th>
               ${workerCols}
             </tr>
