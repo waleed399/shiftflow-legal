@@ -56,7 +56,7 @@ export function renderProfile() {
     <div class="profile-grid">
       <div class="profile-card">
         <h3>Your account</h3>
-        <div class="profile-avatar">${initials}</div>
+        <div class="profile-avatar" id="profile-avatar">${initials}</div>
         <div class="profile-name">${esc(currentUser.name)}</div>
         <div class="profile-email">${esc(currentUser.email)}</div>
         <div class="profile-role-badge">Manager</div>
@@ -124,6 +124,15 @@ export function renderProfile() {
       <p class="billing-footer-note">Cancel anytime &middot; Secured by Lemon Squeezy</p>
       `}
     </div>`
+
+  if (currentUser.avatarUrl) {
+    const slot = document.getElementById('profile-avatar')
+    const img = document.createElement('img')
+    img.alt = ''
+    img.onload = () => { slot.textContent = ''; slot.appendChild(img) }
+    img.onerror = () => { /* keep initials */ }
+    img.src = currentUser.avatarUrl
+  }
 }
 
 function billingCard(planKey, p) {

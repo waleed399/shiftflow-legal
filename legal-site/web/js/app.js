@@ -85,7 +85,15 @@ function showToast(msg) {
 function renderSidebar() {
   const { currentUser, currentOrg } = state
   const initials = (currentUser.name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
-  document.getElementById('sb-avatar').textContent = initials
+  const sbAvatar = document.getElementById('sb-avatar')
+  sbAvatar.textContent = initials
+  if (currentUser.avatarUrl) {
+    const img = document.createElement('img')
+    img.alt = ''
+    img.onload = () => { sbAvatar.textContent = ''; sbAvatar.appendChild(img) }
+    img.onerror = () => { /* keep initials */ }
+    img.src = currentUser.avatarUrl
+  }
   document.getElementById('sb-name').textContent = currentUser.name
   document.getElementById('sb-org').textContent = currentOrg.name
 
