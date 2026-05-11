@@ -72,12 +72,13 @@
     .week-btn:hover { border-color: var(--navy); color: var(--navy); }
 
     /* ── Day tabs ── */
-    .day-tabs { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 28px; display: flex; gap: 4px; flex-shrink: 0; }
-    .day-tab { padding: 12px 16px; font-size: 0.8rem; font-weight: 600; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.15s; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .day-tabs { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 20px; display: flex; gap: 2px; flex-shrink: 0; }
+    .day-tab { padding: 10px 12px; font-size: 0.7rem; font-weight: 600; cursor: pointer; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; transition: all 0.15s; display: flex; flex-direction: column; align-items: center; gap: 4px; }
     .day-tab:hover { color: var(--navy); }
-    .day-tab.active { color: var(--navy); border-bottom-color: var(--red); }
-    .day-tab .day-num { font-size: 1rem; font-weight: 700; }
-    .day-tab.today .day-num { color: var(--red); }
+    .day-tab.active { color: var(--navy); }
+    .day-tab .day-num { font-size: 1rem; font-weight: 700; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.15s; }
+    .day-tab.active .day-num { background: var(--red); color: white; }
+    .day-tab.today:not(.active) .day-num { color: var(--red); }
 
     /* ── Shifts list ── */
     .content-area { flex: 1; overflow-y: auto; padding: 24px 28px; }
@@ -88,33 +89,33 @@
     .empty-state svg { margin-bottom: 16px; opacity: 0.3; }
     .empty-state p { font-size: 0.9rem; }
 
-    /* ── Shift card ── */
-    .shift-card { background: var(--white); border-radius: 14px; padding: 18px 20px; border: 1px solid var(--border); display: flex; gap: 16px; align-items: flex-start; transition: box-shadow 0.15s; }
-    .shift-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
-
-    .shift-time-col { display: flex; flex-direction: column; align-items: center; min-width: 72px; }
+    /* ── Shift time column (shared) ── */
+    .shift-time-col { display: flex; flex-direction: column; align-items: center; }
     .shift-time { font-size: 0.8rem; font-weight: 700; color: var(--navy); }
-    .shift-time-sep { width: 1px; height: 20px; background: var(--border); margin: 4px 0; }
+    .shift-time-sep { width: 1px; height: 18px; background: var(--border); margin: 3px 0; }
 
-    .shift-body { flex: 1; }
-    .shift-top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
-    .shift-dept { font-size: 0.9rem; font-weight: 700; color: var(--text); }
-    .shift-template { font-size: 0.75rem; color: var(--muted); }
-
-    .status-pill { font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.03em; }
+    .status-pill { font-size: 0.65rem; font-weight: 700; padding: 3px 8px; border-radius: 100px; text-transform: capitalize; letter-spacing: 0.02em; }
     .status-DRAFT     { background: #f1f5f9; color: #94a3b8; }
-    .status-PUBLISHED { background: #ede9fe; color: #6d28d9; }
-    .status-ACTIVE    { background: #dcfce7; color: #16a34a; }
-    .status-COMPLETED { background: #f1f5f9; color: #64748b; }
-    .status-CANCELLED { background: #fee2e2; color: #dc2626; }
+    .status-PUBLISHED { background: #eff6ff; color: #1a2d4f; }
+    .status-ACTIVE    { background: #fffbeb; color: #f59e0b; }
+    .status-COMPLETED { background: #f0fdf4; color: #22c55e; }
+    .status-CANCELLED { background: #fef2f2; color: #ef4444; }
 
-    .understaffed-badge { font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 100px; background: #fff7ed; color: #c2410c; }
+    .understaffed-badge { font-size: 0.65rem; font-weight: 700; padding: 3px 8px; border-radius: 100px; background: #fffbeb; color: #f59e0b; border: 1px solid #fcd34d; }
 
-    .shift-workers { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
-    .worker-chip { display: flex; align-items: center; gap: 5px; background: var(--bg); border-radius: 100px; padding: 3px 10px 3px 3px; font-size: 0.75rem; color: var(--text); }
-    .worker-avatar { width: 20px; height: 20px; border-radius: 50%; background: var(--navy); display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 700; color: white; flex-shrink: 0; }
-    .workers-count { font-size: 0.8rem; color: var(--muted); font-weight: 500; margin-left: 4px; }
-    .workers-empty { font-size: 0.8rem; color: #cbd5e1; font-style: italic; }
+    /* ── Department sections ── */
+    .dept-section { border-radius: 16px; margin-bottom: 14px; border: 2px solid; overflow: hidden; }
+    .dept-header { padding: 11px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(0,0,0,0.06); }
+    .dept-stripe { width: 4px; height: 22px; border-radius: 3px; flex-shrink: 0; }
+    .dept-name { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+    .dept-worker-badge { margin-left: auto; border-radius: 20px; padding: 3px 10px; font-size: 0.7rem; font-weight: 700; white-space: nowrap; }
+    .dept-shift-row { padding: 14px 16px; border-bottom: 1px solid; display: flex; align-items: center; gap: 14px; background: var(--white); cursor: pointer; transition: background 0.12s; }
+    .dept-shift-row:last-child { border-bottom: none; }
+    .dept-shift-row:hover { background: #f8fafc; }
+    .shift-row-body { flex: 1; min-width: 0; }
+    .shift-row-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 5px; }
+    .shift-workers-row { display: flex; align-items: center; gap: 5px; }
+    .shift-workers-row span { font-size: 0.8rem; font-weight: 600; }
 
     /* ── Profile view ── */
     .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 860px; }
@@ -220,6 +221,7 @@
   const API = 'https://shift-right-production.up.railway.app/api'
   const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+  const DEPT_COLORS = ['#1a2d4f','#f59e0b','#0ea5e9','#22c55e','#ec4899','#f97316','#8b5cf6','#14b8a6']
 
   let currentUser = null
   let currentOrg  = null
@@ -443,43 +445,64 @@
       return
     }
 
-    el.innerHTML = `<div class="shifts-grid">${dayShifts.map(shiftCard).join('')}</div>`
+    // Group by department
+    const groupMap = new Map()
+    dayShifts.forEach(s => {
+      const deptId = s.department?.id || 'unknown'
+      if (!groupMap.has(deptId)) {
+        groupMap.set(deptId, { name: s.department?.name || 'Unknown', shifts: [] })
+      }
+      groupMap.get(deptId).shifts.push(s)
+    })
+
+    const groups = [...groupMap.values()]
+    el.innerHTML = `<div class="shifts-grid">${groups.map((g, i) => deptSection(g, DEPT_COLORS[i % DEPT_COLORS.length])).join('')}</div>`
   }
 
-  function shiftCard(shift) {
+  function deptSection(group, color) {
+    const totalAssigned = group.shifts.reduce((sum, s) => sum + (s.assignments?.length || 0), 0)
+    const totalRequired = group.shifts.reduce((sum, s) => sum + (s.requiredWorkers || 0), 0)
+    const badgeColor = totalAssigned === 0 ? '#ef4444' : totalAssigned < totalRequired ? '#f59e0b' : color
+
+    return `
+      <div class="dept-section" style="border-color:${color}40; box-shadow:0 4px 12px ${color}18">
+        <div class="dept-header" style="background:${color}12">
+          <div class="dept-stripe" style="background:${color}"></div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span class="dept-name" style="color:${color}">${group.name}</span>
+          <span class="dept-worker-badge" style="background:${badgeColor}20;color:${badgeColor}">${totalAssigned}/${totalRequired} workers</span>
+        </div>
+        ${group.shifts.map(s => shiftRow(s, color)).join('')}
+      </div>`
+  }
+
+  function shiftRow(shift, color) {
     const assigned = shift.assignments || []
     const count = assigned.length
     const required = shift.requiredWorkers
-
-    const workersHtml = count === 0
-      ? '<span class="workers-empty">No workers assigned</span>'
-      : assigned.map(a => {
-          const initials = (a.worker?.name || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase()
-          return `<div class="worker-chip"><div class="worker-avatar">${initials}</div>${a.worker?.name || 'Unknown'}</div>`
-        }).join('')
-
+    const workerColor = count === 0 ? '#ef4444' : count < required ? '#f59e0b' : '#94a3b8'
+    const workerText = count === 0 ? 'No workers assigned' : `${count} / ${required} workers`
     const understaffed = shift.understaffed
       ? '<span class="understaffed-badge">⚠ Understaffed</span>' : ''
 
-    const templateName = shift.template?.name || shift.department?.name || ''
-
     return `
-      <div class="shift-card">
-        <div class="shift-time-col">
+      <div class="dept-shift-row" style="border-bottom-color:${color}18">
+        <div class="shift-time-col" style="min-width:68px">
           <span class="shift-time">${shift.startTime}</span>
           <div class="shift-time-sep"></div>
           <span class="shift-time">${shift.endTime}</span>
         </div>
-        <div class="shift-body">
-          <div class="shift-top">
-            <span class="shift-dept">${shift.department?.name || 'Unknown'}</span>
-            ${templateName !== shift.department?.name ? `<span class="shift-template">${templateName}</span>` : ''}
-            <span class="status-pill status-${shift.status}">${shift.status}</span>
+        <div class="shift-row-body">
+          <div class="shift-row-top">
+            <span class="status-pill status-${shift.status}">${shift.status.toLowerCase()}</span>
             ${understaffed}
-            <span class="workers-count">${count}/${required} workers</span>
           </div>
-          <div class="shift-workers">${workersHtml}</div>
+          <div class="shift-workers-row" style="color:${workerColor}">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span>${workerText}</span>
+          </div>
         </div>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>`
   }
 
