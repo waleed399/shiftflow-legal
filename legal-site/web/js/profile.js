@@ -12,7 +12,7 @@ export { getEffectivePlan }
 export function renderProfile() {
   const { currentUser, currentOrg } = state
   const effectivePlan = getEffectivePlan(currentOrg)
-  const isPaid = currentOrg.plan !== 'FREE'
+  const isPaid = currentOrg.plan === 'PRO' || currentOrg.plan === 'BUSINESS'
   const isOnTrial = !isPaid && effectivePlan === 'PRO'
   const planLabels = { FREE: 'Free', PRO: 'Pro', BUSINESS: 'Business' }
   const initials = (currentUser.name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
