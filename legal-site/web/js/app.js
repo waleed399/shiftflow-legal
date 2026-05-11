@@ -1,6 +1,6 @@
 import { state } from './state.js'
 import { getToken, getRefreshToken, clearSession, apiFetch } from './api.js'
-import { getMondayOf } from './utils.js'
+import { getWeekStartOf } from './utils.js'
 import { renderWeekLabel, renderDayTabs, loadShifts } from './shifts.js'
 import { renderProfile, getEffectivePlan } from './profile.js'
 import './modals.js' // registers window.openShiftModal and other modal handlers
@@ -22,7 +22,7 @@ async function init() {
     renderSidebar()
 
     const today = new Date()
-    state.currentWeek = getMondayOf(today)
+    state.currentWeek = getWeekStartOf(today, state.currentOrg?.weekStartsOn)
     state.selectedDay = today
 
     renderDayTabs()

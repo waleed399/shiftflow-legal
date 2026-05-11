@@ -1,6 +1,6 @@
 import { state } from './state.js'
 import { apiFetch } from './api.js'
-import { DAYS, MONTHS, DEPT_COLORS, addDays, isSameDay, toYMD, fmtDate } from './utils.js'
+import { DAYS, MONTHS, DEPT_COLORS, addDays, isSameDay, toYMD, fmtDate, getWeekStartOf } from './utils.js'
 
 export function renderWeekLabel() {
   const end = addDays(state.currentWeek, 6)
@@ -25,7 +25,8 @@ export function renderDayTabs() {
 }
 
 export function changeWeek(dir) {
-  state.currentWeek = addDays(state.currentWeek, dir * 7)
+  const candidate = addDays(state.currentWeek, dir * 7)
+  state.currentWeek = getWeekStartOf(candidate, state.currentOrg?.weekStartsOn)
   const today = new Date()
   const weekEnd = addDays(state.currentWeek, 6)
   state.selectedDay = (today >= state.currentWeek && today <= weekEnd) ? today : new Date(state.currentWeek)

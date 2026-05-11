@@ -152,7 +152,7 @@ export function filterPicker(query) {
 
 async function fetchOrgWorkers() {
   if (state.orgWorkers) return state.orgWorkers
-  const res = await apiFetch('/members')
+  const res = await apiFetch('/organization/members')
   if (!res?.ok) return []
   const data = await res.json()
   state.orgWorkers = Array.isArray(data) ? data : (data.members || data.users || [])
