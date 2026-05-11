@@ -155,7 +155,8 @@ async function fetchOrgWorkers() {
   const res = await apiFetch('/organization/members')
   if (!res?.ok) return []
   const data = await res.json()
-  state.orgWorkers = Array.isArray(data) ? data : (data.members || data.users || [])
+  const all = Array.isArray(data) ? data : (data.members || data.users || [])
+  state.orgWorkers = all.filter(w => w.role === 'WORKER')
   return state.orgWorkers
 }
 
