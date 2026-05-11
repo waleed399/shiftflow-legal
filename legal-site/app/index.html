@@ -3,8 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://shift-right-production.up.railway.app; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>ShiftRight — Open on this device</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="qrcode.min.js"></script>
   <style>
     :root {
       --navy: #1a2d4f;
@@ -336,118 +339,7 @@
   &copy; 2025 ShiftRight
 </footer>
 
-<script>
-  const API = 'https://shift-right-production.up.railway.app/api'
-
-  let pollInterval = null
-  let countdownInterval = null
-  let expiresAt = null
-  let currentToken = null
-
-  async function init() {
-    try {
-      const res = await fetch(`${API}/auth/qr/generate`, { method: 'POST' })
-      if (!res.ok) throw new Error('Failed to generate QR')
-      const data = await res.json()
-      currentToken = data.token
-      expiresAt = new Date(data.expiresAt)
-      renderQR(data.token)
-      startCountdown()
-      startPolling(data.token)
-    } catch (e) {
-      showError('Could not connect to ShiftRight. Please refresh the page.')
-    }
-  }
-
-  function renderQR(token) {
-    document.getElementById('qrcode').innerHTML = ''
-    new QRCode(document.getElementById('qrcode'), {
-      text: token,
-      width: 200,
-      height: 200,
-      colorDark: '#1a2d4f',
-      colorLight: '#ffffff',
-      correctLevel: QRCode.CorrectLevel.M,
-    })
-  }
-
-  function startCountdown() {
-    if (countdownInterval) clearInterval(countdownInterval)
-    countdownInterval = setInterval(() => {
-      const remaining = Math.max(0, expiresAt - Date.now())
-      const minutes = Math.floor(remaining / 60000)
-      const seconds = Math.floor((remaining % 60000) / 1000)
-      document.getElementById('countdown').textContent =
-        `${minutes}:${seconds.toString().padStart(2, '0')}`
-
-      if (remaining <= 0) {
-        clearInterval(countdownInterval)
-        clearInterval(pollInterval)
-        // Auto-regenerate
-        init()
-      }
-    }, 1000)
-  }
-
-  function startPolling(token) {
-    if (pollInterval) clearInterval(pollInterval)
-    pollInterval = setInterval(async () => {
-      try {
-        const res = await fetch(`${API}/auth/qr/poll/${token}`)
-        if (res.status === 404) {
-          // Expired server-side — regenerate
-          clearInterval(pollInterval)
-          clearInterval(countdownInterval)
-          init()
-          return
-        }
-        if (!res.ok) return
-        const data = await res.json()
-        if (data.status === 'scanned') {
-          clearInterval(pollInterval)
-          clearInterval(countdownInterval)
-          onScanned(data)
-        }
-      } catch {
-        // Network error — keep polling
-      }
-    }, 2000)
-  }
-
-  function isPaidPlan(org) {
-    if (org?.trialEndsAt && new Date(org.trialEndsAt) > new Date()) return true
-    return org?.plan === 'PRO' || org?.plan === 'BUSINESS'
-  }
-
-  function onScanned(data) {
-    clearInterval(pollInterval)
-    clearInterval(countdownInterval)
-
-    if (!isPaidPlan(data.organization)) {
-      document.getElementById('qr-state').style.display = 'none'
-      document.getElementById('upgrade-state').style.display = 'block'
-      return
-    }
-
-    // Store session in localStorage — same domain as /web/ so it's shared
-    localStorage.setItem('shiftflow_token', data.token)
-    localStorage.setItem('shiftflow_refresh_token', data.refreshToken)
-    localStorage.setItem('shiftflow_user', JSON.stringify(data.user))
-    localStorage.setItem('shiftflow_org', JSON.stringify(data.organization))
-
-    document.getElementById('qr-state').style.display = 'none'
-    document.getElementById('success-state').style.display = 'block'
-    setTimeout(() => { window.location.href = '/web/' }, 1200)
-  }
-
-  function showError(msg) {
-    const el = document.getElementById('error-msg')
-    el.textContent = msg
-    el.style.display = 'block'
-  }
-
-  init()
-</script>
+<script src="app.js"></script>
 
 </body>
 </html>

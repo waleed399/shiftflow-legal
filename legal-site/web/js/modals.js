@@ -1,6 +1,6 @@
 import { state } from './state.js'
 import { apiFetch } from './api.js'
-import { toYMD } from './utils.js'
+import { toYMD, esc } from './utils.js'
 import { loadShifts, updateActionBar } from './shifts.js'
 
 // ── Shift detail modal ────────────────────────────────────────────────────────
@@ -46,7 +46,7 @@ function renderModalWorkers(shift) {
 
   el.innerHTML = assigned.map(a => {
     const name = a.worker?.name || 'Unknown'
-    const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+    const initials = esc(name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase())
     const att = a.attendance || 'PENDING'
 
     const attBtns = isActive ? `
@@ -65,7 +65,7 @@ function renderModalWorkers(shift) {
     return `
       <div class="worker-row">
         <div class="worker-row-avatar">${initials}</div>
-        <span class="worker-row-name">${name}</span>
+        <span class="worker-row-name">${esc(name)}</span>
         ${attBtns}
         ${removeBtn}
       </div>`
@@ -171,13 +171,13 @@ function renderPickerList(workers, query) {
   }
 
   document.getElementById('picker-list').innerHTML = filtered.map(w => {
-    const initials = (w.name || '?').split(' ').map(c => c[0]).join('').slice(0, 2).toUpperCase()
+    const initials = esc((w.name || '?').split(' ').map(c => c[0]).join('').slice(0, 2).toUpperCase())
     const already = assignedIds.has(w.id)
     return `
       <div class="pick-row ${already ? 'already-assigned' : ''}" onclick="${already ? '' : `assignWorker('${w.id}')`}">
         <div class="worker-row-avatar" style="width:28px;height:28px;font-size:0.65rem">${initials}</div>
         <div>
-          <div class="pick-row-name">${w.name || '—'}</div>
+          <div class="pick-row-name">${esc(w.name || '—')}</div>
           ${already ? '<div class="pick-row-dept">Already assigned</div>' : ''}
         </div>
       </div>`

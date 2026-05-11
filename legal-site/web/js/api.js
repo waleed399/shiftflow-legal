@@ -23,21 +23,24 @@ export async function apiFetch(path, opts = {}) {
 
   if (res.status === 401 && !_retrying) {
     _retrying = true
-    const refresh = getRefreshToken()
-    if (refresh) {
-      const rRes = await fetch(API + '/auth/refresh', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken: refresh }),
-      })
-      if (rRes.ok) {
-        const { token: t, refreshToken: r } = await rRes.json()
-        saveTokens(t, r)
-        _retrying = false
-        return apiFetch(path, opts)
+    try {
+      const refresh = getRefreshToken()
+      if (refresh) {
+        const rRes = await fetch(API + '/auth/refresh', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken: refresh }),
+        })
+        if (rRes.ok) {
+          const { token: t, refreshToken: r } = await rRes.json()
+          saveTokens(t, r)
+          _retrying = false
+          return apiFetch(path, opts)
+        }
       }
+    } finally {
+      _retrying = false
     }
-    _retrying = false
     clearSession()
     window.location.href = '/app/'
     return null

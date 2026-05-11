@@ -1,5 +1,6 @@
 import { state } from './state.js'
 import { apiFetch } from './api.js'
+import { esc } from './utils.js'
 
 let billingPeriod = 'monthly'
 
@@ -34,7 +35,7 @@ export function renderProfile() {
   const effectivePlan = getEffectivePlan(currentOrg)
   const isPaid = currentOrg.plan === 'PRO' || currentOrg.plan === 'BUSINESS'
   const isOnTrial = !isPaid && effectivePlan === 'PRO'
-  const initials = (currentUser.name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+  const initials = esc((currentUser.name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase())
 
   const PLANS = {
     PRO: {
@@ -56,8 +57,8 @@ export function renderProfile() {
       <div class="profile-card">
         <h3>Your account</h3>
         <div class="profile-avatar">${initials}</div>
-        <div class="profile-name">${currentUser.name}</div>
-        <div class="profile-email">${currentUser.email}</div>
+        <div class="profile-name">${esc(currentUser.name)}</div>
+        <div class="profile-email">${esc(currentUser.email)}</div>
         <div class="profile-role-badge">Manager</div>
       </div>
 
@@ -65,7 +66,7 @@ export function renderProfile() {
         <h3>Organization</h3>
         <div class="info-row">
           <span class="info-label">Name</span>
-          <span class="info-value">${currentOrg.name}</span>
+          <span class="info-value">${esc(currentOrg.name)}</span>
         </div>
         <div class="info-row">
           <span class="info-label">Plan</span>
@@ -76,13 +77,13 @@ export function renderProfile() {
         ${currentOrg.timezone ? `
         <div class="info-row">
           <span class="info-label">Timezone</span>
-          <span class="info-value">${currentOrg.timezone}</span>
+          <span class="info-value">${esc(currentOrg.timezone)}</span>
         </div>` : ''}
         ${currentOrg.inviteCode ? `
         <div class="info-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
           <span class="info-label">Invite code</span>
           <div>
-            <div class="invite-code" onclick="copyInvite('${currentOrg.inviteCode}')" title="Click to copy">${currentOrg.inviteCode}</div>
+            <div class="invite-code" onclick="copyInvite('${esc(currentOrg.inviteCode)}')" title="Click to copy">${esc(currentOrg.inviteCode)}</div>
             <div class="copy-hint" id="copy-hint">Click to copy</div>
           </div>
         </div>` : ''}

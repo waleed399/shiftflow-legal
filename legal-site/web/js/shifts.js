@@ -1,6 +1,6 @@
 import { state } from './state.js'
 import { apiFetch } from './api.js'
-import { DAYS, MONTHS, DEPT_COLORS, addDays, isSameDay, toYMD, fmtDate, getWeekStartOf } from './utils.js'
+import { DAYS, MONTHS, DEPT_COLORS, addDays, isSameDay, toYMD, fmtDate, getWeekStartOf, esc } from './utils.js'
 
 let shiftsView = 'list'
 
@@ -168,7 +168,7 @@ function deptSection(group, color) {
       <div class="dept-header" style="background:${color}12">
         <div class="dept-stripe" style="background:${color}"></div>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        <span class="dept-name" style="color:${color}">${group.dept?.name || 'Unknown'}</span>
+        <span class="dept-name" style="color:${color}">${esc(group.dept?.name || 'Unknown')}</span>
         <span class="dept-worker-badge" style="background:${badgeColor}20;color:${badgeColor}">${totalAssigned}/${totalRequired} workers</span>
       </div>
       ${group.shifts.map(s => shiftRow(s, color)).join('')}
@@ -263,11 +263,11 @@ export async function renderTableView() {
 
   // ── Header row ──
   const workerCols = workers.map(w => {
-    const initials = w.name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase()
+    const initials = esc(w.name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase())
     return `
       <th class="dt-worker-th">
         <div class="dt-worker-avatar">${initials}</div>
-        <div class="dt-worker-name">${w.name.split(' ')[0]}</div>
+        <div class="dt-worker-name">${esc(w.name.split(' ')[0])}</div>
       </th>`
   }).join('')
 
@@ -275,7 +275,7 @@ export async function renderTableView() {
   const bodyRows = [...byDept.entries()].map(([deptId, dept]) => {
     const bandRow = `
       <tr class="dt-dept-band">
-        <td class="dt-info-cell dt-dept-label">${dept.name}</td>
+        <td class="dt-info-cell dt-dept-label">${esc(dept.name)}</td>
         ${workers.map(() => '<td class="dt-dept-spacer"></td>').join('')}
       </tr>`
 
