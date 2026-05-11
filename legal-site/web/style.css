@@ -124,34 +124,58 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .view-toggle-btn:hover { color: var(--navy); }
 .view-toggle-btn.active { background: white; color: var(--navy); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
-/* ── Roster table view ── */
+/* ── Table (roster) view ── */
 .content-area-flush { padding: 0; }
-.roster-wrapper { overflow-x: auto; height: 100%; }
-.roster-table { width: 100%; border-collapse: collapse; min-width: 720px; font-size: 0.875rem; table-layout: fixed; }
+.dt-outer { display: flex; flex-direction: column; height: 100%; }
+.dt-scroll-wrap { flex: 1; overflow: auto; }
 
-.roster-worker-th { width: 170px; padding: 12px 16px; text-align: left; font-size: 0.68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; background: white; position: sticky; left: 0; z-index: 2; border-bottom: 2px solid var(--border); border-right: 1px solid var(--border); }
-.roster-day-th { padding: 10px 8px; text-align: center; background: white; border-bottom: 2px solid var(--border); border-right: 1px solid rgba(0,0,0,0.05); }
-.roster-day-th:last-child { border-right: none; }
-.roster-today-col { background: #f5f3ff; }
-.roster-day-label { font-size: 0.68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
-.roster-day-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; font-weight: 700; color: var(--text); margin: 0 auto; }
-.roster-today-num { background: var(--red); color: white; }
+.dt-table { border-collapse: collapse; font-size: 0.82rem; white-space: nowrap; }
 
-.roster-row { border-bottom: 1px solid var(--border); }
-.roster-row:last-child { border-bottom: none; }
-.roster-worker-td { padding: 10px 14px; background: white; position: sticky; left: 0; z-index: 1; border-right: 1px solid var(--border); display: flex; align-items: center; gap: 9px; min-height: 64px; width: 170px; }
-.roster-row:hover .roster-worker-td { background: #f8fafc; }
-.roster-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--navy); color: white; font-size: 0.65rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.roster-worker-name { font-size: 0.8rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Corner cell */
+.dt-corner { width: 108px; min-width: 108px; position: sticky; left: 0; z-index: 3; background: #f8fafc; border-right: 2px solid var(--border); border-bottom: 2px solid var(--border); padding: 0; overflow: hidden; }
+.dt-corner-line { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom right, transparent calc(50% - 0.5px), #cbd5e1 calc(50%), transparent calc(50% + 0.5px)); pointer-events: none; }
+.dt-corner-label { position: absolute; font-size: 0.6rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
+.dt-corner-top    { top: 7px; right: 7px; }
+.dt-corner-bottom { bottom: 7px; left: 7px; }
 
-.roster-cell { padding: 6px 6px; vertical-align: top; border-right: 1px solid rgba(0,0,0,0.04); }
-.roster-cell:last-child { border-right: none; }
-.roster-cell-empty { background: #fafbfc; }
-.roster-shift-card { background: var(--bg); border-radius: 8px; padding: 6px 8px; cursor: pointer; transition: background 0.12s; margin-bottom: 4px; border-left: 3px solid transparent; }
-.roster-shift-card:last-child { margin-bottom: 0; }
-.roster-shift-card:hover { background: #eef2f8; }
-.roster-shift-time { font-size: 0.72rem; font-weight: 700; color: var(--text); margin-bottom: 1px; }
-.roster-shift-dept { font-size: 0.65rem; font-weight: 600; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Worker header columns */
+.dt-worker-th { width: 88px; min-width: 88px; padding: 8px 4px; text-align: center; background: #f8fafc; border-left: 1px solid var(--border); border-bottom: 2px solid var(--border); vertical-align: middle; }
+.dt-worker-avatar { width: 28px; height: 28px; border-radius: 50%; background: #6366f1; color: white; font-size: 0.62rem; font-weight: 800; display: flex; align-items: center; justify-content: center; margin: 0 auto 4px; }
+.dt-worker-name { font-size: 0.68rem; font-weight: 600; color: #334155; overflow: hidden; text-overflow: ellipsis; }
+
+/* Department band */
+.dt-dept-band td { height: 26px; background: var(--navy); border-top: 1px solid var(--navy); }
+.dt-dept-label { font-size: 0.72rem; font-weight: 700; color: white; padding: 0 10px; position: sticky; left: 0; z-index: 2; border-right: 2px solid rgba(255,255,255,0.2) !important; }
+.dt-dept-spacer { border-left: 1px solid rgba(255,255,255,0.12) !important; }
+
+/* Shift info cell (left column) */
+.dt-info-cell { width: 108px; min-width: 108px; padding: 8px 10px; background: #f8fafc; position: sticky; left: 0; z-index: 1; border-right: 2px solid var(--border); border-top: 1px solid var(--border); cursor: pointer; transition: background 0.12s; vertical-align: top; }
+.dt-info-cell:hover { background: #eef2f8; }
+.dt-shift-time { font-size: 0.72rem; font-weight: 700; color: var(--navy); margin-bottom: 1px; }
+.dt-shift-dur  { font-size: 0.65rem; color: var(--muted); margin-bottom: 4px; }
+.dt-shift-meta { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.dt-status-pill { font-size: 0.58rem; font-weight: 700; padding: 1px 5px; border-radius: 4px; text-transform: uppercase; }
+
+/* Worker assignment cells */
+.dt-worker-cell { width: 88px; min-width: 88px; text-align: center; vertical-align: middle; height: 64px; border-left: 1px solid var(--border); border-top: 1px solid var(--border); transition: background 0.1s; }
+.dt-row-border { border-top: 1px solid var(--border); }
+
+.dt-cell-check { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; font-weight: 700; color: white; margin: 0 auto; }
+.dt-cell-plus  { width: 26px; height: 26px; border-radius: 50%; border: 1.5px dashed #cbd5e1; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: #cbd5e1; margin: 0 auto; transition: border-color 0.12s, color 0.12s; }
+.dt-worker-cell:hover .dt-cell-plus { border-color: #6366f1; color: #6366f1; }
+.dt-cell-dash  { font-size: 0.875rem; color: #e2e8f0; }
+.dt-cell-blocked { display: flex; flex-direction: column; align-items: center; gap: 1px; opacity: 0.8; }
+.dt-blocked-icon  { font-size: 0.75rem; }
+.dt-blocked-label { font-size: 0.6rem; font-weight: 700; }
+.dt-cell-loading { display: flex; align-items: center; justify-content: center; height: 100%; }
+
+/* Legend */
+.dt-legend { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 8px 16px; border-top: 1px solid var(--border); background: #f8fafc; flex-shrink: 0; }
+.dt-legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.72rem; color: var(--muted); }
+.dt-legend-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dt-legend-sep  { color: var(--border); }
+.dt-check-mini  { width: 16px; height: 16px; border-radius: 50%; background: #22c55e; color: white; font-size: 0.6rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+.dt-plus-mini   { width: 16px; height: 16px; border-radius: 50%; border: 1.5px dashed #94a3b8; color: #94a3b8; font-size: 0.8rem; display: inline-flex; align-items: center; justify-content: center; }
 
 /* ── Profile view ── */
 .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 860px; }
