@@ -427,8 +427,9 @@
   function renderShiftsForDay() {
     const key = toYMD(currentWeek)
     const all = shiftsCache[key] || []
+    const selectedYMD = toYMD(selectedDay)
     const dayShifts = all
-      .filter(s => isSameDay(new Date(s.date), selectedDay) && s.status !== 'CANCELLED')
+      .filter(s => s.date.substring(0, 10) === selectedYMD && s.status !== 'CANCELLED')
       .sort((a, b) => a.startTime.localeCompare(b.startTime))
 
     const el = document.getElementById('shifts-content')
