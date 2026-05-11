@@ -118,6 +118,41 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .shift-workers-row { display: flex; align-items: center; gap: 5px; }
 .shift-workers-row span { font-size: 0.8rem; font-weight: 600; }
 
+/* ── View toggle (list / roster) ── */
+.view-toggle { display: flex; background: var(--bg); border-radius: 8px; padding: 2px; border: 1px solid var(--border); gap: 2px; }
+.view-toggle-btn { width: 30px; height: 30px; border-radius: 6px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); transition: all 0.12s; }
+.view-toggle-btn:hover { color: var(--navy); }
+.view-toggle-btn.active { background: white; color: var(--navy); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+/* ── Roster table view ── */
+.content-area-flush { padding: 0; }
+.roster-wrapper { overflow-x: auto; height: 100%; }
+.roster-table { width: 100%; border-collapse: collapse; min-width: 720px; font-size: 0.875rem; table-layout: fixed; }
+
+.roster-worker-th { width: 170px; padding: 12px 16px; text-align: left; font-size: 0.68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; background: white; position: sticky; left: 0; z-index: 2; border-bottom: 2px solid var(--border); border-right: 1px solid var(--border); }
+.roster-day-th { padding: 10px 8px; text-align: center; background: white; border-bottom: 2px solid var(--border); border-right: 1px solid rgba(0,0,0,0.05); }
+.roster-day-th:last-child { border-right: none; }
+.roster-today-col { background: #f5f3ff; }
+.roster-day-label { font-size: 0.68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.roster-day-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; font-weight: 700; color: var(--text); margin: 0 auto; }
+.roster-today-num { background: var(--red); color: white; }
+
+.roster-row { border-bottom: 1px solid var(--border); }
+.roster-row:last-child { border-bottom: none; }
+.roster-worker-td { padding: 10px 14px; background: white; position: sticky; left: 0; z-index: 1; border-right: 1px solid var(--border); display: flex; align-items: center; gap: 9px; min-height: 64px; width: 170px; }
+.roster-row:hover .roster-worker-td { background: #f8fafc; }
+.roster-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--navy); color: white; font-size: 0.65rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.roster-worker-name { font-size: 0.8rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.roster-cell { padding: 6px 6px; vertical-align: top; border-right: 1px solid rgba(0,0,0,0.04); }
+.roster-cell:last-child { border-right: none; }
+.roster-cell-empty { background: #fafbfc; }
+.roster-shift-card { background: var(--bg); border-radius: 8px; padding: 6px 8px; cursor: pointer; transition: background 0.12s; margin-bottom: 4px; border-left: 3px solid transparent; }
+.roster-shift-card:last-child { margin-bottom: 0; }
+.roster-shift-card:hover { background: #eef2f8; }
+.roster-shift-time { font-size: 0.72rem; font-weight: 700; color: var(--text); margin-bottom: 1px; }
+.roster-shift-dept { font-size: 0.65rem; font-weight: 600; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
 /* ── Profile view ── */
 .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 860px; }
 .profile-card { background: var(--white); border-radius: 16px; padding: 24px; border: 1px solid var(--border); }

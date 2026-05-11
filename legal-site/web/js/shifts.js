@@ -2,6 +2,16 @@ import { state } from './state.js'
 import { apiFetch } from './api.js'
 import { DAYS, MONTHS, DEPT_COLORS, addDays, isSameDay, toYMD, fmtDate, getWeekStartOf } from './utils.js'
 
+let shiftsView = 'list'
+
+// Stable dept ID → color mapping (same dept always gets same color)
+function getDeptColor(deptId) {
+  if (!deptId) return DEPT_COLORS[0]
+  let hash = 0
+  for (let i = 0; i < deptId.length; i++) hash = (hash * 31 + deptId.charCodeAt(i)) | 0
+  return DEPT_COLORS[Math.abs(hash) % DEPT_COLORS.length]
+}
+
 export function renderWeekLabel() {
   const end = addDays(state.currentWeek, 6)
   document.getElementById('week-label').textContent =
@@ -24,6 +34,30 @@ export function renderDayTabs() {
   }
 }
 
+export function setShiftsView(view) {
+  shiftsView = view
+
+  const listBtn  = document.getElementById('view-list-btn')
+  const tableBtn = document.getElementById('view-table-btn')
+  if (listBtn)  listBtn.classList.toggle('active',  view === 'list')
+  if (tableBtn) tableBtn.classList.toggle('active', view === 'table')
+
+  const dayTabs   = document.getElementById('day-tabs')
+  const actionBar = document.getElementById('action-bar')
+  const content   = document.getElementById('shifts-content').parentElement // .content-area
+
+  if (view === 'table') {
+    dayTabs.style.display   = 'none'
+    actionBar.style.display = 'none'
+    content.classList.add('content-area-flush')
+    renderTableView()
+  } else {
+    dayTabs.style.display = ''
+    content.classList.remove('content-area-flush')
+    renderShiftsForDay()
+  }
+}
+
 export function changeWeek(dir) {
   const candidate = addDays(state.currentWeek, dir * 7)
   state.currentWeek = getWeekStartOf(candidate, state.currentOrg?.weekStartsOn)
@@ -31,7 +65,7 @@ export function changeWeek(dir) {
   const weekEnd = addDays(state.currentWeek, 6)
   state.selectedDay = (today >= state.currentWeek && today <= weekEnd) ? today : new Date(state.currentWeek)
   renderWeekLabel()
-  renderDayTabs()
+  if (shiftsView === 'list') renderDayTabs()
   loadShifts()
 }
 
@@ -44,7 +78,8 @@ export async function loadShifts() {
       if (!res) return
       state.shiftsCache[key] = await res.json()
     }
-    renderShiftsForDay()
+    if (shiftsView === 'table') renderTableView()
+    else renderShiftsForDay()
   } catch {
     document.getElementById('shifts-content').innerHTML = '<div class="empty-state"><p>Failed to load shifts.</p></div>'
   }
@@ -73,13 +108,95 @@ export function renderShiftsForDay() {
   const groupMap = new Map()
   dayShifts.forEach(s => {
     const deptId = s.department?.id || 'unknown'
-    if (!groupMap.has(deptId)) groupMap.set(deptId, { name: s.department?.name || 'Unknown', shifts: [] })
+    if (!groupMap.has(deptId)) groupMap.set(deptId, { dept: s.department, shifts: [] })
     groupMap.get(deptId).shifts.push(s)
   })
 
-  const groups = [...groupMap.values()]
-  el.innerHTML = `<div class="shifts-grid">${groups.map((g, i) => deptSection(g, DEPT_COLORS[i % DEPT_COLORS.length])).join('')}</div>`
+  const groups = [...groupMap.entries()]
+  el.innerHTML = `<div class="shifts-grid">${groups.map(([deptId, g]) => deptSection(g, getDeptColor(deptId))).join('')}</div>`
   updateActionBar()
+}
+
+function renderTableView() {
+  const key = toYMD(state.currentWeek)
+  const allShifts = state.shiftsCache[key] || []
+  const today = new Date()
+  const days = Array.from({ length: 7 }, (_, i) => addDays(state.currentWeek, i))
+
+  // Build worker → day → [shifts] map
+  const workerMap = new Map()
+  allShifts.forEach(s => {
+    if (s.status === 'CANCELLED') return
+    const dateKey = s.date.substring(0, 10)
+    const color = getDeptColor(s.department?.id)
+    ;(s.assignments || []).forEach(a => {
+      const wId   = a.worker?.id   || a.id
+      const wName = a.worker?.name || a.name || '?'
+      if (!workerMap.has(wId)) workerMap.set(wId, { name: wName, days: new Map() })
+      const worker = workerMap.get(wId)
+      if (!worker.days.has(dateKey)) worker.days.set(dateKey, [])
+      worker.days.get(dateKey).push({ ...s, _color: color })
+    })
+  })
+
+  const el = document.getElementById('shifts-content')
+
+  if (workerMap.size === 0) {
+    el.innerHTML = `
+      <div class="empty-state">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <p>No workers assigned this week</p>
+      </div>`
+    return
+  }
+
+  const workers = [...workerMap.entries()].sort((a, b) => a[1].name.localeCompare(b[1].name))
+
+  const dayHeaders = days.map(d => {
+    const isToday = isSameDay(d, today)
+    return `
+      <th class="roster-day-th${isToday ? ' roster-today-col' : ''}">
+        <div class="roster-day-label">${DAYS[d.getDay()]}</div>
+        <div class="roster-day-num${isToday ? ' roster-today-num' : ''}">${d.getDate()}</div>
+      </th>`
+  }).join('')
+
+  const rows = workers.map(([, worker]) => {
+    const initials = worker.name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase()
+    const cells = days.map(d => {
+      const shifts = worker.days.get(toYMD(d)) || []
+      if (shifts.length === 0) return `<td class="roster-cell roster-cell-empty"></td>`
+      const cards = shifts.map(s => `
+        <div class="roster-shift-card" style="border-left:3px solid ${s._color}" onclick="openShiftModal('${s.id}')">
+          <div class="roster-shift-time">${s.startTime.substring(0, 5)}–${s.endTime.substring(0, 5)}</div>
+          <div class="roster-shift-dept" style="color:${s._color}">${s.department?.name || ''}</div>
+          <span class="status-pill status-${s.status}">${s.status.toLowerCase()}</span>
+        </div>`).join('')
+      return `<td class="roster-cell">${cards}</td>`
+    }).join('')
+
+    return `
+      <tr class="roster-row">
+        <td class="roster-worker-td">
+          <div class="roster-avatar">${initials}</div>
+          <span class="roster-worker-name">${worker.name}</span>
+        </td>
+        ${cells}
+      </tr>`
+  }).join('')
+
+  el.innerHTML = `
+    <div class="roster-wrapper">
+      <table class="roster-table">
+        <thead>
+          <tr>
+            <th class="roster-worker-th">Worker</th>
+            ${dayHeaders}
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`
 }
 
 function deptSection(group, color) {
@@ -92,7 +209,7 @@ function deptSection(group, color) {
       <div class="dept-header" style="background:${color}12">
         <div class="dept-stripe" style="background:${color}"></div>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        <span class="dept-name" style="color:${color}">${group.name}</span>
+        <span class="dept-name" style="color:${color}">${group.dept?.name || 'Unknown'}</span>
         <span class="dept-worker-badge" style="background:${badgeColor}20;color:${badgeColor}">${totalAssigned}/${totalRequired} workers</span>
       </div>
       ${group.shifts.map(s => shiftRow(s, color)).join('')}
@@ -134,7 +251,7 @@ export function updateActionBar() {
   const selectedYMD = toYMD(state.selectedDay)
   const dayShifts = all.filter(s => s.date.substring(0, 10) === selectedYMD && s.status !== 'CANCELLED')
   const bar = document.getElementById('action-bar')
-  if (dayShifts.length === 0) { bar.style.display = 'none'; return }
+  if (shiftsView === 'table' || dayShifts.length === 0) { bar.style.display = 'none'; return }
 
   bar.style.display = 'flex'
   document.getElementById('btn-publish-day').disabled   = !dayShifts.some(s => s.status === 'DRAFT')
@@ -161,7 +278,7 @@ export async function unpublishDay() {
   }
 }
 
-// Expose to window for HTML inline handlers
-window.changeWeek  = changeWeek
-window.publishDay  = publishDay
+window.changeWeek   = changeWeek
+window.publishDay   = publishDay
 window.unpublishDay = unpublishDay
+window.setShiftsView = setShiftsView
