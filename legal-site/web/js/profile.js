@@ -1,6 +1,8 @@
 import { state } from './state.js'
 import { apiFetch } from './api.js'
 
+let billingPeriod = 'monthly'
+
 function getEffectivePlan(org) {
   if (!org) return 'FREE'
   if (org.trialEndsAt && new Date(org.trialEndsAt) > new Date()) return 'PRO'
@@ -22,12 +24,32 @@ function getPlanLabel(org) {
 
 export { getEffectivePlan }
 
+export function setBillingPeriod(period) {
+  billingPeriod = period
+  renderProfile()
+}
+
 export function renderProfile() {
   const { currentUser, currentOrg } = state
   const effectivePlan = getEffectivePlan(currentOrg)
   const isPaid = currentOrg.plan === 'PRO' || currentOrg.plan === 'BUSINESS'
   const isOnTrial = !isPaid && effectivePlan === 'PRO'
   const initials = (currentUser.name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+
+  const PLANS = {
+    PRO: {
+      icon: '&#9889;', name: 'Pro', cls: 'pro', popular: true,
+      monthly: { price: '$49.99', label: null },
+      annual:  { price: '$39.99', label: 'Billed $479.88/yr &mdash; save $120' },
+      features: ['Up to 50 workers', 'Unlimited locations', 'Advanced scheduling', 'Analytics &amp; reports', 'Web app access', 'Priority support'],
+    },
+    BUSINESS: {
+      icon: '&#128081;', name: 'Business', cls: 'business', popular: false,
+      monthly: { price: '$99.99', label: null },
+      annual:  { price: '$79.99', label: 'Billed $959.88/yr &mdash; save $240' },
+      features: ['Unlimited workers', 'Unlimited locations', 'Everything in Pro', 'Dedicated support'],
+    },
+  }
 
   document.getElementById('profile-content').innerHTML = `
     <div class="profile-grid">
@@ -87,44 +109,41 @@ export function renderProfile() {
         <span>&#10024;</span>
         <span>You&apos;re on a free trial &mdash; upgrade now to keep access after your trial ends.</span>
       </div>` : ''}
-      <div class="billing-cards">
-        ${billingCard('PRO', '&#9889;', 'Pro', 'pro', '$49.99', [
-          'Up to 50 workers',
-          'Unlimited locations',
-          'Advanced scheduling',
-          'Analytics &amp; reports',
-          'Web app access',
-          'Priority support',
-        ], true)}
-        ${billingCard('BUSINESS', '&#128081;', 'Business', 'business', '$99.99', [
-          'Unlimited workers',
-          'Unlimited locations',
-          'Everything in Pro',
-          'Dedicated support',
-        ], false)}
+
+      <div class="billing-period-toggle">
+        <button class="period-btn${billingPeriod === 'monthly' ? ' active' : ''}" onclick="setBillingPeriod('monthly')">Monthly</button>
+        <button class="period-btn${billingPeriod === 'annual' ? ' active' : ''}" onclick="setBillingPeriod('annual')">
+          Annual <span class="period-save-badge">Save 20%</span>
+        </button>
       </div>
-      <p class="billing-footer-note">Annual plans available — save up to 20% &middot; Cancel anytime &middot; Secured by Lemon Squeezy</p>
+
+      <div class="billing-cards">
+        ${Object.entries(PLANS).map(([key, p]) => billingCard(key, p)).join('')}
+      </div>
+      <p class="billing-footer-note">Cancel anytime &middot; Secured by Lemon Squeezy</p>
       `}
     </div>`
 }
 
-function billingCard(planKey, icon, name, cls, price, features, popular) {
+function billingCard(planKey, p) {
+  const { price, label } = billingPeriod === 'annual' ? p.annual : p.monthly
   return `
-    <div class="billing-plan-card billing-card-${cls}">
-      ${popular ? '<div class="billing-card-popular-badge">Most popular</div>' : ''}
+    <div class="billing-plan-card billing-card-${p.cls}">
+      ${p.popular ? '<div class="billing-card-popular-badge">Most popular</div>' : ''}
       <div class="billing-card-top">
-        <div class="billing-card-icon">${icon}</div>
-        <div class="billing-card-name">${name}</div>
+        <div class="billing-card-icon">${p.icon}</div>
+        <div class="billing-card-name">${p.name}</div>
       </div>
       <div class="billing-card-price">
         <span class="billing-price-amount">${price}</span>
-        <span class="billing-price-per">/month</span>
+        <span class="billing-price-per">/mo</span>
       </div>
+      ${label ? `<div class="billing-annual-note">${label}</div>` : '<div class="billing-annual-note-placeholder"></div>'}
       <ul class="billing-card-features">
-        ${features.map(f => `<li>${f}</li>`).join('')}
+        ${p.features.map(f => `<li>${f}</li>`).join('')}
       </ul>
       <button id="checkout-btn-${planKey}" class="billing-upgrade-btn" onclick="startCheckout('${planKey}')">
-        Upgrade to ${name}
+        Upgrade to ${p.name}
       </button>
     </div>`
 }
@@ -141,22 +160,17 @@ export async function startCheckout(planKey) {
   const originalText = btn?.textContent
   if (btn) { btn.disabled = true; btn.textContent = 'Loading…' }
 
-  // Build a return URL so Lemon Squeezy sends the user back here after payment.
-  // The ?payment=success flag tells the app to show a success message and
-  // refresh the plan — bypassing the mobile-only shiftright:// deep link.
   const successUrl = window.location.origin + window.location.pathname + '?payment=success'
 
   try {
     const res = await apiFetch('/billing/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan: planKey, period: 'monthly', successUrl }),
+      body: JSON.stringify({ plan: planKey, period: billingPeriod, successUrl }),
     })
     if (!res) { restoreBtn(btn, originalText); return }
     const data = await res.json()
     if (!data.url) throw new Error('No checkout URL')
-    // Navigate the current tab — same-tab is the standard web purchase UX.
-    // On return, app.js init() will re-run and pick up the updated plan.
     window.location.href = data.url
   } catch {
     restoreBtn(btn, originalText)
@@ -186,7 +200,7 @@ function restoreBtn(btn, text) {
   if (btn) { btn.disabled = false; btn.textContent = text }
 }
 
-
 window.copyInvite = copyInvite
 window.startCheckout = startCheckout
 window.openPortal = openPortal
+window.setBillingPeriod = setBillingPeriod
