@@ -7,6 +7,19 @@ function getEffectivePlan(org) {
   return org.plan || 'FREE'
 }
 
+function getPlanLabel(org) {
+  if (!org) return 'Free'
+  const plan = org.plan || 'FREE'
+  if (plan === 'PRO') return 'Pro'
+  if (plan === 'BUSINESS') return 'Business'
+  if (org.trialEndsAt && new Date(org.trialEndsAt) > new Date()) {
+    const ms = new Date(org.trialEndsAt) - new Date()
+    const days = Math.ceil(ms / (1000 * 60 * 60 * 24))
+    return `Pro Trial (${days} day${days === 1 ? '' : 's'} left)`
+  }
+  return 'Free'
+}
+
 export { getEffectivePlan }
 
 export function renderProfile() {
@@ -14,7 +27,6 @@ export function renderProfile() {
   const effectivePlan = getEffectivePlan(currentOrg)
   const isPaid = currentOrg.plan === 'PRO' || currentOrg.plan === 'BUSINESS'
   const isOnTrial = !isPaid && effectivePlan === 'PRO'
-  const planLabels = { FREE: 'Free', PRO: 'Pro', BUSINESS: 'Business' }
   const initials = (currentUser.name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
 
   document.getElementById('profile-content').innerHTML = `
@@ -36,8 +48,7 @@ export function renderProfile() {
         <div class="info-row">
           <span class="info-label">Plan</span>
           <span class="info-value">
-            <span class="plan-pill plan-${currentOrg.plan}">${planLabels[currentOrg.plan] || currentOrg.plan}</span>
-            ${isOnTrial ? '<span class="trial-badge">Trial active</span>' : ''}
+            <span class="plan-pill plan-${effectivePlan}">${getPlanLabel(currentOrg)}</span>
           </span>
         </div>
         ${currentOrg.timezone ? `
@@ -66,7 +77,7 @@ export function renderProfile() {
       <div class="billing-current-plan">
         <div class="billing-current-icon">${currentOrg.plan === 'BUSINESS' ? '&#128081;' : '&#9889;'}</div>
         <div>
-          <div class="billing-current-name">${planLabels[currentOrg.plan]} Plan</div>
+          <div class="billing-current-name">${getPlanLabel(currentOrg)} Plan</div>
           <div class="billing-current-desc">Thank you for supporting ShiftRight! Use the Manage billing button to update your subscription, cancel, or download invoices.</div>
         </div>
       </div>

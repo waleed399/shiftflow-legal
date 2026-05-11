@@ -181,7 +181,6 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .plan-pill.plan-FREE     { background: rgba(148,163,184,0.15); color: #64748b; }
 .plan-pill.plan-PRO      { background: rgba(191,31,58,0.12); color: #bf1f3a; }
 .plan-pill.plan-BUSINESS { background: rgba(217,119,6,0.12); color: #d97706; }
-.trial-badge { display: inline-block; font-size: 0.65rem; font-weight: 700; padding: 2px 7px; border-radius: 6px; background: rgba(34,197,94,0.12); color: #16a34a; margin-left: 5px; text-transform: uppercase; }
 
 /* ── Billing section ── */
 .billing-section { margin-top: 20px; max-width: 860px; }
