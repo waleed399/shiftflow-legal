@@ -141,17 +141,23 @@ export async function startCheckout(planKey) {
   const originalText = btn?.textContent
   if (btn) { btn.disabled = true; btn.textContent = 'Loading…' }
 
+  // Build a return URL so Lemon Squeezy sends the user back here after payment.
+  // The ?payment=success flag tells the app to show a success message and
+  // refresh the plan — bypassing the mobile-only shiftright:// deep link.
+  const successUrl = window.location.origin + window.location.pathname + '?payment=success'
+
   try {
     const res = await apiFetch('/billing/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan: planKey, period: 'monthly' }),
+      body: JSON.stringify({ plan: planKey, period: 'monthly', successUrl }),
     })
     if (!res) { restoreBtn(btn, originalText); return }
     const data = await res.json()
     if (!data.url) throw new Error('No checkout URL')
-    window.open(data.url, '_blank')
-    watchForPlanChange()
+    // Navigate the current tab — same-tab is the standard web purchase UX.
+    // On return, app.js init() will re-run and pick up the updated plan.
+    window.location.href = data.url
   } catch {
     restoreBtn(btn, originalText)
     alert('Failed to start checkout. Please try again.')
@@ -180,27 +186,6 @@ function restoreBtn(btn, text) {
   if (btn) { btn.disabled = false; btn.textContent = text }
 }
 
-function watchForPlanChange() {
-  const check = async () => {
-    if (document.hidden) return
-    document.removeEventListener('visibilitychange', check)
-
-    try {
-      const res = await apiFetch('/billing/plan')
-      if (!res) return
-      const info = await res.json()
-      if (info.plan && info.plan !== state.currentOrg?.plan) {
-        state.currentOrg = { ...state.currentOrg, plan: info.plan }
-        localStorage.setItem('shiftflow_org', JSON.stringify(state.currentOrg))
-        const planEl = document.getElementById('sb-plan')
-        if (planEl) { planEl.textContent = info.plan; planEl.className = `plan-badge plan-${info.plan}` }
-        const profileView = document.getElementById('view-profile')
-        if (profileView && profileView.style.display !== 'none') renderProfile()
-      }
-    } catch {}
-  }
-  document.addEventListener('visibilitychange', check)
-}
 
 window.copyInvite = copyInvite
 window.startCheckout = startCheckout

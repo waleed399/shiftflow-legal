@@ -8,6 +8,13 @@ import './modals.js' // registers window.openShiftModal and other modal handlers
 async function init() {
   if (!getToken()) { window.location.href = '/app/'; return }
 
+  // Detect return from Lemon Squeezy checkout
+  const params = new URLSearchParams(window.location.search)
+  const returningFromPayment = params.get('payment') === 'success'
+  if (returningFromPayment) {
+    history.replaceState({}, '', window.location.pathname)
+  }
+
   try {
     const res = await apiFetch('/auth/me')
     if (!res) return
@@ -31,9 +38,48 @@ async function init() {
 
     document.getElementById('loading').style.display = 'none'
     document.getElementById('app').style.display = 'flex'
+
+    if (returningFromPayment) {
+      showView('profile')
+      showToast('🎉 Payment successful! Your plan has been upgraded.')
+      // Webhook is usually processed before LS redirects, but poll a few times
+      // in case of slight delay so the sidebar badge and profile update reliably.
+      pollPlanUpdate(4, 2000)
+    }
   } catch {
     window.location.href = '/app/'
   }
+}
+
+async function pollPlanUpdate(attemptsLeft, delayMs) {
+  if (attemptsLeft <= 0) return
+  await new Promise(r => setTimeout(r, delayMs))
+  try {
+    const res = await apiFetch('/billing/plan')
+    if (!res) return
+    const info = await res.json()
+    if (info.plan && info.plan !== state.currentOrg?.plan) {
+      state.currentOrg = { ...state.currentOrg, plan: info.plan }
+      localStorage.setItem('shiftflow_org', JSON.stringify(state.currentOrg))
+      renderSidebar()
+      const profileView = document.getElementById('view-profile')
+      if (profileView && profileView.style.display !== 'none') renderProfile()
+      return
+    }
+  } catch {}
+  pollPlanUpdate(attemptsLeft - 1, delayMs * 1.5)
+}
+
+function showToast(msg) {
+  const toast = document.createElement('div')
+  toast.className = 'app-toast'
+  toast.textContent = msg
+  document.body.appendChild(toast)
+  requestAnimationFrame(() => toast.classList.add('app-toast-visible'))
+  setTimeout(() => {
+    toast.classList.remove('app-toast-visible')
+    setTimeout(() => toast.remove(), 400)
+  }, 4000)
 }
 
 function renderSidebar() {

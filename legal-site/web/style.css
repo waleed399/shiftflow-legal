@@ -177,6 +177,10 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .remove-btn:hover { color: #ef4444; background: #fef2f2; }
 .workers-empty-msg { font-size: 0.85rem; color: #cbd5e1; font-style: italic; padding: 8px 12px; }
 
+/* ── Toast ── */
+.app-toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(12px); background: #0f172a; color: white; font-size: 0.875rem; font-weight: 600; padding: 12px 22px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.22); z-index: 200; opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none; white-space: nowrap; }
+.app-toast-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
 /* ── Plan pill (inline in org card) ── */
 .plan-pill { display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.03em; }
 .plan-pill.plan-FREE     { background: rgba(148,163,184,0.15); color: #64748b; }
