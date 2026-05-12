@@ -5,6 +5,7 @@ import { renderWeekLabel, renderDayTabs, loadShifts } from './shifts.js'
 import { renderProfile, getEffectivePlan } from './profile.js'
 import './modals.js' // registers window.openShiftModal and other modal handlers
 import './createShift.js' // registers window.openCreateShiftModal and submit handlers
+import { renderRequests, loadPendingCount } from './requests.js'
 
 async function init() {
   if (!getToken()) { window.location.href = '/app/'; return }
@@ -39,6 +40,8 @@ async function init() {
 
     document.getElementById('loading').style.display = 'none'
     document.getElementById('app').style.display = 'flex'
+
+    loadPendingCount() // non-blocking badge update
 
     if (returningFromPayment) {
       showView('profile')
@@ -105,11 +108,14 @@ function renderSidebar() {
 }
 
 function showView(view) {
-  document.getElementById('view-shifts').style.display  = view === 'shifts'  ? 'flex' : 'none'
-  document.getElementById('view-profile').style.display = view === 'profile' ? 'flex' : 'none'
-  document.getElementById('nav-shifts').classList.toggle('active',  view === 'shifts')
-  document.getElementById('nav-profile').classList.toggle('active', view === 'profile')
-  if (view === 'profile') renderProfile()
+  document.getElementById('view-shifts').style.display   = view === 'shifts'   ? 'flex' : 'none'
+  document.getElementById('view-profile').style.display  = view === 'profile'  ? 'flex' : 'none'
+  document.getElementById('view-requests').style.display = view === 'requests' ? 'flex' : 'none'
+  document.getElementById('nav-shifts').classList.toggle('active',   view === 'shifts')
+  document.getElementById('nav-profile').classList.toggle('active',  view === 'profile')
+  document.getElementById('nav-requests').classList.toggle('active', view === 'requests')
+  if (view === 'profile')  renderProfile()
+  if (view === 'requests') renderRequests()
 }
 
 function signOut() {

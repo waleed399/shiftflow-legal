@@ -8,4 +8,5 @@ export const state = {
   departments: null,
   activeShiftId: null,
   activeShiftData: null,
+  pendingRequestCount: 0,
 }
