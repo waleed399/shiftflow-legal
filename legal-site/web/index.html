@@ -61,10 +61,6 @@
     <div id="view-shifts">
       <div class="topbar">
         <span class="topbar-title">Shifts</span>
-        <button class="btn btn-success btn-sm" id="new-shift-btn" onclick="openCreateShiftModal()" title="Create a new shift">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          New shift
-        </button>
         <div class="view-toggle">
           <button class="view-toggle-btn active" id="view-list-btn" onclick="setShiftsView('list')" title="List view">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
@@ -103,6 +99,10 @@
           <div class="loader-inline"><div class="spinner"></div></div>
         </div>
       </div>
+
+      <button class="fab" id="fab-new-shift" onclick="openCreateShiftModal()" title="Create a new shift" aria-label="Create a new shift">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
     </div>
 
     <!-- Profile view -->

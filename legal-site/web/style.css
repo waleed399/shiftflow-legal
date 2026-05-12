@@ -54,6 +54,7 @@ nav { flex: 1; padding: 12px 10px; overflow-y: auto; }
 /* ── Main ── */
 main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 #view-shifts, #view-profile { flex: 1; flex-direction: column; min-height: 0; }
+#view-shifts { position: relative; }
 
 /* ── Top bar ── */
 .topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 28px; height: 58px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
@@ -322,6 +323,7 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 textarea.form-input { resize: vertical; min-height: 44px; }
 .form-error { min-height: 18px; font-size: 0.8rem; color: #dc2626; font-weight: 500; }
 
-/* Topbar "New shift" button — sits between title and view-toggle */
-#new-shift-btn { margin-left: 18px; margin-right: auto; }
-.topbar > .view-toggle { margin-right: 14px; }
+/* ── FAB ── */
+.fab { position: absolute; bottom: 28px; right: 32px; width: 52px; height: 52px; border-radius: 50%; background: var(--navy); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(26,45,79,0.35); transition: transform 0.15s, box-shadow 0.15s; z-index: 10; }
+.fab:hover { transform: scale(1.08); box-shadow: 0 6px 20px rgba(26,45,79,0.45); }
+.fab:active { transform: scale(0.96); }

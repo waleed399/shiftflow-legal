@@ -55,7 +55,7 @@ export async function submitCreateShift(e) {
 
   if (!departmentId) { showError('Pick a department'); return }
   if (!startTime || !endTime) { showError('Pick a start and end time'); return }
-  if (startTime === endTime) { showError('Start and end time can’t match'); return }
+  if (startTime === endTime) { showError("Start and end time can’t match"); return }
   if (requiredWorkers < 1) { showError('Required workers must be at least 1'); return }
 
   const submitBtn = document.getElementById('cs-submit')
