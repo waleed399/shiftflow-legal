@@ -4,6 +4,10 @@ import { esc } from './utils.js'
 
 let activeTab = 'timeoff'
 
+// Cached data from last fetch — tab switching re-renders without re-fetching
+let _cachedSwaps   = null
+let _cachedTimeoff = null
+
 // Pagination cursors — reset on each fresh renderRequests() call
 let _swapsCursor   = null
 let _timeoffCursor = null
@@ -20,9 +24,11 @@ function fmtDate(iso) {
 // ── Render ────────────────────────────────────────────────────────────────────
 
 export async function renderRequests() {
-  // Reset pagination state for fresh load
-  _swapsCursor = _timeoffCursor = null
-  _swapsHasMore = _timeoffHasMore = false
+  // If cache is already warm (seeded by loadPendingCount), render immediately
+  if (_cachedSwaps !== null) {
+    renderTab(_cachedSwaps, _cachedTimeoff)
+    return
+  }
 
   const container = document.getElementById('requests-content')
   container.innerHTML = '<div class="loader-inline"><div class="spinner"></div></div>'
@@ -37,21 +43,20 @@ export async function renderRequests() {
     const swapsPage   = await sr.json()
     const timeoffPage = await tr.json()
 
-    const allSwaps   = swapsPage.swaps   || []
-    const allTimeoff = timeoffPage.requests || []
-
+    _cachedSwaps   = swapsPage.swaps    || []
+    _cachedTimeoff = timeoffPage.requests || []
     _swapsCursor   = swapsPage.nextCursor
     _timeoffCursor = timeoffPage.nextCursor
     _swapsHasMore   = swapsPage.hasMore
     _timeoffHasMore = timeoffPage.hasMore
 
-    const pendingSwaps   = allSwaps.filter(s => s.status === 'PENDING')
-    const pendingTimeoff = allTimeoff.filter(t => t.status === 'PENDING')
+    const pendingSwaps   = _cachedSwaps.filter(s => s.status === 'PENDING')
+    const pendingTimeoff = _cachedTimeoff.filter(t => t.status === 'PENDING')
 
     updateBadge(pendingSwaps.length + pendingTimeoff.length)
     updateTabCounts(pendingSwaps.length, pendingTimeoff.length)
 
-    renderTab(allSwaps, allTimeoff)
+    renderTab(_cachedSwaps, _cachedTimeoff)
   } catch {
     container.innerHTML = '<div class="empty-state"><p>Failed to load requests — try again</p></div>'
   }
@@ -233,7 +238,11 @@ function setReqTab(tab) {
   activeTab = tab
   document.getElementById('req-tab-timeoff').classList.toggle('active', tab === 'timeoff')
   document.getElementById('req-tab-swaps').classList.toggle('active', tab === 'swaps')
-  renderRequests()
+  if (_cachedSwaps !== null) {
+    renderTab(_cachedSwaps, _cachedTimeoff)
+  } else {
+    renderRequests()
+  }
 }
 
 async function doAction(fn) {
@@ -284,9 +293,19 @@ export async function loadPendingCount() {
     if (!sr?.ok || !tr?.ok) return
     const sd = await sr.json()
     const td = await tr.json()
-    const s  = (sd.swaps    || []).filter(x => x.status === 'PENDING').length
-    const t  = (td.requests || []).filter(x => x.status === 'PENDING').length
+
+    // Seed the cache so navigating to Requests doesn't re-fetch
+    _cachedSwaps   = sd.swaps    || []
+    _cachedTimeoff = td.requests || []
+    _swapsCursor   = sd.nextCursor
+    _timeoffCursor = td.nextCursor
+    _swapsHasMore   = sd.hasMore  || false
+    _timeoffHasMore = td.hasMore  || false
+
+    const s = _cachedSwaps.filter(x => x.status === 'PENDING').length
+    const t = _cachedTimeoff.filter(x => x.status === 'PENDING').length
     updateBadge(s + t)
+    updateTabCounts(s, t)
   } catch {}
 }
 
