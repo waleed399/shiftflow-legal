@@ -3,6 +3,19 @@ import { apiFetch } from './api.js'
 import { toYMD, esc } from './utils.js'
 import { loadShifts, updateActionBar } from './shifts.js'
 
+// ── Avatar helper ─────────────────────────────────────────────────────────────
+
+function applyAvatars(container) {
+  container.querySelectorAll('[data-avatar]').forEach(el => {
+    const url = el.getAttribute('data-avatar')
+    if (!url) return
+    const img = document.createElement('img')
+    img.alt = ''
+    img.onload = () => { el.textContent = ''; el.appendChild(img) }
+    img.src = url
+  })
+}
+
 // ── Shift detail modal ────────────────────────────────────────────────────────
 
 export function openShiftModal(shiftId) {
@@ -64,12 +77,13 @@ function renderModalWorkers(shift) {
 
     return `
       <div class="worker-row">
-        <div class="worker-row-avatar">${initials}</div>
+        <div class="worker-row-avatar" data-avatar="${esc(a.worker?.avatarUrl || '')}">${initials}</div>
         <span class="worker-row-name">${esc(name)}</span>
         ${attBtns}
         ${removeBtn}
       </div>`
   }).join('')
+  applyAvatars(el)
 }
 
 function renderModalFooter(shift) {
@@ -170,18 +184,20 @@ function renderPickerList(workers, query) {
     return
   }
 
-  document.getElementById('picker-list').innerHTML = filtered.map(w => {
+  const list = document.getElementById('picker-list')
+  list.innerHTML = filtered.map(w => {
     const initials = esc((w.name || '?').split(' ').map(c => c[0]).join('').slice(0, 2).toUpperCase())
     const already = assignedIds.has(w.id)
     return `
       <div class="pick-row ${already ? 'already-assigned' : ''}" onclick="${already ? '' : `assignWorker('${w.id}')`}">
-        <div class="worker-row-avatar" style="width:28px;height:28px;font-size:0.65rem">${initials}</div>
+        <div class="worker-row-avatar" style="width:28px;height:28px;font-size:0.65rem" data-avatar="${esc(w.avatarUrl || '')}">${initials}</div>
         <div>
           <div class="pick-row-name">${esc(w.name || '—')}</div>
           ${already ? '<div class="pick-row-dept">Already assigned</div>' : ''}
         </div>
       </div>`
   }).join('')
+  applyAvatars(list)
 }
 
 export async function assignWorker(workerId) {
