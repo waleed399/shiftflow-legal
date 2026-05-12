@@ -5,6 +5,7 @@ export const state = {
   selectedDay: null,
   shiftsCache: {},
   orgWorkers: null,
+  departments: null,
   activeShiftId: null,
   activeShiftData: null,
 }

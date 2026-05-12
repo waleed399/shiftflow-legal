@@ -309,3 +309,19 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .pick-row-name { font-size: 0.875rem; color: var(--text); font-weight: 500; }
 .pick-row-dept { font-size: 0.75rem; color: var(--muted); }
 .pick-row.already-assigned { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+/* ── Form (create-shift modal) ─────────────────────────────────────────────── */
+#create-shift-form { display: flex; flex-direction: column; gap: 14px; }
+.form-row { display: flex; flex-direction: column; gap: 5px; }
+.form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-label { font-size: 0.75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.form-optional { font-weight: 400; text-transform: none; letter-spacing: 0; color: #cbd5e1; }
+.form-input { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 9px; font-size: 0.875rem; font-family: inherit; color: var(--text); background: var(--white); transition: border-color 0.12s, box-shadow 0.12s; }
+.form-input:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(26,45,79,0.08); }
+.form-input:disabled { background: var(--bg); color: var(--muted); cursor: not-allowed; }
+textarea.form-input { resize: vertical; min-height: 44px; }
+.form-error { min-height: 18px; font-size: 0.8rem; color: #dc2626; font-weight: 500; }
+
+/* Topbar "New shift" button — sits between title and view-toggle */
+#new-shift-btn { margin-left: 18px; margin-right: auto; }
+.topbar > .view-toggle { margin-right: 14px; }

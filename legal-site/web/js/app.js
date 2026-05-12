@@ -4,6 +4,7 @@ import { getWeekStartOf } from './utils.js'
 import { renderWeekLabel, renderDayTabs, loadShifts } from './shifts.js'
 import { renderProfile, getEffectivePlan } from './profile.js'
 import './modals.js' // registers window.openShiftModal and other modal handlers
+import './createShift.js' // registers window.openCreateShiftModal and submit handlers
 
 async function init() {
   if (!getToken()) { window.location.href = '/app/'; return }

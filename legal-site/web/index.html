@@ -61,6 +61,10 @@
     <div id="view-shifts">
       <div class="topbar">
         <span class="topbar-title">Shifts</span>
+        <button class="btn btn-success btn-sm" id="new-shift-btn" onclick="openCreateShiftModal()" title="Create a new shift">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New shift
+        </button>
         <div class="view-toggle">
           <button class="view-toggle-btn active" id="view-list-btn" onclick="setShiftsView('list')" title="List view">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
@@ -156,6 +160,52 @@
     <div class="modal-body">
       <input class="picker-search" id="picker-search" placeholder="Search workers…" oninput="filterPicker(this.value)">
       <div class="picker-list" id="picker-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Create shift modal -->
+<div class="modal-overlay hidden" id="create-shift-modal" onclick="onCreateShiftOverlayClick(event)">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <div class="modal-title">Create shift</div>
+        <div class="modal-subtitle" id="cs-subtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeCreateShiftModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="create-shift-form" onsubmit="submitCreateShift(event)" autocomplete="off">
+        <div class="form-row">
+          <label class="form-label" for="cs-department">Department</label>
+          <select class="form-input" id="cs-department" required></select>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-row">
+            <label class="form-label" for="cs-start">Start time</label>
+            <input class="form-input" type="time" id="cs-start" required>
+          </div>
+          <div class="form-row">
+            <label class="form-label" for="cs-end">End time</label>
+            <input class="form-input" type="time" id="cs-end" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="cs-required">Required workers</label>
+          <input class="form-input" type="number" id="cs-required" min="1" max="99" value="1" required>
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="cs-notes">Notes <span class="form-optional">(optional)</span></label>
+          <textarea class="form-input" id="cs-notes" rows="2" maxlength="500" placeholder="Anything the team should know"></textarea>
+        </div>
+        <div id="cs-error" class="form-error"></div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeCreateShiftModal()">Cancel</button>
+      <button class="btn btn-success" id="cs-submit" onclick="submitCreateShift()">Create shift</button>
     </div>
   </div>
 </div>
