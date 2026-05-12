@@ -100,9 +100,13 @@ function onScanned(data) {
   localStorage.setItem('shiftflow_user', JSON.stringify(data.user))
   localStorage.setItem('shiftflow_org', JSON.stringify(data.organization))
 
+  document.getElementById('success-name').textContent = data.user.name || ''
+  document.getElementById('success-role').textContent = (data.user.role || '').toLowerCase()
+  document.getElementById('success-org').textContent = data.organization.name || ''
+
   document.getElementById('qr-state').style.display = 'none'
   document.getElementById('success-state').style.display = 'block'
-  setTimeout(() => { window.location.href = '/web/' }, 1200)
+  setTimeout(() => { window.location.href = '/web/' }, 2000)
 }
 
 function showError(msg) {
