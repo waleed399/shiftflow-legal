@@ -4,6 +4,12 @@ import { esc } from './utils.js'
 
 let activeTab = 'timeoff'
 
+// Pagination cursors — reset on each fresh renderRequests() call
+let _swapsCursor   = null
+let _timeoffCursor = null
+let _swapsHasMore   = false
+let _timeoffHasMore = false
+
 function fmtDate(iso) {
   if (!iso) return '?'
   const [, m, d] = iso.slice(0, 10).split('-')
@@ -14,15 +20,30 @@ function fmtDate(iso) {
 // ── Render ────────────────────────────────────────────────────────────────────
 
 export async function renderRequests() {
+  // Reset pagination state for fresh load
+  _swapsCursor = _timeoffCursor = null
+  _swapsHasMore = _timeoffHasMore = false
+
   const container = document.getElementById('requests-content')
   container.innerHTML = '<div class="loader-inline"><div class="spinner"></div></div>'
 
   try {
-    const [sr, tr] = await Promise.all([apiFetch('/swaps'), apiFetch('/time-off')])
+    const [sr, tr] = await Promise.all([
+      apiFetch('/swaps?limit=20'),
+      apiFetch('/time-off?limit=20'),
+    ])
     if (!sr || !tr) return
 
-    const allSwaps   = await sr.json()
-    const allTimeoff = await tr.json()
+    const swapsPage   = await sr.json()
+    const timeoffPage = await tr.json()
+
+    const allSwaps   = swapsPage.swaps   || []
+    const allTimeoff = timeoffPage.requests || []
+
+    _swapsCursor   = swapsPage.nextCursor
+    _timeoffCursor = timeoffPage.nextCursor
+    _swapsHasMore   = swapsPage.hasMore
+    _timeoffHasMore = timeoffPage.hasMore
 
     const pendingSwaps   = allSwaps.filter(s => s.status === 'PENDING')
     const pendingTimeoff = allTimeoff.filter(t => t.status === 'PENDING')
@@ -30,34 +51,43 @@ export async function renderRequests() {
     updateBadge(pendingSwaps.length + pendingTimeoff.length)
     updateTabCounts(pendingSwaps.length, pendingTimeoff.length)
 
-    const isTimeoff = activeTab === 'timeoff'
-    const pending = isTimeoff ? pendingTimeoff : pendingSwaps
-    const history = (isTimeoff ? allTimeoff : allSwaps)
-      .filter(x => x.status !== 'PENDING')
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-
-    if (!pending.length && !history.length) {
-      container.innerHTML = '<div class="empty-state"><p>No requests yet</p></div>'
-      return
-    }
-
-    let html = ''
-
-    if (pending.length) {
-      html += pending.map(x => isTimeoff ? timeOffCard(x) : swapCard(x)).join('')
-    } else {
-      html += '<div class="req-no-pending">No pending requests</div>'
-    }
-
-    if (history.length) {
-      html += `<div class="req-history-divider"><span>History</span></div>`
-      html += history.map(x => isTimeoff ? timeOffHistoryCard(x) : swapHistoryCard(x)).join('')
-    }
-
-    container.innerHTML = html
+    renderTab(allSwaps, allTimeoff)
   } catch {
     container.innerHTML = '<div class="empty-state"><p>Failed to load requests — try again</p></div>'
   }
+}
+
+function renderTab(allSwaps, allTimeoff) {
+  const container = document.getElementById('requests-content')
+  const isTimeoff  = activeTab === 'timeoff'
+  const all        = isTimeoff ? allTimeoff : allSwaps
+  const pending    = all.filter(x => x.status === 'PENDING')
+  const history    = all.filter(x => x.status !== 'PENDING')
+  const hasMore    = isTimeoff ? _timeoffHasMore : _swapsHasMore
+
+  if (!pending.length && !history.length) {
+    container.innerHTML = '<div class="empty-state"><p>No requests yet</p></div>'
+    return
+  }
+
+  let html = ''
+
+  if (pending.length) {
+    html += pending.map(x => isTimeoff ? timeOffCard(x) : swapCard(x)).join('')
+  } else {
+    html += '<div class="req-no-pending">No pending requests</div>'
+  }
+
+  if (history.length) {
+    html += `<div class="req-history-divider"><span>History</span></div>`
+    html += history.map(x => isTimeoff ? timeOffHistoryCard(x) : swapHistoryCard(x)).join('')
+  }
+
+  if (hasMore) {
+    html += `<div class="req-load-more-wrap"><button class="req-load-more-btn" onclick="loadMoreRequests()">Load more</button></div>`
+  }
+
+  container.innerHTML = html
 }
 
 // ── Pending cards ─────────────────────────────────────────────────────────────
@@ -247,12 +277,62 @@ async function denyTimeOff(id) {
 
 export async function loadPendingCount() {
   try {
-    const [sr, tr] = await Promise.all([apiFetch('/swaps'), apiFetch('/time-off')])
+    const [sr, tr] = await Promise.all([
+      apiFetch('/swaps?limit=20'),
+      apiFetch('/time-off?limit=20'),
+    ])
     if (!sr?.ok || !tr?.ok) return
-    const s = (await sr.json()).filter(x => x.status === 'PENDING').length
-    const t = (await tr.json()).filter(x => x.status === 'PENDING').length
+    const sd = await sr.json()
+    const td = await tr.json()
+    const s  = (sd.swaps    || []).filter(x => x.status === 'PENDING').length
+    const t  = (td.requests || []).filter(x => x.status === 'PENDING').length
     updateBadge(s + t)
   } catch {}
+}
+
+export async function loadMoreRequests() {
+  const isTimeoff = activeTab === 'timeoff'
+  const cursor    = isTimeoff ? _timeoffCursor : _swapsCursor
+  const hasMore   = isTimeoff ? _timeoffHasMore : _swapsHasMore
+  if (!hasMore || !cursor) return
+
+  const btn = document.querySelector('.req-load-more-btn')
+  if (btn) { btn.disabled = true; btn.textContent = 'Loading…' }
+
+  try {
+    const path = isTimeoff ? `/time-off?limit=20&cursor=${cursor}` : `/swaps?limit=20&cursor=${cursor}`
+    const res  = await apiFetch(path)
+    if (!res?.ok) return
+    const page = await res.json()
+
+    const newItems = isTimeoff ? (page.requests || []) : (page.swaps || [])
+
+    if (isTimeoff) {
+      _timeoffCursor = page.nextCursor
+      _timeoffHasMore = page.hasMore
+    } else {
+      _swapsCursor = page.nextCursor
+      _swapsHasMore = page.hasMore
+    }
+
+    // Append history cards after the existing history section
+    const wrap = document.querySelector('.req-load-more-wrap')
+    if (wrap) {
+      const historyCards = newItems
+        .filter(x => x.status !== 'PENDING')
+        .map(x => isTimeoff ? timeOffHistoryCard(x) : swapHistoryCard(x))
+        .join('')
+      wrap.insertAdjacentHTML('beforebegin', historyCards)
+
+      if (page.hasMore) {
+        if (btn) { btn.disabled = false; btn.textContent = 'Load more' }
+      } else {
+        wrap.remove()
+      }
+    }
+  } catch {
+    if (btn) { btn.disabled = false; btn.textContent = 'Load more' }
+  }
 }
 
 window.approveSwap      = approveSwap
@@ -261,3 +341,4 @@ window.denySwap         = denySwap
 window.approveTimeOff   = approveTimeOff
 window.denyTimeOff      = denyTimeOff
 window.setReqTab        = setReqTab
+window.loadMoreRequests = loadMoreRequests
