@@ -327,10 +327,15 @@ textarea.form-input { resize: vertical; min-height: 44px; }
 .nav-badge { display: none; margin-left: auto; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--red); color: white; font-size: 0.65rem; font-weight: 700; align-items: center; justify-content: center; }
 .nav-badge.visible { display: inline-flex; }
 
+/* ── Request tabs ── */
+.req-tabs { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 28px; display: flex; gap: 4px; flex-shrink: 0; }
+.req-tab { padding: 12px 16px; font-size: 0.85rem; font-weight: 600; color: var(--muted); background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; display: flex; align-items: center; gap: 7px; transition: color 0.15s; margin-bottom: -1px; }
+.req-tab:hover { color: var(--navy); }
+.req-tab.active { color: var(--navy); border-bottom-color: var(--navy); }
+.req-tab-badge { display: none; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--red); color: white; font-size: 0.65rem; font-weight: 700; align-items: center; justify-content: center; }
+.req-tab-badge.visible { display: inline-flex; }
+
 /* ── Request cards ── */
-.req-section { margin-bottom: 28px; }
-.req-section-title { font-size: 0.75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
-.req-count { background: var(--bg); border: 1px solid var(--border); color: var(--muted); border-radius: 10px; padding: 1px 7px; font-size: 0.7rem; font-weight: 600; text-transform: none; letter-spacing: 0; }
 .req-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 10px; }
 .req-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 .req-who { font-size: 0.9rem; font-weight: 700; color: var(--text); }
@@ -339,13 +344,22 @@ textarea.form-input { resize: vertical; min-height: 44px; }
 .req-dim { color: var(--muted) !important; font-weight: 400 !important; }
 .req-reason { font-size: 0.78rem; color: var(--muted); font-style: italic; }
 .req-select { margin-top: 6px; padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.8rem; font-family: inherit; color: var(--text); background: var(--bg); cursor: pointer; max-width: 220px; }
-.req-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+.req-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; align-items: flex-end; }
 .req-btn { padding: 7px 16px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; border: none; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
 .req-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .req-approve { background: #ecfdf5; color: #166534; }
 .req-approve:hover:not(:disabled) { background: #166534; color: white; }
 .req-deny { background: #fef2f2; color: #991b1b; }
 .req-deny:hover:not(:disabled) { background: #991b1b; color: white; }
+.req-no-pending { font-size: 0.8rem; color: var(--muted); padding: 12px 0 4px; }
+.req-history-divider { display: flex; align-items: center; gap: 12px; margin: 20px 0 14px; color: var(--muted); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+.req-history-divider::before, .req-history-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.req-card-history { opacity: 0.75; background: var(--bg); border-color: transparent; }
+.req-reviewer { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+.req-status-badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
+.req-status-approved  { background: #dcfce7; color: #166534; }
+.req-status-denied    { background: #fee2e2; color: #991b1b; }
+.req-status-cancelled { background: #f1f5f9; color: #64748b; }
 
 /* ── FAB ── */
 .fab { position: absolute; bottom: 28px; right: 32px; width: 52px; height: 52px; border-radius: 50%; background: var(--navy); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(26,45,79,0.35); transition: transform 0.15s, box-shadow 0.15s; z-index: 10; }

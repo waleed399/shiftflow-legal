@@ -125,6 +125,16 @@
       <div class="topbar">
         <span class="topbar-title">Requests</span>
       </div>
+      <div class="req-tabs">
+        <button class="req-tab active" id="req-tab-timeoff" onclick="setReqTab('timeoff')">
+          Time-off
+          <span class="req-tab-badge" id="req-tab-count-timeoff"></span>
+        </button>
+        <button class="req-tab" id="req-tab-swaps" onclick="setReqTab('swaps')">
+          Swaps
+          <span class="req-tab-badge" id="req-tab-count-swaps"></span>
+        </button>
+      </div>
       <div class="content-area">
         <div id="requests-content"></div>
       </div>

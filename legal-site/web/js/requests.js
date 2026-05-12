@@ -2,12 +2,16 @@ import { state } from './state.js'
 import { apiFetch } from './api.js'
 import { esc } from './utils.js'
 
+let activeTab = 'timeoff'
+
 function fmtDate(iso) {
   if (!iso) return '?'
   const [, m, d] = iso.slice(0, 10).split('-')
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
   return `${parseInt(d, 10)} ${months[parseInt(m, 10) - 1]}`
 }
+
+// ── Render ────────────────────────────────────────────────────────────────────
 
 export async function renderRequests() {
   const container = document.getElementById('requests-content')
@@ -17,28 +21,37 @@ export async function renderRequests() {
     const [sr, tr] = await Promise.all([apiFetch('/swaps'), apiFetch('/time-off')])
     if (!sr || !tr) return
 
-    const swaps   = (await sr.json()).filter(s => s.status === 'PENDING')
-    const timeoff = (await tr.json()).filter(t => t.status === 'PENDING')
+    const allSwaps   = await sr.json()
+    const allTimeoff = await tr.json()
 
-    updateBadge(swaps.length + timeoff.length)
+    const pendingSwaps   = allSwaps.filter(s => s.status === 'PENDING')
+    const pendingTimeoff = allTimeoff.filter(t => t.status === 'PENDING')
 
-    if (!swaps.length && !timeoff.length) {
-      container.innerHTML = '<div class="empty-state"><p>All caught up — no pending requests</p></div>'
+    updateBadge(pendingSwaps.length + pendingTimeoff.length)
+    updateTabCounts(pendingSwaps.length, pendingTimeoff.length)
+
+    const isTimeoff = activeTab === 'timeoff'
+    const pending = isTimeoff ? pendingTimeoff : pendingSwaps
+    const history = (isTimeoff ? allTimeoff : allSwaps)
+      .filter(x => x.status !== 'PENDING')
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+
+    if (!pending.length && !history.length) {
+      container.innerHTML = '<div class="empty-state"><p>No requests yet</p></div>'
       return
     }
 
     let html = ''
 
-    if (swaps.length) {
-      html += `<div class="req-section"><div class="req-section-title">Swap requests <span class="req-count">${swaps.length}</span></div>`
-      swaps.forEach(s => { html += swapCard(s) })
-      html += '</div>'
+    if (pending.length) {
+      html += pending.map(x => isTimeoff ? timeOffCard(x) : swapCard(x)).join('')
+    } else {
+      html += '<div class="req-no-pending">No pending requests</div>'
     }
 
-    if (timeoff.length) {
-      html += `<div class="req-section"><div class="req-section-title">Time-off requests <span class="req-count">${timeoff.length}</span></div>`
-      timeoff.forEach(t => { html += timeOffCard(t) })
-      html += '</div>'
+    if (history.length) {
+      html += `<div class="req-history-divider"><span>History</span></div>`
+      html += history.map(x => isTimeoff ? timeOffHistoryCard(x) : swapHistoryCard(x)).join('')
     }
 
     container.innerHTML = html
@@ -46,6 +59,8 @@ export async function renderRequests() {
     container.innerHTML = '<div class="empty-state"><p>Failed to load requests — try again</p></div>'
   }
 }
+
+// ── Pending cards ─────────────────────────────────────────────────────────────
 
 function swapCard(s) {
   const shift      = s.requesterAssignment?.shift
@@ -72,8 +87,8 @@ function swapCard(s) {
     meta = `<div class="req-meta">→ ${esc(s.targetWorker?.name || 'Unknown')}</div>`
   }
 
-  const canApprove    = !isOpen || volunteers.length > 0
-  const approveClick  = isOpen ? `approveSwapOpen('${s.id}')` : `approveSwap('${s.id}')`
+  const canApprove   = !isOpen || volunteers.length > 0
+  const approveClick = isOpen ? `approveSwapOpen('${s.id}')` : `approveSwap('${s.id}')`
 
   return `<div class="req-card" id="swap-${esc(s.id)}">
     <div class="req-body">
@@ -109,12 +124,86 @@ function timeOffCard(t) {
   </div>`
 }
 
+// ── History cards ─────────────────────────────────────────────────────────────
+
+function statusBadge(status) {
+  const map = { APPROVED: 'approved', DENIED: 'denied', CANCELLED: 'cancelled' }
+  const cls   = map[status] || 'cancelled'
+  const label = status.charAt(0) + status.slice(1).toLowerCase()
+  return `<span class="req-status-badge req-status-${cls}">${label}</span>`
+}
+
+function swapHistoryCard(s) {
+  const shift = s.requesterAssignment?.shift
+  const dept  = shift?.department?.name || '—'
+  const date  = fmtDate(shift?.date)
+  const time  = shift ? `${shift.startTime}–${shift.endTime}` : '—'
+
+  let meta = s.targetWorker ? `<div class="req-meta">→ ${esc(s.targetWorker.name)}</div>` : ''
+
+  let reviewer = ''
+  if (s.reviewedBy?.name && s.status !== 'CANCELLED') {
+    const verb = s.status === 'APPROVED' ? 'Approved' : 'Denied'
+    reviewer = `<div class="req-reviewer">${verb} by ${esc(s.reviewedBy.name)}</div>`
+  }
+
+  return `<div class="req-card req-card-history">
+    <div class="req-body">
+      <div class="req-who">${esc(s.requester?.name || 'Unknown')}</div>
+      <div class="req-details">${esc(dept)} · ${esc(date)} · ${esc(time)}</div>
+      ${meta}
+      ${s.reason ? `<div class="req-reason">&ldquo;${esc(s.reason)}&rdquo;</div>` : ''}
+      ${reviewer}
+    </div>
+    <div class="req-actions">${statusBadge(s.status)}</div>
+  </div>`
+}
+
+function timeOffHistoryCard(t) {
+  const start = fmtDate(t.startDate)
+  const end   = fmtDate(t.endDate)
+  const same  = t.startDate?.slice(0, 10) === t.endDate?.slice(0, 10)
+  const range = same ? start : `${start} – ${end}`
+
+  let reviewer = ''
+  if (t.reviewedBy?.name && t.status !== 'CANCELLED') {
+    const verb = t.status === 'APPROVED' ? 'Approved' : 'Denied'
+    reviewer = `<div class="req-reviewer">${verb} by ${esc(t.reviewedBy.name)}</div>`
+  }
+
+  return `<div class="req-card req-card-history">
+    <div class="req-body">
+      <div class="req-who">${esc(t.worker?.name || 'Unknown')}</div>
+      <div class="req-details">${range}</div>
+      ${t.reason ? `<div class="req-reason">&ldquo;${esc(t.reason)}&rdquo;</div>` : ''}
+      ${reviewer}
+    </div>
+    <div class="req-actions">${statusBadge(t.status)}</div>
+  </div>`
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
 function updateBadge(n) {
   state.pendingRequestCount = n
   const el = document.getElementById('req-badge')
   if (!el) return
   el.textContent = n > 0 ? String(n) : ''
   el.classList.toggle('visible', n > 0)
+}
+
+function updateTabCounts(swapCount, timeoffCount) {
+  const tc = document.getElementById('req-tab-count-timeoff')
+  const sc = document.getElementById('req-tab-count-swaps')
+  if (tc) { tc.textContent = timeoffCount || ''; tc.classList.toggle('visible', timeoffCount > 0) }
+  if (sc) { sc.textContent = swapCount || '';    sc.classList.toggle('visible', swapCount > 0) }
+}
+
+function setReqTab(tab) {
+  activeTab = tab
+  document.getElementById('req-tab-timeoff').classList.toggle('active', tab === 'timeoff')
+  document.getElementById('req-tab-swaps').classList.toggle('active', tab === 'swaps')
+  renderRequests()
 }
 
 async function doAction(fn) {
@@ -171,3 +260,4 @@ window.approveSwapOpen  = approveSwapOpen
 window.denySwap         = denySwap
 window.approveTimeOff   = approveTimeOff
 window.denyTimeOff      = denyTimeOff
+window.setReqTab        = setReqTab
