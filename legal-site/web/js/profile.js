@@ -42,13 +42,13 @@ export function renderProfile() {
       icon: '&#9889;', name: 'Pro', cls: 'pro', popular: true,
       monthly: { price: '$49.99', label: null },
       annual:  { price: '$39.99', label: 'Billed $479.88/yr &mdash; save $120' },
-      features: ['Up to 50 workers', 'Unlimited locations', 'Advanced scheduling', 'Analytics &amp; reports', 'Web app access', 'Priority support'],
+      features: ['Everything in Free', 'Up to 50 workers', 'Unlimited departments', 'Coverage builder', 'Auto-scheduling', 'Web app access'],
     },
     BUSINESS: {
       icon: '&#128081;', name: 'Business', cls: 'business', popular: false,
       monthly: { price: '$99.99', label: null },
       annual:  { price: '$79.99', label: 'Billed $959.88/yr &mdash; save $240' },
-      features: ['Unlimited workers', 'Unlimited locations', 'Everything in Pro', 'Dedicated support'],
+      features: ['Everything in Pro', 'Unlimited workers', 'Priority support'],
     },
   }
 
