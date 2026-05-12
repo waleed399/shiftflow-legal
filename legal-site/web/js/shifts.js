@@ -1,6 +1,6 @@
 import { state } from './state.js'
 import { apiFetch } from './api.js'
-import { DAYS, MONTHS, DEPT_COLORS, addDays, isSameDay, toYMD, fmtDate, getWeekStartOf, esc } from './utils.js'
+import { DAYS, MONTHS, DEPT_COLORS, addDays, isSameDay, toYMD, fmtDate, getWeekStartOf, esc, applyAvatars } from './utils.js'
 
 let shiftsView = 'list'
 
@@ -274,7 +274,7 @@ export async function renderTableView() {
     const initials = esc(w.name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase())
     return `
       <th class="dt-worker-th">
-        <div class="dt-worker-avatar">${initials}</div>
+        <div class="dt-worker-avatar" data-avatar="${esc(w.avatarUrl || '')}">${initials}</div>
         <div class="dt-worker-name">${esc(w.name.split(' ')[0])}</div>
       </th>`
   }).join('')
@@ -382,6 +382,7 @@ export async function renderTableView() {
         <span class="dt-legend-item" style="color:#94a3b8">— = shift full</span>
       </div>
     </div>`
+  applyAvatars(el)
 }
 
 export async function assignInTable(shiftId, workerId) {

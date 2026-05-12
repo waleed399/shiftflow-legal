@@ -1,20 +1,7 @@
 import { state } from './state.js'
 import { apiFetch } from './api.js'
-import { toYMD, esc } from './utils.js'
+import { toYMD, esc, applyAvatars } from './utils.js'
 import { loadShifts, updateActionBar } from './shifts.js'
-
-// ── Avatar helper ─────────────────────────────────────────────────────────────
-
-function applyAvatars(container) {
-  container.querySelectorAll('[data-avatar]').forEach(el => {
-    const url = el.getAttribute('data-avatar')
-    if (!url) return
-    const img = document.createElement('img')
-    img.alt = ''
-    img.onload = () => { el.textContent = ''; el.appendChild(img) }
-    img.src = url
-  })
-}
 
 // ── Shift detail modal ────────────────────────────────────────────────────────
 

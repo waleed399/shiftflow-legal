@@ -33,3 +33,14 @@ export function toYMD(date) {
 export function fmtDate(date) {
   return `${DAYS[date.getDay()]} ${date.getDate()} ${MONTHS[date.getMonth()]}`
 }
+
+export function applyAvatars(container) {
+  container.querySelectorAll('[data-avatar]').forEach(el => {
+    const url = el.getAttribute('data-avatar')
+    if (!url) return
+    const img = document.createElement('img')
+    img.alt = ''
+    img.onload = () => { el.textContent = ''; el.appendChild(img) }
+    img.src = url
+  })
+}
