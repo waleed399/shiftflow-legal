@@ -1,4 +1,4 @@
-import { state } from './state.js'
+import { state, ensureOrgWorkers } from './state.js'
 import { apiFetch } from './api.js'
 import { toYMD, esc, applyAvatars } from './utils.js'
 import { loadShifts, updateActionBar } from './shifts.js'
@@ -135,7 +135,7 @@ export async function openAssignPicker() {
   document.getElementById('assign-modal').classList.remove('hidden')
   document.getElementById('picker-search').value = ''
   document.getElementById('picker-list').innerHTML = '<div style="padding:12px;color:var(--muted);font-size:0.85rem">Loading…</div>'
-  const workers = await fetchOrgWorkers()
+  const workers = await ensureOrgWorkers()
   renderPickerList(workers, '')
 }
 
@@ -148,17 +148,7 @@ export function onAssignOverlayClick(e) {
 }
 
 export function filterPicker(query) {
-  fetchOrgWorkers().then(workers => renderPickerList(workers, query))
-}
-
-async function fetchOrgWorkers() {
-  if (state.orgWorkers) return state.orgWorkers
-  const res = await apiFetch('/organization/members')
-  if (!res?.ok) return []
-  const data = await res.json()
-  const all = Array.isArray(data) ? data : (data.members || data.users || [])
-  state.orgWorkers = all.filter(w => w.role === 'WORKER')
-  return state.orgWorkers
+  ensureOrgWorkers().then(workers => renderPickerList(workers, query))
 }
 
 function renderPickerList(workers, query) {

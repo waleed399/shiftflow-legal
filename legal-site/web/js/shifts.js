@@ -1,4 +1,4 @@
-import { state } from './state.js'
+import { state, ensureOrgWorkers } from './state.js'
 import { apiFetch } from './api.js'
 import { DAYS, MONTHS, DEPT_COLORS, addDays, isSameDay, toYMD, fmtDate, getWeekStartOf, esc, applyAvatars } from './utils.js'
 
@@ -115,14 +115,6 @@ export async function loadShifts() {
   } catch {
     document.getElementById('shifts-content').innerHTML = '<div class="empty-state"><p>Failed to load shifts.</p></div>'
   }
-}
-
-async function ensureOrgWorkers() {
-  if (state.orgWorkers) return
-  const res = await apiFetch('/organization/members')
-  if (!res) return
-  const all = await res.json()
-  state.orgWorkers = all.filter(w => w.role === 'WORKER').sort((a, b) => a.name.localeCompare(b.name))
 }
 
 // ── List view ─────────────────────────────────────────────────────────────────
