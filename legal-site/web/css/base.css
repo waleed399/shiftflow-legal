@@ -1,0 +1,99 @@
+:root {
+  --navy: #1a2d4f;
+  --navy-mid: #223660;
+  --navy-deep: #0d1b35;
+  --red: #bf1f3a;
+  --bg: #f0f4f8;
+  --white: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --sidebar: 272px;
+  --radius-card: 14px;
+  --radius-btn: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; }
+
+/* ── Loading ── */
+#loading {
+  position: fixed; inset: 0;
+  background: linear-gradient(160deg, #1e3358 0%, #0d1b35 100%);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; z-index: 100; overflow: hidden;
+  transition: opacity 0.38s ease;
+}
+#loading::before {
+  content: ''; position: absolute; pointer-events: none;
+  width: 700px; height: 700px; top: -280px; right: -200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(191,31,58,0.1) 0%, transparent 70%);
+  animation: orbDrift 16s ease-in-out infinite alternate;
+}
+#loading::after {
+  content: ''; position: absolute; pointer-events: none;
+  width: 600px; height: 600px; bottom: -250px; left: -200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(34,54,96,0.45) 0%, transparent 70%);
+  animation: orbDrift 22s ease-in-out infinite alternate-reverse;
+}
+.loading-inner {
+  display: flex; flex-direction: column; align-items: center; gap: 18px;
+  position: relative; z-index: 1;
+  animation: loadLogoIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+#loading .logo { font-size: 2rem; font-weight: 800; color: white; letter-spacing: -0.5px; }
+#loading .logo span { color: var(--red); }
+.loading-msg { font-size: 0.8rem; color: rgba(255,255,255,0.3); font-weight: 500; letter-spacing: 0.03em; margin-top: -4px; }
+#loading.loading-exit { opacity: 0; pointer-events: none; }
+.spinner { width: 32px; height: 32px; border: 3px solid rgba(255,255,255,0.12); border-top-color: var(--red); border-radius: 50%; animation: spin 0.75s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes orbDrift {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(24px, 18px) scale(1.07); }
+}
+@keyframes loadLogoIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Layout ── */
+#app { display: none; width: 100%; height: 100vh; }
+
+/* ── Animations ── */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fillBar {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.35; transform: scale(0.8); }
+}
+@keyframes fabIn {
+  from { opacity: 0; transform: scale(0.4); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes badgePop {
+  0%   { transform: scale(0.5); }
+  70%  { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* ── View transitions ── */
+.view-enter { animation: viewIn 0.24s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes viewIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
