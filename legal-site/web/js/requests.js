@@ -125,7 +125,7 @@ function swapCard(s) {
   const canApprove   = !isOpen || volunteers.length > 0
   const approveClick = isOpen ? `approveSwapOpen('${s.id}')` : `approveSwap('${s.id}')`
 
-  return `<div class="req-card" id="swap-${esc(s.id)}">
+  return `<div class="req-card req-card-swap" id="swap-${esc(s.id)}">
     <div class="req-body">
       <div class="req-who">${esc(s.requester?.name || 'Unknown')}</div>
       <div class="req-details">${esc(dept)} · ${esc(date)} · ${esc(time)}</div>
@@ -146,7 +146,7 @@ function timeOffCard(t) {
   const same  = t.startDate?.slice(0, 10) === t.endDate?.slice(0, 10)
   const range = same ? start : `${start} – ${end}`
 
-  return `<div class="req-card" id="timeoff-${esc(t.id)}">
+  return `<div class="req-card req-card-timeoff" id="timeoff-${esc(t.id)}">
     <div class="req-body">
       <div class="req-who">${esc(t.worker?.name || 'Unknown')}</div>
       <div class="req-details">${range}</div>

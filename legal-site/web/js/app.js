@@ -38,8 +38,10 @@ async function init() {
     renderWeekLabel()
     await loadShifts()
 
-    document.getElementById('loading').style.display = 'none'
+    const loadingEl = document.getElementById('loading')
     document.getElementById('app').style.display = 'flex'
+    loadingEl.classList.add('loading-exit')
+    setTimeout(() => { loadingEl.style.display = 'none' }, 400)
 
     loadPendingCount() // non-blocking badge update
 
@@ -108,9 +110,17 @@ function renderSidebar() {
 }
 
 function showView(view) {
-  document.getElementById('view-shifts').style.display   = view === 'shifts'   ? 'flex' : 'none'
-  document.getElementById('view-profile').style.display  = view === 'profile'  ? 'flex' : 'none'
-  document.getElementById('view-requests').style.display = view === 'requests' ? 'flex' : 'none'
+  for (const v of ['shifts', 'profile', 'requests']) {
+    const el = document.getElementById(`view-${v}`)
+    if (v === view) {
+      el.style.display = 'flex'
+      el.classList.remove('view-enter')
+      void el.offsetWidth
+      el.classList.add('view-enter')
+    } else {
+      el.style.display = 'none'
+    }
+  }
   document.getElementById('nav-shifts').classList.toggle('active',   view === 'shifts')
   document.getElementById('nav-profile').classList.toggle('active',  view === 'profile')
   document.getElementById('nav-requests').classList.toggle('active', view === 'requests')

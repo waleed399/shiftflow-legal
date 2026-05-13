@@ -54,25 +54,21 @@ export function renderProfile() {
 
   document.getElementById('profile-content').innerHTML = `
     <div class="profile-grid">
-      <div class="profile-card">
-        <h3>Your account</h3>
-        <div class="profile-avatar" id="profile-avatar">${initials}</div>
-        <div class="profile-name">${esc(currentUser.name)}</div>
-        <div class="profile-email">${esc(currentUser.email)}</div>
-        <div class="profile-role-badge">Manager</div>
+      <div class="profile-card profile-card-identity">
+        <div class="profile-avatar-xl" id="profile-avatar">${initials}</div>
+        <div class="profile-name-xl">${esc(currentUser.name)}</div>
+        <div class="profile-email-xl">${esc(currentUser.email)}</div>
+        <div class="profile-id-badges">
+          <span class="profile-role-badge">Manager</span>
+          <span class="plan-pill plan-${effectivePlan}">${getPlanLabel(currentOrg)}</span>
+        </div>
       </div>
 
-      <div class="profile-card">
+      <div class="profile-card" style="animation-delay:0.06s">
         <h3>Organization</h3>
         <div class="info-row">
           <span class="info-label">Name</span>
           <span class="info-value">${esc(currentOrg.name)}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Plan</span>
-          <span class="info-value">
-            <span class="plan-pill plan-${effectivePlan}">${getPlanLabel(currentOrg)}</span>
-          </span>
         </div>
         ${currentOrg.timezone ? `
         <div class="info-row">
@@ -80,7 +76,7 @@ export function renderProfile() {
           <span class="info-value">${esc(currentOrg.timezone)}</span>
         </div>` : ''}
         ${currentOrg.inviteCode ? `
-        <div class="info-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+        <div class="info-row" style="flex-direction:column;align-items:flex-start;gap:8px;border-bottom:none">
           <span class="info-label">Invite code</span>
           <div>
             <div class="invite-code" onclick="copyInvite('${esc(currentOrg.inviteCode)}')" title="Click to copy">${esc(currentOrg.inviteCode)}</div>
