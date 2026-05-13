@@ -222,6 +222,8 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .btn-warning:hover:not(:disabled) { background: #64748b; color: white; }
 .btn-ghost { background: var(--bg); color: var(--text); }
 .btn-ghost:hover:not(:disabled) { background: var(--border); }
+.btn-danger { background: #fee2e2; color: #991b1b; }
+.btn-danger:hover:not(:disabled) { background: #991b1b; color: white; }
 .btn-sm { padding: 5px 12px; font-size: 0.75rem; border-radius: 7px; }
 
 /* ── Worker rows in modal ── */

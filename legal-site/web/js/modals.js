@@ -5,10 +5,23 @@ import { loadShifts, updateActionBar } from './shifts.js'
 
 // ── Shift detail modal ────────────────────────────────────────────────────────
 
+let _editing = false
+
+const WORKERS_SECTION_HTML = `
+  <div>
+    <div class="modal-section-label">Workers</div>
+    <div id="modal-workers-list"></div>
+    <button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="openAssignPicker()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Assign worker
+    </button>
+  </div>`
+
 export function openShiftModal(shiftId) {
   const all = state.shiftsCache[toYMD(state.currentWeek)] || []
   const shift = all.find(s => s.id === shiftId)
   if (!shift) return
+  _editing = false
   state.activeShiftId = shiftId
   state.activeShiftData = shift
   renderShiftModal(shift)
@@ -17,6 +30,7 @@ export function openShiftModal(shiftId) {
 
 export function closeShiftModal() {
   document.getElementById('shift-modal').classList.add('hidden')
+  _editing = false
   state.activeShiftId = null
   state.activeShiftData = null
 }
@@ -25,11 +39,18 @@ export function onModalOverlayClick(e) {
   if (e.target === document.getElementById('shift-modal')) closeShiftModal()
 }
 
+function restoreModalBody() {
+  if (!_editing) return
+  _editing = false
+  document.getElementById('shift-modal-body').innerHTML = WORKERS_SECTION_HTML
+}
+
 function renderShiftModal(shift) {
   document.getElementById('modal-dept').textContent = shift.department?.name || ''
   document.getElementById('modal-title').textContent = `${shift.startTime} – ${shift.endTime}`
   document.getElementById('modal-subtitle').innerHTML =
     `<span class="status-pill status-${shift.status}" style="font-size:0.7rem">${shift.status.toLowerCase()}</span>`
+  restoreModalBody()
   renderModalWorkers(shift)
   renderModalFooter(shift)
 }
@@ -74,7 +95,15 @@ function renderModalWorkers(shift) {
 }
 
 function renderModalFooter(shift) {
+  const canModify = shift.status === 'DRAFT' || shift.status === 'PUBLISHED'
   let html = ''
+
+  if (canModify) {
+    html += `<button class="btn btn-ghost btn-sm" onclick="openEditMode()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Edit
+    </button>`
+  }
   if (shift.status === 'DRAFT') {
     html += `<button class="btn btn-success" onclick="publishShift('${shift.id}')">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -83,6 +112,9 @@ function renderModalFooter(shift) {
   }
   if (shift.status === 'PUBLISHED') {
     html += `<button class="btn btn-warning" onclick="publishShift('${shift.id}', true)">Unpublish</button>`
+  }
+  if (canModify) {
+    html += `<button class="btn btn-danger" style="margin-left:auto" onclick="confirmCancelShift('${shift.id}')">Cancel shift</button>`
   }
   html += `<button class="btn btn-ghost" onclick="closeShiftModal()">Close</button>`
   document.getElementById('modal-footer').innerHTML = html
@@ -191,15 +223,148 @@ export async function assignWorker(workerId) {
   if (updated) { state.activeShiftData = updated; renderShiftModal(updated) }
 }
 
+// ── Edit shift ────────────────────────────────────────────────────────────────
+
+export function openEditMode() {
+  const shift = state.activeShiftData
+  if (!shift) return
+  _editing = true
+  const start = shift.startTime.substring(0, 5)
+  const end   = shift.endTime.substring(0, 5)
+  document.getElementById('shift-modal-body').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label class="form-label" for="es-start">Start time</label>
+          <input class="form-input" type="time" id="es-start" value="${start}">
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="es-end">End time</label>
+          <input class="form-input" type="time" id="es-end" value="${end}">
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="es-required">Required workers</label>
+        <input class="form-input" type="number" id="es-required" min="1" max="99" value="${shift.requiredWorkers}">
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="es-notes">Notes <span class="form-optional">(optional)</span></label>
+        <textarea class="form-input" id="es-notes" rows="2" maxlength="500">${esc(shift.notes || '')}</textarea>
+      </div>
+      <div id="es-error" class="form-error"></div>
+    </div>`
+  document.getElementById('modal-footer').innerHTML = `
+    <button class="btn btn-success" id="es-save-btn" onclick="saveEditShift()">Save changes</button>
+    <button class="btn btn-ghost" onclick="closeEditMode()">Discard</button>`
+}
+
+export function closeEditMode() {
+  _editing = false
+  document.getElementById('shift-modal-body').innerHTML = WORKERS_SECTION_HTML
+  renderModalWorkers(state.activeShiftData)
+  renderModalFooter(state.activeShiftData)
+}
+
+export async function saveEditShift() {
+  const startTime      = document.getElementById('es-start')?.value
+  const endTime        = document.getElementById('es-end')?.value
+  const requiredWorkers = parseInt(document.getElementById('es-required')?.value, 10)
+  const notes          = document.getElementById('es-notes')?.value.trim()
+  const errEl          = document.getElementById('es-error')
+
+  if (!startTime || !endTime) { errEl.textContent = 'Pick a start and end time'; return }
+  if (startTime === endTime)  { errEl.textContent = "Start and end time can't match"; return }
+  if (requiredWorkers < 1)    { errEl.textContent = 'Required workers must be at least 1'; return }
+  errEl.textContent = ''
+
+  const btn = document.getElementById('es-save-btn')
+  btn.disabled = true
+  btn.textContent = 'Saving…'
+
+  try {
+    const body = { startTime, endTime, requiredWorkers }
+    if (notes) body.notes = notes
+    const res = await apiFetch(`/shifts/${state.activeShiftId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    if (!res?.ok) {
+      const d = await res?.json().catch(() => ({}))
+      errEl.textContent = d?.error || 'Failed to save changes'
+      btn.disabled = false
+      btn.textContent = 'Save changes'
+      return
+    }
+    const key = toYMD(state.currentWeek)
+    delete state.shiftsCache[key]
+    await loadShifts()
+    const updated = (state.shiftsCache[key] || []).find(s => s.id === state.activeShiftId)
+    if (updated) {
+      _editing = false
+      state.activeShiftData = updated
+      document.getElementById('shift-modal-body').innerHTML = WORKERS_SECTION_HTML
+      renderShiftModal(updated)
+    } else {
+      closeShiftModal()
+    }
+  } catch {
+    errEl.textContent = 'Network error — try again'
+    btn.disabled = false
+    btn.textContent = 'Save changes'
+  }
+}
+
+// ── Cancel (delete) shift ─────────────────────────────────────────────────────
+
+export function confirmCancelShift(shiftId) {
+  document.getElementById('modal-footer').innerHTML = `
+    <span style="font-size:0.82rem;color:var(--muted);align-self:center;flex:1">Cancel this shift?</span>
+    <button class="btn btn-danger" id="confirm-cancel-btn" onclick="doDeleteShift('${shiftId}')">Yes, cancel it</button>
+    <button class="btn btn-ghost" onclick="renderModalFooterFromState()">Keep it</button>`
+}
+
+export function renderModalFooterFromState() {
+  renderModalFooter(state.activeShiftData)
+}
+
+export async function doDeleteShift(shiftId) {
+  const btn = document.getElementById('confirm-cancel-btn')
+  if (btn) { btn.disabled = true; btn.textContent = 'Cancelling…' }
+  try {
+    const res = await apiFetch(`/shifts/${shiftId}`, { method: 'DELETE' })
+    if (!res?.ok) {
+      const d = await res?.json().catch(() => ({}))
+      alert(d?.error || 'Failed to cancel shift')
+      renderModalFooter(state.activeShiftData)
+      return
+    }
+    closeShiftModal()
+    const key = toYMD(state.currentWeek)
+    delete state.shiftsCache[key]
+    await loadShifts()
+    updateActionBar()
+  } catch {
+    alert('Network error — try again')
+    renderModalFooter(state.activeShiftData)
+  }
+}
+
 // Expose to window for HTML inline handlers
-window.openShiftModal      = openShiftModal
-window.closeShiftModal     = closeShiftModal
-window.onModalOverlayClick = onModalOverlayClick
-window.publishShift        = publishShift
-window.removeWorker        = removeWorker
-window.markAttendance      = markAttendance
-window.openAssignPicker    = openAssignPicker
-window.closeAssignModal    = closeAssignModal
-window.onAssignOverlayClick = onAssignOverlayClick
-window.filterPicker        = filterPicker
-window.assignWorker        = assignWorker
+window.openShiftModal           = openShiftModal
+window.closeShiftModal          = closeShiftModal
+window.onModalOverlayClick      = onModalOverlayClick
+window.publishShift             = publishShift
+window.removeWorker             = removeWorker
+window.markAttendance           = markAttendance
+window.openAssignPicker         = openAssignPicker
+window.closeAssignModal         = closeAssignModal
+window.onAssignOverlayClick     = onAssignOverlayClick
+window.filterPicker             = filterPicker
+window.assignWorker             = assignWorker
+window.openEditMode             = openEditMode
+window.closeEditMode            = closeEditMode
+window.saveEditShift            = saveEditShift
+window.confirmCancelShift       = confirmCancelShift
+window.renderModalFooterFromState = renderModalFooterFromState
+window.doDeleteShift            = doDeleteShift
