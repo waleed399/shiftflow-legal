@@ -3,396 +3,665 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shift-Right – Smart Shift Scheduling for Teams</title>
+  <title>ShiftRight – Smart Shift Scheduling for Teams</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
       --navy: #1a2d4f;
-      --navy-deep: #111e36;
+      --navy-deep: #0d1b35;
+      --navy-mid: #223660;
       --red: #bf1f3a;
       --red-light: #e8253f;
-      --bg: #f8fafc;
+      --bg: #f0f4f8;
       --white: #ffffff;
-      --text: #1e293b;
+      --text: #0f172a;
       --muted: #64748b;
       --border: #e2e8f0;
     }
+    html { scroll-behavior: smooth; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-    }
-
-    /* NAV */
+    /* ── NAV ── */
     nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: var(--navy);
-      padding: 16px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 0 32px; height: 68px;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: background 0.25s, box-shadow 0.25s;
     }
-    .nav-logo {
-      color: #fff;
-      font-size: 1.2rem;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      text-decoration: none;
-    }
+    nav.scrolled { background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .nav-logo { color: #fff; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.5px; text-decoration: none; transition: color 0.25s; }
+    nav.scrolled .nav-logo { color: var(--navy); }
     .nav-logo span { color: var(--red); }
-    .nav-cta {
-      background: var(--red);
-      color: #fff;
-      border: none;
-      padding: 9px 20px;
-      border-radius: 8px;
-      font-size: 0.875rem;
-      font-weight: 700;
-      text-decoration: none;
-      transition: background 0.15s;
+    .nav-center { display: flex; align-items: center; gap: 4px; }
+    .nav-link { color: rgba(255,255,255,0.7); font-size: 0.875rem; font-weight: 500; text-decoration: none; padding: 8px 14px; border-radius: 8px; transition: all 0.15s; }
+    nav.scrolled .nav-link { color: var(--muted); }
+    .nav-link:hover { color: white; background: rgba(255,255,255,0.1); }
+    nav.scrolled .nav-link:hover { color: var(--navy); background: var(--bg); }
+    .nav-actions { display: flex; align-items: center; gap: 10px; }
+    .nav-app-btn {
+      font-size: 0.82rem; font-weight: 600; color: rgba(255,255,255,0.7); text-decoration: none;
+      padding: 8px 16px; border: 1px solid rgba(255,255,255,0.25); border-radius: 8px; transition: all 0.15s;
     }
-    .nav-cta:hover { background: var(--red-light); }
+    nav.scrolled .nav-app-btn { color: var(--muted); border-color: var(--border); }
+    .nav-app-btn:hover { color: white; border-color: rgba(255,255,255,0.6); }
+    nav.scrolled .nav-app-btn:hover { color: var(--navy); border-color: var(--navy); background: var(--bg); }
+    .nav-cta {
+      background: var(--red); color: #fff; border: none; padding: 9px 20px;
+      border-radius: 8px; font-size: 0.82rem; font-weight: 700;
+      text-decoration: none; transition: background 0.15s, transform 0.1s;
+    }
+    .nav-cta:hover { background: var(--red-light); transform: translateY(-1px); }
 
-    /* HERO */
+    /* ── HERO ── */
     .hero {
-      background: linear-gradient(135deg, var(--navy) 0%, #243560 60%, #1a3060 100%);
-      padding: 80px 24px 100px;
-      text-align: center;
-      color: #fff;
+      background: var(--navy-deep);
+      min-height: 100vh;
+      padding: 120px 32px 80px;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+    .hero-orb {
+      position: absolute; border-radius: 50%; pointer-events: none;
+    }
+    .hero-orb-1 {
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(191,31,58,0.14) 0%, transparent 70%);
+      top: -150px; right: -100px;
+      animation: orbDrift 14s ease-in-out infinite;
+    }
+    .hero-orb-2 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(66,102,220,0.1) 0%, transparent 70%);
+      bottom: 0; left: -80px;
+      animation: orbDrift 18s ease-in-out infinite reverse;
+    }
+    .hero-orb-3 {
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(191,31,58,0.08) 0%, transparent 70%);
+      bottom: 100px; right: 30%;
+      animation: orbDrift 10s ease-in-out infinite 3s;
+    }
+    .hero-inner {
+      max-width: 1100px; width: 100%;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 60px; align-items: center;
+      position: relative; z-index: 1;
     }
     .hero-badge {
-      display: inline-block;
-      background: rgba(191, 31, 58, 0.2);
-      border: 1px solid rgba(191, 31, 58, 0.5);
-      color: #ff8a96;
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 5px 14px;
-      border-radius: 20px;
-      margin-bottom: 24px;
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(191,31,58,0.18); border: 1px solid rgba(191,31,58,0.35);
+      color: #fca5a5; font-size: 0.75rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 6px 14px; border-radius: 20px; margin-bottom: 28px;
     }
+    .hero-badge::before { content: '✦'; font-size: 0.6rem; }
     .hero h1 {
-      font-size: clamp(2rem, 5vw, 3.2rem);
-      font-weight: 800;
-      line-height: 1.2;
-      max-width: 700px;
-      margin: 0 auto 20px;
-      letter-spacing: -1px;
+      font-size: clamp(2.2rem, 4.5vw, 3.4rem);
+      font-weight: 800; line-height: 1.15; letter-spacing: -1.5px;
+      color: #fff; margin-bottom: 22px;
     }
     .hero h1 em { color: #ff8a96; font-style: normal; }
     .hero p {
-      color: rgba(255,255,255,0.72);
-      font-size: 1.1rem;
-      max-width: 520px;
-      margin: 0 auto 36px;
+      color: rgba(255,255,255,0.62); font-size: 1.05rem;
+      max-width: 440px; margin-bottom: 38px; line-height: 1.7;
     }
-    .hero-actions {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      flex-wrap: wrap;
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn-hero-primary {
+      background: var(--red); color: #fff; padding: 14px 32px;
+      border-radius: 10px; font-size: 1rem; font-weight: 700;
+      text-decoration: none; transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
+      box-shadow: 0 4px 20px rgba(191,31,58,0.4);
     }
-    .btn-primary {
-      background: var(--red);
-      color: #fff;
-      padding: 14px 32px;
-      border-radius: 10px;
-      font-size: 1rem;
-      font-weight: 700;
-      text-decoration: none;
-      transition: background 0.15s, transform 0.1s;
-      display: inline-block;
+    .btn-hero-primary:hover { background: var(--red-light); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(191,31,58,0.5); }
+    .btn-hero-secondary {
+      background: rgba(255,255,255,0.09); color: rgba(255,255,255,0.85);
+      border: 1px solid rgba(255,255,255,0.2); padding: 14px 32px;
+      border-radius: 10px; font-size: 1rem; font-weight: 600;
+      text-decoration: none; transition: all 0.15s;
     }
-    .btn-primary:hover { background: var(--red-light); transform: translateY(-1px); }
-    .btn-secondary {
-      background: rgba(255,255,255,0.1);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.25);
-      padding: 14px 32px;
-      border-radius: 10px;
-      font-size: 1rem;
-      font-weight: 600;
-      text-decoration: none;
-      transition: background 0.15s;
-      display: inline-block;
-    }
-    .btn-secondary:hover { background: rgba(255,255,255,0.18); }
+    .btn-hero-secondary:hover { background: rgba(255,255,255,0.16); color: #fff; border-color: rgba(255,255,255,0.4); }
 
-    /* SECTIONS */
-    .section { padding: 80px 24px; }
-    .section-inner { max-width: 1000px; margin: 0 auto; }
-    .section-label {
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--red);
-      margin-bottom: 10px;
+    /* App mockup */
+    .hero-visual { display: flex; justify-content: flex-end; animation: heroVisualIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) both 0.2s; }
+    .mockup-window {
+      width: 100%; max-width: 460px;
+      background: #131f35; border-radius: 16px; overflow: hidden;
+      box-shadow: 0 48px 96px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.07);
+      animation: mockupFloat 8s ease-in-out infinite 1.2s;
     }
-    .section-title {
-      font-size: clamp(1.6rem, 3vw, 2.2rem);
-      font-weight: 800;
-      color: var(--navy);
-      letter-spacing: -0.5px;
-      margin-bottom: 12px;
+    .mockup-chrome {
+      background: #1a2d4f; padding: 10px 16px;
+      display: flex; align-items: center; gap: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
     }
-    .section-sub {
-      color: var(--muted);
-      font-size: 1.05rem;
-      max-width: 500px;
-      margin-bottom: 48px;
+    .chrome-dots { display: flex; gap: 5px; }
+    .chrome-dots i { width: 10px; height: 10px; border-radius: 50%; display: block; }
+    .chrome-dots i:nth-child(1) { background: #ef4444; }
+    .chrome-dots i:nth-child(2) { background: #f59e0b; }
+    .chrome-dots i:nth-child(3) { background: #22c55e; }
+    .chrome-url {
+      flex: 1; background: rgba(255,255,255,0.08); border-radius: 6px;
+      padding: 4px 12px; font-size: 0.7rem; color: rgba(255,255,255,0.35);
+      text-align: center;
     }
-
-    /* FEATURES */
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 20px;
+    .mockup-app { display: flex; height: 300px; }
+    .mockup-sidebar {
+      width: 56px; background: #0d1b35;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 14px 0; gap: 12px; border-right: 1px solid rgba(255,255,255,0.06);
     }
-    .feature-card {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 28px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-      transition: box-shadow 0.15s, transform 0.15s;
+    .m-logo {
+      width: 30px; height: 30px; background: var(--red); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem; font-weight: 800; color: white; margin-bottom: 8px;
     }
-    .feature-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.08); transform: translateY(-2px); }
-    .feature-icon { font-size: 1.8rem; margin-bottom: 14px; }
-    .feature-card h3 { font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
-    .feature-card p { font-size: 0.88rem; color: var(--muted); line-height: 1.6; }
-
-    /* PRICING */
-    .pricing-section { background: var(--navy); color: #fff; }
-    .pricing-section .section-title { color: #fff; }
-    .pricing-section .section-sub { color: rgba(255,255,255,0.55); }
-    .pricing-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-      gap: 20px;
-      align-items: start;
-    }
-    .pricing-card {
+    .m-nav-item {
+      width: 32px; height: 32px; border-radius: 8px;
       background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 16px;
-      padding: 32px 28px;
-      position: relative;
+      display: flex; align-items: center; justify-content: center;
     }
+    .m-nav-item.m-active { background: rgba(255,255,255,0.14); }
+    .m-nav-icon { width: 14px; height: 2px; background: rgba(255,255,255,0.4); border-radius: 1px; position: relative; }
+    .m-nav-icon::before, .m-nav-icon::after { content: ''; position: absolute; left: 0; width: 14px; height: 2px; background: rgba(255,255,255,0.4); border-radius: 1px; }
+    .m-nav-icon::before { top: -4px; } .m-nav-icon::after { top: 4px; }
+    .m-nav-item.m-active .m-nav-icon { background: white; }
+    .m-nav-item.m-active .m-nav-icon::before, .m-nav-item.m-active .m-nav-icon::after { background: white; }
+    .mockup-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .m-topbar {
+      background: #1a2d4f; padding: 10px 14px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.07); flex-shrink: 0;
+    }
+    .m-topbar-title { width: 40px; height: 8px; background: rgba(255,255,255,0.5); border-radius: 4px; }
+    .m-tabs { display: flex; gap: 4px; }
+    .m-tab { width: 24px; height: 22px; border-radius: 4px; background: rgba(255,255,255,0.07); }
+    .m-tab.m-tab-active { background: rgba(255,255,255,0.18); }
+    .m-content { flex: 1; padding: 12px; overflow: hidden; }
+    .m-stats { display: flex; gap: 6px; margin-bottom: 10px; }
+    .m-stat { flex: 1; background: rgba(255,255,255,0.07); border-radius: 6px; padding: 6px 8px; }
+    .m-stat-num { width: 20px; height: 8px; background: rgba(255,255,255,0.6); border-radius: 3px; margin-bottom: 4px; }
+    .m-stat-label { width: 30px; height: 5px; background: rgba(255,255,255,0.2); border-radius: 2px; }
+    .m-stat.m-stat-green .m-stat-num { background: #22c55e; }
+    .m-dept-card { background: rgba(255,255,255,0.06); border-radius: 8px; margin-bottom: 8px; overflow: hidden; }
+    .m-dept-header { height: 20px; padding: 0 8px; display: flex; align-items: center; gap: 6px; border-left: 3px solid; }
+    .m-dept-header.c1 { border-color: #6366f1; background: rgba(99,102,241,0.12); }
+    .m-dept-header.c2 { border-color: #f59e0b; background: rgba(245,158,11,0.12); }
+    .m-dept-dot { width: 18px; height: 4px; border-radius: 2px; }
+    .c1 .m-dept-dot { background: rgba(99,102,241,0.7); }
+    .c2 .m-dept-dot { background: rgba(245,158,11,0.7); }
+    .m-dept-label { width: 36px; height: 4px; background: rgba(255,255,255,0.4); border-radius: 2px; }
+    .m-shift { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .m-shift:last-child { border-bottom: none; }
+    .m-shift-times { display: flex; flex-direction: column; gap: 2px; min-width: 32px; }
+    .m-shift-time-line { width: 30px; height: 4px; background: rgba(255,255,255,0.55); border-radius: 2px; }
+    .m-bar-wrap { flex: 1; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+    .m-bar-fill { height: 100%; border-radius: 2px; transform-origin: left; animation: fillBar 1s ease both; }
+    .m-bar-fill.full { background: #22c55e; animation-delay: 0.8s; }
+    .m-bar-fill.partial { background: #f59e0b; animation-delay: 1s; }
+    .m-bar-fill.empty { background: #ef4444; animation-delay: 1.2s; }
+    .m-pill { width: 28px; height: 10px; border-radius: 10px; }
+    .m-pill.published { background: rgba(99,102,241,0.4); }
+    .m-pill.active { background: rgba(245,158,11,0.5); animation: statusPulse 2s infinite; }
+    .m-pill.draft { background: rgba(255,255,255,0.15); }
+
+    /* ── STATS STRIP ── */
+    .stats-strip {
+      background: var(--white); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      padding: 22px 32px; display: flex; align-items: center;
+      justify-content: center; gap: 0; flex-wrap: wrap;
+    }
+    .stat-item { padding: 6px 36px; text-align: center; font-size: 0.9rem; color: var(--muted); }
+    .stat-item strong { color: var(--navy); font-weight: 800; }
+    .stat-sep { width: 1px; height: 28px; background: var(--border); }
+
+    /* ── SECTIONS ── */
+    .section { padding: 96px 32px; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+    .section-eyebrow { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--red); margin-bottom: 12px; }
+    .section-title { font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 800; color: var(--navy); letter-spacing: -0.8px; margin-bottom: 14px; line-height: 1.2; }
+    .section-sub { color: var(--muted); font-size: 1.05rem; max-width: 520px; line-height: 1.7; }
+
+    /* ── FEATURE BENTO ── */
+    .features-bg { background: var(--white); }
+    .features-bento { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 52px; }
+    .feature-card {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 18px;
+      padding: 32px 28px; transition: box-shadow 0.2s, transform 0.2s, background 0.2s;
+    }
+    .feature-card:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.08); transform: translateY(-3px); background: white; }
+    .feature-card.card-large { grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: center; }
+    .feature-icon-wrap {
+      width: 48px; height: 48px; border-radius: 14px; margin-bottom: 18px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .feature-card.card-large .feature-icon-wrap { width: 56px; height: 56px; border-radius: 16px; }
+    .icon-red   { background: rgba(191,31,58,0.1); color: var(--red); }
+    .icon-blue  { background: rgba(99,102,241,0.1); color: #6366f1; }
+    .icon-amber { background: rgba(245,158,11,0.1); color: #d97706; }
+    .icon-green { background: rgba(5,150,105,0.1); color: #059669; }
+    .icon-purple{ background: rgba(139,92,246,0.1); color: #7c3aed; }
+    .icon-teal  { background: rgba(20,184,166,0.1); color: #0d9488; }
+    .feature-card h3 { font-size: 1.05rem; font-weight: 700; color: var(--navy); margin-bottom: 10px; letter-spacing: -0.2px; }
+    .feature-card p { font-size: 0.88rem; color: var(--muted); line-height: 1.65; }
+    .feature-card.card-large h3 { font-size: 1.2rem; }
+    .feature-card.card-large p { font-size: 0.9rem; }
+
+    /* Mini schedule illustration inside the large card */
+    .feature-mini-sched { background: var(--navy-deep); border-radius: 12px; padding: 16px; }
+    .fms-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .fms-row:last-child { margin-bottom: 0; }
+    .fms-time { font-size: 0.65rem; font-weight: 700; color: rgba(255,255,255,0.45); min-width: 44px; font-variant-numeric: tabular-nums; }
+    .fms-bar { flex: 1; height: 8px; border-radius: 4px; position: relative; overflow: hidden; }
+    .fms-fill { position: absolute; left: 0; top: 0; height: 100%; border-radius: 4px; animation: fillBar 0.9s ease both; }
+    .fms-count { font-size: 0.65rem; font-weight: 700; min-width: 24px; text-align: right; }
+    .fms-pill { font-size: 0.58rem; font-weight: 700; padding: 2px 7px; border-radius: 20px; }
+    .pill-pub  { background: rgba(99,102,241,0.25); color: #a5b4fc; }
+    .pill-act  { background: rgba(245,158,11,0.25); color: #fcd34d; }
+    .pill-dft  { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.4); }
+
+    /* ── PRICING ── */
+    .pricing-bg { background: var(--navy-deep); color: white; }
+    .pricing-bg .section-title { color: white; }
+    .pricing-bg .section-sub { color: rgba(255,255,255,0.5); }
+    .pricing-toggle { display: flex; background: rgba(255,255,255,0.08); border-radius: 12px; padding: 4px; width: fit-content; gap: 2px; margin: 32px 0; }
+    .pricing-toggle-btn {
+      padding: 9px 22px; border-radius: 9px; border: none;
+      font-size: 0.85rem; font-weight: 600; cursor: pointer;
+      background: transparent; color: rgba(255,255,255,0.5);
+      transition: all 0.18s; font-family: inherit;
+    }
+    .pricing-toggle-btn.active { background: white; color: var(--navy); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+    .pricing-save-badge { background: #059669; color: white; font-size: 0.62rem; font-weight: 800; padding: 2px 7px; border-radius: 5px; margin-left: 6px; vertical-align: middle; }
+    .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: start; }
+    .pricing-card {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px; padding: 32px 28px; position: relative;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .pricing-card:hover { transform: translateY(-4px); box-shadow: 0 20px 48px rgba(0,0,0,0.3); }
     .pricing-card.popular {
-      background: var(--white);
-      color: var(--text);
-      border-color: transparent;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+      background: white; color: var(--text);
+      border-color: transparent; box-shadow: 0 12px 48px rgba(0,0,0,0.35);
     }
     .popular-badge {
-      position: absolute;
-      top: -12px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--red);
-      color: #fff;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 4px 14px;
-      border-radius: 20px;
-      white-space: nowrap;
+      position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+      background: var(--red); color: white; font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase; padding: 4px 16px;
+      border-radius: 20px; white-space: nowrap;
     }
-    .pricing-tier {
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.45);
-      margin-bottom: 8px;
-    }
+    .pricing-tier { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.38); margin-bottom: 10px; }
     .pricing-card.popular .pricing-tier { color: var(--muted); }
-    .pricing-price {
-      font-size: 2.6rem;
-      font-weight: 800;
-      color: #fff;
-      line-height: 1;
-      margin-bottom: 4px;
-    }
+    .pricing-price { font-size: 2.8rem; font-weight: 900; color: white; line-height: 1; margin-bottom: 6px; letter-spacing: -1.5px; }
     .pricing-card.popular .pricing-price { color: var(--navy); }
-    .pricing-price span { font-size: 1rem; font-weight: 500; opacity: 0.55; }
-    .pricing-desc { font-size: 0.85rem; color: rgba(255,255,255,0.45); margin-bottom: 24px; }
-    .pricing-card.popular .pricing-desc { color: var(--muted); }
+    .pricing-price sup { font-size: 1.2rem; font-weight: 700; vertical-align: super; letter-spacing: 0; }
+    .pricing-price span { font-size: 1rem; font-weight: 500; opacity: 0.45; letter-spacing: 0; }
+    .pricing-note { font-size: 0.78rem; color: rgba(255,255,255,0.35); margin-bottom: 24px; min-height: 18px; }
+    .pricing-card.popular .pricing-note { color: var(--muted); }
     .pricing-features { list-style: none; margin-bottom: 28px; }
     .pricing-features li {
-      font-size: 0.88rem;
-      color: rgba(255,255,255,0.78);
-      padding: 7px 0;
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
+      font-size: 0.875rem; color: rgba(255,255,255,0.75);
+      padding: 8px 0; display: flex; align-items: flex-start;
+      gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.07);
+      line-height: 1.4;
     }
     .pricing-features li:last-child { border-bottom: none; }
     .pricing-card.popular .pricing-features li { color: var(--text); border-bottom-color: var(--border); }
-    .pricing-features li::before { content: "✓"; color: #4ade80; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+    .pricing-features li::before { content: "✓"; color: #4ade80; font-weight: 800; flex-shrink: 0; margin-top: 1px; font-size: 0.85rem; }
     .pricing-cta {
-      display: block;
-      text-align: center;
-      padding: 12px 20px;
-      border-radius: 10px;
-      font-size: 0.9rem;
-      font-weight: 700;
-      text-decoration: none;
-      transition: all 0.15s;
+      display: block; text-align: center; padding: 13px 20px;
+      border-radius: 12px; font-size: 0.9rem; font-weight: 700;
+      text-decoration: none; transition: all 0.15s;
     }
-    .pricing-cta-outline { border: 1px solid rgba(255,255,255,0.25); color: #fff; }
-    .pricing-cta-outline:hover { background: rgba(255,255,255,0.1); }
-    .pricing-cta-solid { background: var(--red); color: #fff; }
-    .pricing-cta-solid:hover { background: var(--red-light); }
+    .pricing-cta-ghost { border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.8); }
+    .pricing-cta-ghost:hover { background: rgba(255,255,255,0.1); color: white; border-color: rgba(255,255,255,0.5); }
+    .pricing-cta-solid { background: var(--red); color: white; box-shadow: 0 4px 16px rgba(191,31,58,0.4); }
+    .pricing-cta-solid:hover { background: var(--red-light); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(191,31,58,0.5); }
 
-    /* CTA STRIP */
-    .cta-strip { background: var(--red); padding: 64px 24px; text-align: center; color: #fff; }
-    .cta-strip h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); font-weight: 800; margin-bottom: 12px; }
-    .cta-strip p { color: rgba(255,255,255,0.8); font-size: 1rem; margin-bottom: 28px; }
-    .btn-white {
-      background: #fff;
-      color: var(--red);
-      padding: 14px 36px;
-      border-radius: 10px;
-      font-size: 1rem;
-      font-weight: 800;
-      text-decoration: none;
-      display: inline-block;
-      transition: transform 0.1s, box-shadow 0.15s;
+    /* ── CTA STRIP ── */
+    .cta-strip {
+      background: linear-gradient(135deg, #8f1127 0%, var(--red) 50%, #e8253f 100%);
+      padding: 88px 32px; text-align: center; color: white;
+      position: relative; overflow: hidden;
     }
-    .btn-white:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+    .cta-strip::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.12) 0%, transparent 60%);
+    }
+    .cta-strip-inner { position: relative; z-index: 1; }
+    .cta-strip h2 { font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-weight: 800; letter-spacing: -0.8px; margin-bottom: 14px; }
+    .cta-strip p { color: rgba(255,255,255,0.78); font-size: 1.05rem; margin-bottom: 36px; }
+    .btn-cta {
+      display: inline-block; background: white; color: var(--red);
+      padding: 15px 40px; border-radius: 12px; font-size: 1rem;
+      font-weight: 800; text-decoration: none; letter-spacing: -0.2px;
+      transition: transform 0.12s, box-shadow 0.15s;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    .btn-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.28); }
+    .cta-sub { margin-top: 16px; font-size: 0.8rem; color: rgba(255,255,255,0.55); }
 
-    /* FOOTER */
-    footer { background: var(--navy-deep); color: rgba(255,255,255,0.45); padding: 32px 24px; text-align: center; }
-    .footer-links { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
-    .footer-links a { color: rgba(255,255,255,0.45); text-decoration: none; font-size: 0.875rem; transition: color 0.15s; }
-    .footer-links a:hover { color: #fff; }
-    footer p { font-size: 0.8rem; }
+    /* ── FOOTER ── */
+    footer { background: var(--navy-deep); padding: 64px 32px 36px; }
+    .footer-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 52px; }
+    .footer-brand .logo { font-size: 1.2rem; font-weight: 800; color: white; display: inline-block; margin-bottom: 12px; }
+    .footer-brand .logo span { color: var(--red); }
+    .footer-brand p { font-size: 0.875rem; color: rgba(255,255,255,0.38); line-height: 1.6; max-width: 220px; }
+    .footer-col h4 { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.38); margin-bottom: 16px; }
+    .footer-col a { display: block; font-size: 0.875rem; color: rgba(255,255,255,0.55); text-decoration: none; margin-bottom: 10px; transition: color 0.15s; }
+    .footer-col a:hover { color: white; }
+    .footer-bottom { max-width: 1100px; margin: 0 auto; border-top: 1px solid rgba(255,255,255,0.07); padding-top: 28px; display: flex; align-items: center; justify-content: space-between; }
+    .footer-bottom p { font-size: 0.8rem; color: rgba(255,255,255,0.28); }
+    .footer-legal { display: flex; gap: 20px; }
+    .footer-legal a { font-size: 0.8rem; color: rgba(255,255,255,0.28); text-decoration: none; transition: color 0.15s; }
+    .footer-legal a:hover { color: rgba(255,255,255,0.6); }
 
-    @media (max-width: 500px) {
-      .pricing-grid { grid-template-columns: 1fr; }
+    /* ── REVEAL ANIMATIONS ── */
+    .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-delay-1 { transition-delay: 0.08s; }
+    .reveal-delay-2 { transition-delay: 0.16s; }
+    .reveal-delay-3 { transition-delay: 0.24s; }
+    .reveal-delay-4 { transition-delay: 0.32s; }
+    .reveal-delay-5 { transition-delay: 0.40s; }
+
+    /* ── HERO ANIMATION (loads immediately) ── */
+    .hero-text-content { animation: heroTextIn 0.7s ease both; }
+    @keyframes heroTextIn {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes heroVisualIn {
+      from { opacity: 0; transform: translateX(32px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes orbDrift {
+      0%, 100% { transform: translate(0, 0); }
+      33%  { transform: translate(28px, -20px); }
+      66%  { transform: translate(-16px, 12px); }
+    }
+    @keyframes mockupFloat {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-10px); }
+    }
+    @keyframes fillBar {
+      from { transform: scaleX(0); }
+      to   { transform: scaleX(1); }
+    }
+    @keyframes statusPulse {
+      0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .hero-inner { grid-template-columns: 1fr; gap: 48px; text-align: center; }
+      .hero-visual { justify-content: center; }
+      .hero p { margin: 0 auto 38px; }
+      .hero-badge { margin: 0 auto 28px; display: inline-flex; }
+      .hero-actions { justify-content: center; }
+      .features-bento { grid-template-columns: 1fr 1fr; }
+      .feature-card.card-large { grid-column: span 2; grid-template-columns: 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
+      .footer-inner { grid-template-columns: 1fr 1fr; gap: 32px; }
+      .nav-center { display: none; }
+    }
+    @media (max-width: 600px) {
+      .features-bento { grid-template-columns: 1fr; }
+      .feature-card.card-large { grid-column: span 1; grid-template-columns: 1fr; }
+      .stats-strip { flex-direction: column; gap: 8px; }
+      .stat-sep { display: none; }
+      .footer-inner { grid-template-columns: 1fr; }
+      nav { padding: 0 20px; }
+      .hero { padding: 100px 20px 64px; }
     }
   </style>
 </head>
 <body>
 
 <!-- NAV -->
-<nav>
+<nav id="main-nav">
   <a class="nav-logo" href="/">Shift<span>Right</span></a>
-  <div style="display:flex;align-items:center;gap:10px;">
-    <a href="/app/" style="font-size:0.875rem;font-weight:600;color:rgba(255,255,255,0.75);text-decoration:none;padding:8px 16px;border:1px solid rgba(255,255,255,0.2);border-radius:8px;transition:all 0.15s;" onmouseover="this.style.color='white';this.style.borderColor='rgba(255,255,255,0.5)'" onmouseout="this.style.color='rgba(255,255,255,0.75)';this.style.borderColor='rgba(255,255,255,0.2)'">Open web app</a>
-    <a class="nav-cta" href="#pricing">Get Started</a>
+  <div class="nav-center">
+    <a class="nav-link" href="#features">Features</a>
+    <a class="nav-link" href="#pricing">Pricing</a>
+  </div>
+  <div class="nav-actions">
+    <a href="/app/" class="nav-app-btn">Open web app</a>
+    <a href="#pricing" class="nav-cta">Get started free</a>
   </div>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-badge">Shift Management for Teams</div>
-  <h1>Stop scrambling.<br>Start <em>scheduling</em> smarter.</h1>
-  <p>Shift-Right helps managers build coverage, automate schedules, and coordinate their teams — all in one app.</p>
-  <div class="hero-actions">
-    <a class="btn-primary" href="#pricing">Download Free</a>
-    <a class="btn-secondary" href="#features">See Features</a>
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-orb hero-orb-3"></div>
+  <div class="hero-inner">
+
+    <div class="hero-text-content">
+      <div class="hero-badge">Shift Management for Teams</div>
+      <h1>Stop scrambling.<br>Start <em>scheduling</em> smarter.</h1>
+      <p>ShiftRight helps managers build coverage, automate schedules, and coordinate their teams — all from one beautifully simple app.</p>
+      <div class="hero-actions">
+        <a class="btn-hero-primary" href="#pricing">Download Free</a>
+        <a class="btn-hero-secondary" href="#features">See how it works</a>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="mockup-window">
+        <div class="mockup-chrome">
+          <div class="chrome-dots"><i></i><i></i><i></i></div>
+          <div class="chrome-url">shiftright.app/web</div>
+        </div>
+        <div class="mockup-app">
+          <div class="mockup-sidebar">
+            <div class="m-logo">SR</div>
+            <div class="m-nav-item m-active"><div class="m-nav-icon"></div></div>
+            <div class="m-nav-item"><div class="m-nav-icon"></div></div>
+            <div class="m-nav-item"><div class="m-nav-icon"></div></div>
+          </div>
+          <div class="mockup-main">
+            <div class="m-topbar">
+              <div class="m-topbar-title"></div>
+              <div class="m-tabs">
+                <div class="m-tab"></div>
+                <div class="m-tab"></div>
+                <div class="m-tab m-tab-active"></div>
+                <div class="m-tab"></div>
+                <div class="m-tab"></div>
+              </div>
+            </div>
+            <div class="m-content">
+              <div class="m-stats">
+                <div class="m-stat"><div class="m-stat-num" style="width:14px"></div><div class="m-stat-label"></div></div>
+                <div class="m-stat"><div class="m-stat-num" style="width:18px"></div><div class="m-stat-label"></div></div>
+                <div class="m-stat m-stat-green"><div class="m-stat-num" style="width:22px"></div><div class="m-stat-label"></div></div>
+              </div>
+              <div class="m-dept-card">
+                <div class="m-dept-header c1"><div class="m-dept-dot"></div><div class="m-dept-label"></div></div>
+                <div class="m-shift">
+                  <div class="m-shift-times"><div class="m-shift-time-line"></div><div class="m-shift-time-line" style="opacity:0.4"></div></div>
+                  <div class="m-bar-wrap"><div class="m-bar-fill full" style="width:100%;animation-delay:0.8s"></div></div>
+                  <div class="m-pill published"></div>
+                </div>
+                <div class="m-shift">
+                  <div class="m-shift-times"><div class="m-shift-time-line"></div><div class="m-shift-time-line" style="opacity:0.4"></div></div>
+                  <div class="m-bar-wrap"><div class="m-bar-fill partial" style="width:60%;animation-delay:1s"></div></div>
+                  <div class="m-pill active"></div>
+                </div>
+              </div>
+              <div class="m-dept-card">
+                <div class="m-dept-header c2"><div class="m-dept-dot"></div><div class="m-dept-label"></div></div>
+                <div class="m-shift">
+                  <div class="m-shift-times"><div class="m-shift-time-line"></div><div class="m-shift-time-line" style="opacity:0.4"></div></div>
+                  <div class="m-bar-wrap"><div class="m-bar-fill empty" style="width:0%;animation-delay:1.2s"></div></div>
+                  <div class="m-pill draft"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </section>
 
+<!-- STATS STRIP -->
+<div class="stats-strip">
+  <div class="stat-item"><strong>iOS &amp; Android</strong> mobile app</div>
+  <div class="stat-sep"></div>
+  <div class="stat-item"><strong>Web app</strong> for managers</div>
+  <div class="stat-sep"></div>
+  <div class="stat-item">Free to start — <strong>no credit card</strong> required</div>
+  <div class="stat-sep"></div>
+  <div class="stat-item"><strong>Auto-scheduling</strong> on Pro &amp; Business</div>
+</div>
+
 <!-- FEATURES -->
-<section class="section" id="features">
+<section class="section features-bg" id="features">
   <div class="section-inner">
-    <p class="section-label">Features</p>
-    <h2 class="section-title">Everything your team needs</h2>
-    <p class="section-sub">Built for shift-based teams — from small cafes to multi-department operations.</p>
-    <div class="features-grid">
-      <div class="feature-card">
-        <div class="feature-icon">⚡</div>
-        <h3>Auto-Scheduling</h3>
-        <p>Generate full-week schedules in seconds. Shift-Right factors in availability, roles, and coverage requirements automatically.</p>
+    <p class="section-eyebrow reveal">Features</p>
+    <h2 class="section-title reveal reveal-delay-1">Everything your team needs</h2>
+    <p class="section-sub reveal reveal-delay-2">Built for shift-based teams — from small cafes to multi-department operations.</p>
+
+    <div class="features-bento">
+
+      <!-- Large card: Auto-scheduling -->
+      <div class="feature-card card-large reveal">
+        <div>
+          <div class="feature-icon-wrap icon-red">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </div>
+          <h3>Auto-Scheduling</h3>
+          <p>Generate full-week schedules in seconds. ShiftRight factors in availability, roles, and coverage requirements automatically — no more manual juggling.</p>
+        </div>
+        <div class="feature-mini-sched">
+          <div class="fms-row">
+            <span class="fms-time">09:00</span>
+            <div class="fms-bar" style="background:rgba(99,102,241,0.15)"><div class="fms-fill" style="width:100%;background:#6366f1;animation-delay:0.2s"></div></div>
+            <span class="fms-pill pill-pub" style="color:#a5b4fc">pub</span>
+            <span class="fms-count" style="color:#22c55e">4/4</span>
+          </div>
+          <div class="fms-row">
+            <span class="fms-time">14:00</span>
+            <div class="fms-bar" style="background:rgba(245,158,11,0.15)"><div class="fms-fill" style="width:60%;background:#f59e0b;animation-delay:0.4s"></div></div>
+            <span class="fms-pill pill-act">active</span>
+            <span class="fms-count" style="color:#f59e0b">3/5</span>
+          </div>
+          <div class="fms-row">
+            <span class="fms-time">22:00</span>
+            <div class="fms-bar" style="background:rgba(255,255,255,0.06)"><div class="fms-fill" style="width:0%;background:#ef4444;animation-delay:0.6s"></div></div>
+            <span class="fms-pill pill-dft">draft</span>
+            <span class="fms-count" style="color:#ef4444">0/2</span>
+          </div>
+        </div>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">🗺️</div>
+
+      <!-- Coverage Builder -->
+      <div class="feature-card reveal reveal-delay-1">
+        <div class="feature-icon-wrap icon-blue">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </div>
         <h3>Coverage Builder</h3>
-        <p>Define how many people you need per role, per shift. Gaps are flagged before they become a problem on the floor.</p>
+        <p>Define exactly how many people you need per role, per shift. Gaps are flagged before they become a problem on the floor.</p>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">📍</div>
+
+      <!-- Multi-Department -->
+      <div class="feature-card reveal reveal-delay-1">
+        <div class="feature-icon-wrap icon-purple">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        </div>
         <h3>Multi-Department</h3>
         <p>Manage schedules across multiple departments from one dashboard. Each department stays independent or shares your team.</p>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">🔄</div>
+
+      <!-- Shift Swaps -->
+      <div class="feature-card reveal reveal-delay-2">
+        <div class="feature-icon-wrap icon-amber">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        </div>
         <h3>Shift Swaps</h3>
         <p>Workers request swaps directly in the app. Managers approve in one tap — no more group texts or last-minute scrambles.</p>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">📊</div>
+
+      <!-- Reports -->
+      <div class="feature-card reveal reveal-delay-3">
+        <div class="feature-icon-wrap icon-green">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
+        </div>
         <h3>Reports &amp; Analytics</h3>
         <p>Track hours worked, coverage gaps, and overtime trends. Make smarter scheduling decisions every week.</p>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">📅</div>
+
+      <!-- Availability -->
+      <div class="feature-card reveal reveal-delay-4">
+        <div class="feature-icon-wrap icon-teal">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="9 16 11 18 15 14"/></svg>
+        </div>
         <h3>Availability Management</h3>
         <p>Workers set their availability once. Schedules always respect it — and managers see the full picture at a glance.</p>
       </div>
+
     </div>
   </div>
 </section>
 
 <!-- PRICING -->
-<section class="section pricing-section" id="pricing">
+<section class="section pricing-bg" id="pricing">
   <div class="section-inner">
-    <p class="section-label" style="color:rgba(255,255,255,0.4)">Pricing</p>
-    <h2 class="section-title">Simple, transparent pricing</h2>
-    <p class="section-sub">Start free. Upgrade when your team grows.</p>
-    <div class="pricing-grid">
+    <p class="section-eyebrow reveal" style="color:rgba(255,255,255,0.38)">Pricing</p>
+    <h2 class="section-title reveal reveal-delay-1">Simple, transparent pricing</h2>
+    <p class="section-sub reveal reveal-delay-2">Start free. Upgrade when your team grows.</p>
+
+    <div class="pricing-toggle reveal reveal-delay-2">
+      <button class="pricing-toggle-btn active" id="btn-monthly" onclick="setPricing('monthly')">Monthly</button>
+      <button class="pricing-toggle-btn" id="btn-annual" onclick="setPricing('annual')">
+        Annual <span class="pricing-save-badge">Save 20%</span>
+      </button>
+    </div>
+
+    <div class="pricing-grid reveal reveal-delay-3">
 
       <div class="pricing-card">
         <p class="pricing-tier">Free</p>
         <p class="pricing-price">$0 <span>/ forever</span></p>
-        <p class="pricing-desc">Perfect for small teams getting started.</p>
+        <p class="pricing-note">&nbsp;</p>
         <ul class="pricing-features">
           <li>Manual scheduling</li>
           <li>Reports &amp; analytics</li>
           <li>Up to 5 workers</li>
           <li>1 department</li>
         </ul>
-        <a class="pricing-cta pricing-cta-outline" href="#pricing">Download Free</a>
+        <a class="pricing-cta pricing-cta-ghost" href="#">Download Free</a>
       </div>
 
       <div class="pricing-card popular">
         <div class="popular-badge">Most Popular</div>
         <p class="pricing-tier">Pro</p>
-        <p class="pricing-price">$49.99 <span>/ month</span></p>
-        <p class="pricing-desc">For growing teams that need more power. Or $479.88/yr (save 20%).</p>
+        <p class="pricing-price" id="pro-price"><sup>$</sup>49.99 <span>/ mo</span></p>
+        <p class="pricing-note" id="pro-note">&nbsp;</p>
         <ul class="pricing-features">
           <li>Everything in Free</li>
           <li>Up to 50 workers</li>
           <li>Unlimited departments</li>
           <li>Coverage builder</li>
           <li>Auto-scheduling</li>
+          <li>Web app access</li>
         </ul>
-        <a class="pricing-cta pricing-cta-solid" href="#pricing">Get Pro</a>
+        <a class="pricing-cta pricing-cta-solid" href="/app/">Get Pro</a>
       </div>
 
       <div class="pricing-card">
         <p class="pricing-tier">Business</p>
-        <p class="pricing-price">$99.99 <span>/ month</span></p>
-        <p class="pricing-desc">For large or complex operations. Or $959.88/yr (save 20%).</p>
+        <p class="pricing-price" id="biz-price"><sup>$</sup>99.99 <span>/ mo</span></p>
+        <p class="pricing-note" id="biz-note">&nbsp;</p>
         <ul class="pricing-features">
           <li>Everything in Pro</li>
           <li>Unlimited workers</li>
           <li>Priority support</li>
         </ul>
-        <a class="pricing-cta pricing-cta-outline" href="#pricing">Get Business</a>
+        <a class="pricing-cta pricing-cta-ghost" href="/app/">Get Business</a>
       </div>
 
     </div>
@@ -401,20 +670,81 @@
 
 <!-- CTA STRIP -->
 <section class="cta-strip">
-  <h2>Ready to fix your scheduling?</h2>
-  <p>Download Shift-Right free — no credit card required.</p>
-  <a class="btn-white" href="#pricing">Download on the App Store</a>
+  <div class="cta-strip-inner">
+    <h2>Ready to fix your scheduling?</h2>
+    <p>Download ShiftRight free — no credit card required.</p>
+    <a class="btn-cta" href="#">Download on the App Store</a>
+    <p class="cta-sub">Also available on Google Play</p>
+  </div>
 </section>
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-links">
-    <a href="/privacy">Privacy Policy</a>
-    <a href="/terms">Terms of Service</a>
-    <a href="mailto:support@shiftright.app">Contact Support</a>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo">Shift<span>Right</span></div>
+      <p>Smarter shift scheduling for teams of all sizes.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="/app/">Web app</a>
+    </div>
+    <div class="footer-col">
+      <h4>Support</h4>
+      <a href="mailto:support@shiftright.app">Contact us</a>
+    </div>
+    <div class="footer-col">
+      <h4>Legal</h4>
+      <a href="/privacy">Privacy Policy</a>
+      <a href="/terms">Terms of Service</a>
+    </div>
   </div>
-  <p>&copy; 2026 Shift-Right. All rights reserved.</p>
+  <div class="footer-bottom">
+    <p>&copy; 2026 ShiftRight. All rights reserved.</p>
+    <div class="footer-legal">
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+    </div>
+  </div>
 </footer>
+
+<script>
+  // Nav scroll behavior
+  const nav = document.getElementById('main-nav')
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 40)
+  }, { passive: true })
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible') })
+  }, { threshold: 0.12 })
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el))
+
+  // Pricing toggle
+  function setPricing(period) {
+    const isAnnual = period === 'annual'
+    document.getElementById('btn-monthly').classList.toggle('active', !isAnnual)
+    document.getElementById('btn-annual').classList.toggle('active', isAnnual)
+    const proPrice  = document.getElementById('pro-price')
+    const proNote   = document.getElementById('pro-note')
+    const bizPrice  = document.getElementById('biz-price')
+    const bizNote   = document.getElementById('biz-note')
+    if (isAnnual) {
+      proPrice.innerHTML = '<sup>$</sup>39.99 <span>/ mo</span>'
+      proNote.textContent = 'Billed $479.88/yr — save $120'
+      bizPrice.innerHTML = '<sup>$</sup>79.99 <span>/ mo</span>'
+      bizNote.textContent = 'Billed $959.88/yr — save $240'
+    } else {
+      proPrice.innerHTML = '<sup>$</sup>49.99 <span>/ mo</span>'
+      proNote.innerHTML = '&nbsp;'
+      bizPrice.innerHTML = '<sup>$</sup>99.99 <span>/ mo</span>'
+      bizNote.innerHTML = '&nbsp;'
+    }
+  }
+</script>
 
 </body>
 </html>

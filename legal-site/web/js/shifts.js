@@ -151,21 +151,43 @@ export function renderShiftsForDay() {
   })
 
   const groups = [...groupMap.entries()]
-  el.innerHTML = `<div class="shifts-grid">${groups.map(([deptId, g]) => deptSection(g, getDeptColor(deptId))).join('')}</div>`
+  el.innerHTML = renderDayStats(dayShifts) + `<div class="shifts-grid">${groups.map(([deptId, g], i) => deptSection(g, getDeptColor(deptId), i)).join('')}</div>`
   updateActionBar()
 }
 
-function deptSection(group, color) {
+function renderDayStats(dayShifts) {
+  const totalAssigned = dayShifts.reduce((s, sh) => s + (sh.assignments?.length || 0), 0)
+  const totalRequired = dayShifts.reduce((s, sh) => s + (sh.requiredWorkers || 0), 0)
+  const pct = totalRequired > 0 ? Math.round(totalAssigned / totalRequired * 100) : 100
+  const coverageColor = pct >= 100 ? '#059669' : pct >= 60 ? '#d97706' : '#dc2626'
+  return `
+    <div class="day-stats">
+      <div class="stat-chip">
+        <span class="stat-chip-num">${dayShifts.length}</span>
+        <span class="stat-chip-label">Shifts today</span>
+      </div>
+      <div class="stat-chip">
+        <span class="stat-chip-num">${totalAssigned}</span>
+        <span class="stat-chip-label">Workers assigned</span>
+      </div>
+      <div class="stat-chip">
+        <span class="stat-chip-num" style="color:${coverageColor}">${pct}%</span>
+        <span class="stat-chip-label">Coverage</span>
+      </div>
+    </div>`
+}
+
+function deptSection(group, color, index = 0) {
   const totalAssigned = group.shifts.reduce((sum, s) => sum + (s.assignments?.length || 0), 0)
   const totalRequired = group.shifts.reduce((sum, s) => sum + (s.requiredWorkers || 0), 0)
-  const badgeColor = totalAssigned === 0 ? '#ef4444' : totalAssigned < totalRequired ? '#f59e0b' : color
+  const badgeColor = totalAssigned === 0 ? '#dc2626' : totalAssigned < totalRequired ? '#d97706' : color
   return `
-    <div class="dept-section" style="border-color:${color}40;box-shadow:0 4px 12px ${color}18">
-      <div class="dept-header" style="background:${color}12">
+    <div class="dept-section" style="animation-delay:${index * 0.06}s">
+      <div class="dept-header" style="background:${color}10">
         <div class="dept-stripe" style="background:${color}"></div>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
         <span class="dept-name" style="color:${color}">${esc(group.dept?.name || 'Unknown')}</span>
-        <span class="dept-worker-badge" style="background:${badgeColor}20;color:${badgeColor}">${totalAssigned}/${totalRequired} workers</span>
+        <span class="dept-worker-badge" style="background:${badgeColor}22;color:${badgeColor}">${totalAssigned}/${totalRequired} workers</span>
       </div>
       ${group.shifts.map(s => shiftRow(s, color)).join('')}
     </div>`
@@ -173,26 +195,32 @@ function deptSection(group, color) {
 
 function shiftRow(shift, color) {
   const assigned = shift.assignments || []
-  const count = assigned.length
-  const required = shift.requiredWorkers
-  const workerColor = count === 0 ? '#ef4444' : count < required ? '#f59e0b' : '#94a3b8'
-  const workerText = count === 0 ? 'No workers assigned' : `${count} / ${required} workers`
+  const count    = assigned.length
+  const required = shift.requiredWorkers || 1
+  const pct      = Math.min(100, Math.round(count / required * 100))
+  const workerColor = count === 0 ? '#dc2626' : count < required ? '#d97706' : '#059669'
+  const workerText  = count === 0 ? 'No workers' : `${count} / ${required}`
   const understaffed = shift.understaffed ? '<span class="understaffed-badge">⚠ Understaffed</span>' : ''
+  const borderColor  = STATUS_COLORS[shift.status] || '#94a3b8'
+  const start = shift.startTime.substring(0, 5)
+  const end   = shift.endTime.substring(0, 5)
   return `
-    <div class="dept-shift-row" style="border-bottom-color:${color}18" onclick="openShiftModal('${shift.id}')">
-      <div class="shift-time-col" style="min-width:68px">
-        <span class="shift-time">${shift.startTime}</span>
+    <div class="dept-shift-row" style="border-left:3px solid ${borderColor}" onclick="openShiftModal('${shift.id}')">
+      <div class="shift-time-col">
+        <span class="shift-time">${start}</span>
         <div class="shift-time-sep"></div>
-        <span class="shift-time">${shift.endTime}</span>
+        <span class="shift-time">${end}</span>
       </div>
       <div class="shift-row-body">
         <div class="shift-row-top">
           <span class="status-pill status-${shift.status}">${shift.status.toLowerCase()}</span>
           ${understaffed}
         </div>
-        <div class="shift-workers-row" style="color:${workerColor}">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span>${workerText}</span>
+        <div class="shift-coverage">
+          <div class="coverage-bar">
+            <div class="coverage-fill" style="width:${pct}%;background:${workerColor}"></div>
+          </div>
+          <span class="coverage-text" style="color:${workerColor}">${workerText}</span>
         </div>
       </div>
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
