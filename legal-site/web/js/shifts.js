@@ -387,14 +387,16 @@ export async function renderTableView() {
         </td>`
 
       const workerCells = workers.map(w => {
-        const isAssigned  = (s.assignments || []).some(a => (a.worker?.id || a.id) === w.id)
-        const wMins       = workerMinsMap.get(w.id) || 0
-        const isAtLimit   = !isAssigned && (wMins + shiftMins > 720)
-        const ranges      = workerRangeMap.get(w.id) || []
-        const hasConflict = !isAssigned && ranges.some(r => r.shiftId !== s.id && r.startMins < sEnd && r.endMins > sStart)
-        const isBlocked   = isAtLimit || hasConflict
-        const canAssign   = !isAssigned && !isFull && !isBlocked
-        const cellKey     = `${s.id}::${w.id}`
+        const isAssigned   = (s.assignments || []).some(a => (a.worker?.id || a.id) === w.id)
+        const wMins        = workerMinsMap.get(w.id) || 0
+        const isAtLimit    = !isAssigned && (wMins + shiftMins > 720)
+        const ranges       = workerRangeMap.get(w.id) || []
+        const hasConflict  = !isAssigned && ranges.some(r => r.shiftId !== s.id && r.startMins < sEnd && r.endMins > sStart)
+        const deptIds      = w.departmentIds || []
+        const isWrongDept  = !isAssigned && s.department?.id && deptIds.length > 0 && !deptIds.includes(s.department.id)
+        const isBlocked    = isAtLimit || hasConflict || isWrongDept
+        const canAssign    = !isAssigned && !isFull && !isBlocked
+        const cellKey      = `${s.id}::${w.id}`
 
         let bg, clickAttr, content
 
@@ -402,6 +404,10 @@ export async function renderTableView() {
           bg = sColor + '18'
           clickAttr = `onclick="openShiftModal('${s.id}')"`
           content = `<div class="dt-cell-check" style="background:${sColor}">✓</div>`
+        } else if (isWrongDept) {
+          bg = '#f8fafc'
+          clickAttr = ''
+          content = `<div class="dt-cell-blocked"><span class="dt-blocked-icon">🔒</span><span class="dt-blocked-label" style="color:#94a3b8">dept</span></div>`
         } else if (isAtLimit) {
           bg = '#fff7ed'
           clickAttr = ''
@@ -456,6 +462,7 @@ export async function renderTableView() {
         <span class="dt-legend-item"><span class="dt-check-mini">✓</span> Assigned — click to view</span>
         <span class="dt-legend-item"><span class="dt-plus-mini">+</span> Click to assign</span>
         <span class="dt-legend-item" style="color:#d97706">🕐 busy / 12h = unavailable</span>
+        <span class="dt-legend-item" style="color:#94a3b8">🔒 dept = wrong department</span>
         <span class="dt-legend-item" style="color:#94a3b8">— = shift full</span>
       </div>
     </div>`
@@ -617,34 +624,31 @@ export async function renderWeekView() {
     </th>`
   }).join('')
 
-  // Infer each worker's primary department from this week's assignments
-  const workerDeptCounts = new Map() // workerId → Map<deptId, {count, dept}>
-  allShifts.filter(s => s.status !== 'CANCELLED' && s.department).forEach(s => {
-    ;(s.assignments || []).forEach(a => {
-      const wid = a.worker?.id || a.id
-      if (!workerDeptCounts.has(wid)) workerDeptCounts.set(wid, new Map())
-      const m   = workerDeptCounts.get(wid)
-      const did = s.department.id
-      const prev = m.get(did) || { count: 0, dept: s.department }
-      m.set(did, { count: prev.count + 1, dept: s.department })
-    })
-  })
-
   // Seed dept sections from shifts — every dept with shifts this week gets a band
   const deptMap = new Map() // deptId → {dept, workers[]}
   allShifts.filter(s => s.status !== 'CANCELLED' && s.department).forEach(s => {
     if (!deptMap.has(s.department.id)) deptMap.set(s.department.id, { dept: s.department, workers: [] })
   })
 
-  // Place each worker under their primary dept (most assignments); rest go to unassigned
+  // Group workers by their actual department memberships (w.departmentIds from API)
   const unassigned = []
   workers.forEach(w => {
-    const counts = workerDeptCounts.get(w.id)
-    if (!counts?.size) { unassigned.push(w); return }
-    let best = null, bestCount = 0
-    counts.forEach(({ count, dept }) => { if (count > bestCount) { bestCount = count; best = dept } })
-    if (!deptMap.has(best.id)) deptMap.set(best.id, { dept: best, workers: [] })
-    deptMap.get(best.id).workers.push(w)
+    const deptIds = w.departmentIds || []
+    const activeDeptId = deptIds.find(id => deptMap.has(id)) // prefer a dept that has shifts this week
+    if (activeDeptId) {
+      deptMap.get(activeDeptId).workers.push(w)
+    } else if (deptIds.length > 0) {
+      // Worker has dept memberships but none have shifts this week — still show worker
+      const [firstId] = deptIds
+      if (!deptMap.has(firstId)) {
+        // No shifts for this dept this week, skip creating an empty section; put in unassigned
+        unassigned.push(w)
+      } else {
+        deptMap.get(firstId).workers.push(w)
+      }
+    } else {
+      unassigned.push(w)
+    }
   })
   const deptGroups = [...deptMap.values()].sort((a, b) => a.dept.name.localeCompare(b.dept.name))
   if (unassigned.length) deptGroups.push({ dept: null, workers: unassigned })
