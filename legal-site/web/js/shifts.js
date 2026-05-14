@@ -676,9 +676,10 @@ export async function renderWeekView() {
         const sColor = STATUS_COLORS[s.status] || '#94a3b8'
 
         if (assignedIds.has(s.id)) {
-          return `<div class="wv-pill wv-pill-assigned" style="border-color:${dColor};background:${dColor}14" onclick="openShiftModal('${s.id}')">
-            <span class="wv-pill-dot" style="background:${sColor}"></span>
+          return `<div class="wv-pill wv-pill-assigned" style="background:${dColor};border-color:${dColor}" onclick="openShiftModal('${s.id}')">
+            <span class="wv-pill-check">✓</span>
             <span class="wv-pill-time">${start}–${end}</span>
+            <span class="wv-pill-status" style="background:${sColor}"></span>
           </div>`
         }
 

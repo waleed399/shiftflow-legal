@@ -206,8 +206,10 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .wv-empty { color: #cbd5e1; font-size: 0.8rem; display: block; text-align: center; padding: 4px 0; }
 .wv-pill { display: flex; align-items: center; gap: 5px; padding: 4px 8px; border-radius: 6px; border: 1.5px solid; margin-bottom: 4px; cursor: pointer; white-space: nowrap; transition: opacity 0.12s; }
 .wv-pill:last-child { margin-bottom: 0; }
-.wv-pill-assigned:hover { opacity: 0.72; }
-.wv-pill-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.wv-pill-assigned { color: white; }
+.wv-pill-assigned:hover { opacity: 0.82; }
+.wv-pill-check { font-size: 0.7rem; font-weight: 800; opacity: 0.9; }
+.wv-pill-status { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; opacity: 0.7; border: 1px solid rgba(255,255,255,0.5); margin-left: auto; }
 .wv-pill-time { font-size: 0.72rem; font-weight: 600; }
 .wv-pill-open { border-color: #e2e8f0; background: transparent; color: #94a3b8; transition: border-color 0.12s, background 0.12s, color 0.12s; }
 .wv-pill-open:hover { border-color: #1a2d4f; background: #eff6ff; color: #1a2d4f; }
