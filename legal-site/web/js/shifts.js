@@ -630,24 +630,19 @@ export async function renderWeekView() {
     if (!deptMap.has(s.department.id)) deptMap.set(s.department.id, { dept: s.department, workers: [] })
   })
 
-  // Group workers by their actual department memberships (w.departmentIds from API)
+  // Group workers by department memberships:
+  // • No memberships (no restrictions) → appears in every dept section
+  // • Has memberships → appears in each dept section they belong to that has shifts this week
+  // • Has memberships but none have shifts this week → Unassigned
   const unassigned = []
   workers.forEach(w => {
     const deptIds = w.departmentIds || []
-    const activeDeptId = deptIds.find(id => deptMap.has(id)) // prefer a dept that has shifts this week
-    if (activeDeptId) {
-      deptMap.get(activeDeptId).workers.push(w)
-    } else if (deptIds.length > 0) {
-      // Worker has dept memberships but none have shifts this week — still show worker
-      const [firstId] = deptIds
-      if (!deptMap.has(firstId)) {
-        // No shifts for this dept this week, skip creating an empty section; put in unassigned
-        unassigned.push(w)
-      } else {
-        deptMap.get(firstId).workers.push(w)
-      }
+    if (deptIds.length === 0) {
+      deptMap.forEach(entry => entry.workers.push(w))
     } else {
-      unassigned.push(w)
+      let placed = false
+      deptIds.forEach(id => { if (deptMap.has(id)) { deptMap.get(id).workers.push(w); placed = true } })
+      if (!placed) unassigned.push(w)
     }
   })
   const deptGroups = [...deptMap.values()].sort((a, b) => a.dept.name.localeCompare(b.dept.name))
