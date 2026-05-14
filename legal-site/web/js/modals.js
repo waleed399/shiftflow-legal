@@ -1,6 +1,6 @@
 import { state, ensureOrgWorkers } from './state.js'
 import { apiFetch } from './api.js'
-import { toYMD, esc, applyAvatars } from './utils.js'
+import { toYMD, esc, getInitials, applyAvatars } from './utils.js'
 import { loadShifts, updateActionBar } from './shifts.js'
 
 // ── Shift detail modal ────────────────────────────────────────────────────────
@@ -66,7 +66,7 @@ function renderModalWorkers(shift) {
 
   el.innerHTML = assigned.map(a => {
     const name = a.worker?.name || 'Unknown'
-    const initials = esc(name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase())
+    const initials = esc(getInitials(name))
     const att = a.attendance || 'PENDING'
 
     const attBtns = isActive ? `
@@ -194,7 +194,7 @@ function renderPickerList(workers, query) {
 
   const list = document.getElementById('picker-list')
   list.innerHTML = filtered.map(w => {
-    const initials = esc((w.name || '?').split(' ').map(c => c[0]).join('').slice(0, 2).toUpperCase())
+    const initials = esc(getInitials(w.name))
     const already = assignedIds.has(w.id)
     return `
       <div class="pick-row ${already ? 'already-assigned' : ''}" onclick="${already ? '' : `assignWorker('${w.id}')`}">

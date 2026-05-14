@@ -1,6 +1,6 @@
 import { state, ensureOrgWorkers } from './state.js'
 import { apiFetch } from './api.js'
-import { DAYS, MONTHS, DEPT_COLORS, addDays, isSameDay, toYMD, fmtDate, getWeekStartOf, esc, applyAvatars } from './utils.js'
+import { DAYS, MONTHS, DEPT_COLORS, addDays, isSameDay, toYMD, fmtDate, getWeekStartOf, esc, getInitials, applyAvatars } from './utils.js'
 
 let shiftsView = 'list'
 
@@ -291,7 +291,7 @@ export async function renderTableView() {
 
   // ── Header row ──
   const workerCols = workers.map(w => {
-    const initials = esc(w.name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase())
+    const initials = esc(getInitials(w.name))
     return `
       <th class="dt-worker-th">
         <div class="dt-worker-avatar" data-avatar="${esc(w.avatarUrl || '')}">${initials}</div>

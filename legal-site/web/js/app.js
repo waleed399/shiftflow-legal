@@ -1,11 +1,12 @@
 import { state } from './state.js'
 import { getToken, getRefreshToken, clearSession, apiFetch } from './api.js'
-import { getWeekStartOf } from './utils.js'
+import { getWeekStartOf, getInitials } from './utils.js'
 import { renderWeekLabel, renderDayTabs, loadShifts } from './shifts.js'
 import { renderProfile, getEffectivePlan } from './profile.js'
 import './modals.js' // registers window.openShiftModal and other modal handlers
 import './createShift.js' // registers window.openCreateShiftModal and submit handlers
 import { renderRequests, loadPendingCount } from './requests.js'
+import { renderWorkers } from './workers.js'
 
 async function init() {
   if (!getToken()) { window.location.href = '/app/'; return }
@@ -90,7 +91,7 @@ function showToast(msg) {
 
 function renderSidebar() {
   const { currentUser, currentOrg } = state
-  const initials = (currentUser.name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+  const initials = getInitials(currentUser.name)
   const sbAvatar = document.getElementById('sb-avatar')
   sbAvatar.textContent = initials
   if (currentUser.avatarUrl) {
@@ -109,23 +110,18 @@ function renderSidebar() {
   planEl.className = `plan-badge plan-${plan}`
 }
 
+const ON_ENTER = { profile: renderProfile, requests: renderRequests, workers: renderWorkers }
+
 function showView(view) {
-  for (const v of ['shifts', 'profile', 'requests']) {
-    const el = document.getElementById(`view-${v}`)
-    if (v === view) {
-      el.style.display = 'flex'
-      el.classList.remove('view-enter')
-      void el.offsetWidth
-      el.classList.add('view-enter')
-    } else {
-      el.style.display = 'none'
-    }
+  for (const v of ['shifts', 'profile', 'requests', 'workers']) {
+    document.getElementById(`view-${v}`).style.display = v === view ? 'flex' : 'none'
+    document.getElementById(`nav-${v}`).classList.toggle('active', v === view)
   }
-  document.getElementById('nav-shifts').classList.toggle('active',   view === 'shifts')
-  document.getElementById('nav-profile').classList.toggle('active',  view === 'profile')
-  document.getElementById('nav-requests').classList.toggle('active', view === 'requests')
-  if (view === 'profile')  renderProfile()
-  if (view === 'requests') renderRequests()
+  const el = document.getElementById(`view-${view}`)
+  el.classList.remove('view-enter')
+  void el.offsetWidth
+  el.classList.add('view-enter')
+  ON_ENTER[view]?.()
 }
 
 function signOut() {

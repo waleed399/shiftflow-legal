@@ -3,6 +3,10 @@ export function esc(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
 }
 
+export function getInitials(name) {
+  return (name || '?').split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase()
+}
+
 export const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 export const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 export const DEPT_COLORS = ['#1a2d4f', '#f59e0b', '#0ea5e9', '#22c55e', '#ec4899', '#f97316', '#8b5cf6', '#14b8a6']

@@ -1,6 +1,6 @@
 import { state } from './state.js'
 import { apiFetch } from './api.js'
-import { esc } from './utils.js'
+import { esc, getInitials } from './utils.js'
 
 let billingPeriod = 'monthly'
 
@@ -35,7 +35,7 @@ export function renderProfile() {
   const effectivePlan = getEffectivePlan(currentOrg)
   const isPaid = currentOrg.plan === 'PRO' || currentOrg.plan === 'BUSINESS'
   const isOnTrial = !isPaid && effectivePlan === 'PRO'
-  const initials = esc((currentUser.name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase())
+  const initials = esc(getInitials(currentUser.name))
 
   const PLANS = {
     PRO: {
