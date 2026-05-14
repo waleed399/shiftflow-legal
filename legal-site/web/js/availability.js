@@ -1,6 +1,6 @@
 import { state } from './state.js'
 import { apiFetch } from './api.js'
-import { esc, getInitials, applyAvatars, toYMD, addDays, getWeekStartOf, MONTHS } from './utils.js'
+import { esc, getInitials, applyAvatars, toYMD, addDays, getWeekStartOf, MONTHS, DAY_FULL, AVAIL_ICONS } from './utils.js'
 
 // ── Preference config (colours match mobile exactly) ──────────────────────────
 
@@ -13,14 +13,6 @@ const PREF = {
   off:       { label: 'Day off',   color: '#94a3b8', bg: '#f8fafc' },
 }
 
-const ICON = {
-  morning:   `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
-  afternoon: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><line x1="23" y1="22" x2="1" y2="22"/><polyline points="16 5 12 9 8 5"/></svg>`,
-  night:     `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
-  any:       `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
-  custom:    `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
-  off:       `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
-}
 
 const ICON_BELL     = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`
 const ICON_BELL_RING = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><line x1="2" y1="2" x2="4" y2="4"/><line x1="20" y1="2" x2="22" y2="4"/></svg>`
@@ -229,7 +221,7 @@ function dayCell(slot) {
   if (slot.preference === 'custom') {
     return `
       <div class="avail-cell" style="background:${p.bg};color:${p.color}">
-        ${ICON.custom}
+        ${AVAIL_ICONS.custom}
         <span class="avail-cell-time">${esc(slot.startTime)}</span>
         <span class="avail-cell-time-sep">–</span>
         <span class="avail-cell-time">${esc(slot.endTime)}</span>
@@ -242,7 +234,7 @@ function dayCell(slot) {
 
   return `
     <div class="avail-cell" style="background:${p.bg};color:${p.color}">
-      ${ICON[slot.preference]}
+      ${AVAIL_ICONS[slot.preference]}
       <span class="avail-cell-label">${p.label}</span>
       ${sub}
     </div>`

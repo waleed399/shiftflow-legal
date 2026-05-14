@@ -152,6 +152,8 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .dt-worker-avatar { width: 28px; height: 28px; border-radius: 50%; background: #6366f1; color: white; font-size: 0.62rem; font-weight: 800; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .dt-worker-name { font-size: 0.68rem; font-weight: 600; color: #334155; overflow: hidden; text-overflow: ellipsis; }
 .dt-avail-badge { position: absolute; bottom: -3px; right: -5px; width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid; display: flex; align-items: center; justify-content: center; }
+.dt-avail-badge svg { width: 9px; height: 9px; }
+.avail-cell svg { width: 13px; height: 13px; }
 .dt-avail-label { font-size: 0.58rem; font-weight: 700; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80px; }
 .dt-avail-off { opacity: 0.35; }
 .dt-dept-band td { height: 26px; background: var(--navy); border-top: 1px solid var(--navy); }
