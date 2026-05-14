@@ -40,7 +40,6 @@ export function onModalOverlayClick(e) {
 }
 
 function restoreModalBody() {
-  if (!_editing) return
   _editing = false
   document.getElementById('shift-modal-body').innerHTML = WORKERS_SECTION_HTML
 }
