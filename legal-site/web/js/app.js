@@ -1,6 +1,6 @@
 import { state } from './state.js'
 import { getToken, getRefreshToken, clearSession, apiFetch } from './api.js'
-import { getWeekStartOf, getInitials } from './utils.js'
+import { getWeekStartOf, getInitials, showToast } from './utils.js'
 import { renderWeekLabel, renderDayTabs, loadShifts } from './shifts.js'
 import { renderProfile, getEffectivePlan } from './profile.js'
 import './modals.js' // registers window.openShiftModal and other modal handlers
@@ -49,7 +49,7 @@ async function init() {
 
     if (returningFromPayment) {
       showView('profile')
-      showToast('🎉 Payment successful! Your plan has been upgraded.')
+      showToast('🎉 Payment successful! Your plan has been upgraded.', 'success')
       // Webhook is usually processed before LS redirects, but poll a few times
       // in case of slight delay so the sidebar badge and profile update reliably.
       pollPlanUpdate(4, 2000)
@@ -78,17 +78,6 @@ async function pollPlanUpdate(attemptsLeft, delayMs) {
   pollPlanUpdate(attemptsLeft - 1, delayMs * 1.5)
 }
 
-function showToast(msg) {
-  const toast = document.createElement('div')
-  toast.className = 'app-toast'
-  toast.textContent = msg
-  document.body.appendChild(toast)
-  requestAnimationFrame(() => toast.classList.add('app-toast-visible'))
-  setTimeout(() => {
-    toast.classList.remove('app-toast-visible')
-    setTimeout(() => toast.remove(), 400)
-  }, 4000)
-}
 
 function renderSidebar() {
   const { currentUser, currentOrg } = state
@@ -138,7 +127,8 @@ function signOut() {
   window.location.href = '/app/'
 }
 
-window.showView = showView
-window.signOut  = signOut
+window.showView  = showView
+window.signOut   = signOut
+window.showToast = showToast
 
 init()

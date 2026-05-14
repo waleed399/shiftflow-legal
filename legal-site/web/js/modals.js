@@ -1,6 +1,6 @@
 import { state, ensureOrgWorkers } from './state.js'
 import { apiFetch } from './api.js'
-import { toYMD, esc, getInitials, applyAvatars } from './utils.js'
+import { toYMD, esc, getInitials, applyAvatars, showToast } from './utils.js'
 import { loadShifts, updateActionBar } from './shifts.js'
 
 // ── Shift detail modal ────────────────────────────────────────────────────────
@@ -214,7 +214,11 @@ export async function assignWorker(workerId) {
     method: 'POST',
     body: JSON.stringify({ workerId }),
   })
-  if (!res?.ok) return
+  if (!res?.ok) {
+    const d = await res?.json().catch(() => ({}))
+    showToast(d?.error || 'Failed to assign worker')
+    return
+  }
   const key = toYMD(state.currentWeek)
   delete state.shiftsCache[key]
   await loadShifts()

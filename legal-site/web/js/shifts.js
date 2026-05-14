@@ -1,6 +1,6 @@
 import { state, ensureOrgWorkers } from './state.js'
 import { apiFetch } from './api.js'
-import { DAYS, MONTHS, DEPT_COLORS, DAY_FULL, AVAIL_ICONS, addDays, isSameDay, toYMD, fmtDate, getWeekStartOf, esc, getInitials, applyAvatars } from './utils.js'
+import { DAYS, MONTHS, DEPT_COLORS, DAY_FULL, AVAIL_ICONS, addDays, isSameDay, toYMD, fmtDate, getWeekStartOf, esc, getInitials, applyAvatars, showToast } from './utils.js'
 
 let shiftsView = 'list'
 
@@ -488,10 +488,13 @@ export async function assignInTable(shiftId, workerId) {
       delete state.shiftsCache[toYMD(state.currentWeek)]
       await loadShifts()
     } else {
+      const d = await res?.json().catch(() => ({}))
+      showToast(d?.error || 'Failed to assign worker')
       cell.innerHTML = '<div class="dt-cell-plus">+</div>'
       cell.style.cursor = 'pointer'
     }
   } catch {
+    showToast('Network error — try again')
     cell.innerHTML = '<div class="dt-cell-plus">+</div>'
     cell.style.cursor = 'pointer'
   } finally {
@@ -765,11 +768,14 @@ export async function assignInWeekView(shiftId, workerId) {
       delete state.shiftsCache[toYMD(state.currentWeek)]
       await loadShifts()
     } else {
+      const d = await res?.json().catch(() => ({}))
+      showToast(d?.error || 'Failed to assign worker')
       pill.innerHTML = prev
       pill.style.pointerEvents = ''
       delete pill.dataset.assigning
     }
   } catch {
+    showToast('Network error — try again')
     pill.innerHTML = prev
     pill.style.pointerEvents = ''
     delete pill.dataset.assigning

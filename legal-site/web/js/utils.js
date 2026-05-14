@@ -48,6 +48,23 @@ export function fmtDate(date) {
   return `${DAYS[date.getDay()]} ${date.getDate()} ${MONTHS[date.getMonth()]}`
 }
 
+export function showToast(message, type = 'error') {
+  const existing = document.getElementById('app-toast')
+  if (existing) existing.remove()
+
+  const toast = document.createElement('div')
+  toast.id = 'app-toast'
+  toast.className = `app-toast app-toast-${type}`
+  toast.textContent = message
+  document.body.appendChild(toast)
+
+  requestAnimationFrame(() => toast.classList.add('app-toast-visible'))
+  setTimeout(() => {
+    toast.classList.remove('app-toast-visible')
+    toast.addEventListener('transitionend', () => toast.remove(), { once: true })
+  }, 4000)
+}
+
 export function applyAvatars(container) {
   container.querySelectorAll('[data-avatar]').forEach(el => {
     const url = el.getAttribute('data-avatar')

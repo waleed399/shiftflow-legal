@@ -724,3 +724,15 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .confirm-dialog-title { font-size: 1rem; font-weight: 700; color: var(--text); text-align: center; margin-bottom: 8px; }
 .confirm-dialog-body { font-size: 0.84rem; color: var(--muted); text-align: center; line-height: 1.5; margin-bottom: 22px; }
 .confirm-dialog-actions { display: flex; gap: 10px; justify-content: center; }
+
+/* ── Toast notification ── */
+.app-toast {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(12px);
+  padding: 11px 20px; border-radius: 10px; font-size: 0.875rem; font-weight: 600;
+  max-width: 480px; width: max-content; box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+  z-index: 500; opacity: 0; transition: opacity 0.22s, transform 0.22s; pointer-events: none;
+  text-align: center;
+}
+.app-toast-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+.app-toast-error { background: #1e1e2e; color: #fca5a5; border: 1px solid #ef444440; }
+.app-toast-success { background: #1e1e2e; color: #86efac; border: 1px solid #22c55e40; }
