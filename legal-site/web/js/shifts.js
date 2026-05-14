@@ -4,6 +4,20 @@ import { DAYS, MONTHS, DEPT_COLORS, DAY_FULL, AVAIL_ICONS, addDays, isSameDay, t
 
 let shiftsView = 'list'
 
+const DAY_CODE = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
+
+function getWeekViewDays() {
+  const workDays = state.currentOrg?.workDays
+  const result = []
+  for (let i = 0; i < 7; i++) {
+    const d = addDays(state.currentWeek, i)
+    const code = DAY_CODE[d.getDay()]
+    const include = workDays?.length ? workDays.includes(code) : (code !== 'SAT' && code !== 'SUN')
+    if (include) result.push({ date: d, ymd: toYMD(d) })
+  }
+  return result
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function getDeptColor(deptId) {
@@ -81,19 +95,19 @@ export function renderDayTabs() {
 
 export function setShiftsView(view) {
   shiftsView = view
-  const listBtn  = document.getElementById('view-list-btn')
-  const tableBtn = document.getElementById('view-table-btn')
-  if (listBtn)  listBtn.classList.toggle('active',  view === 'list')
-  if (tableBtn) tableBtn.classList.toggle('active', view === 'table')
+  document.getElementById('view-list-btn')?.classList.toggle('active',  view === 'list')
+  document.getElementById('view-table-btn')?.classList.toggle('active', view === 'table')
+  document.getElementById('view-week-btn')?.classList.toggle('active',  view === 'week')
 
   const contentArea = document.getElementById('shifts-content').parentElement
-  if (view === 'table') {
-    contentArea.classList.add('content-area-flush')
-    renderTableView()
-    updateActionBar()
-  } else {
+  if (view === 'list') {
     contentArea.classList.remove('content-area-flush')
     renderShiftsForDay()
+  } else {
+    contentArea.classList.add('content-area-flush')
+    if (view === 'table') renderTableView()
+    else renderWeekView()
+    updateActionBar()
   }
 }
 
@@ -123,6 +137,7 @@ export async function loadShifts() {
       state.shiftsCache[key] = await res.json()
     }
     if (shiftsView === 'table') renderTableView()
+    else if (shiftsView === 'week') renderWeekView()
     else renderShiftsForDay()
   } catch {
     document.getElementById('shifts-content').innerHTML = '<div class="empty-state"><p>Failed to load shifts.</p></div>'
@@ -486,7 +501,7 @@ export function updateActionBar() {
   if (weekActive.length === 0) { bar.style.display = 'none'; return }
   bar.style.display = 'flex'
 
-  const showDay = shiftsView !== 'table'
+  const showDay = shiftsView === 'list'
   ;['action-label-day', 'btn-publish-day', 'btn-unpublish-day', 'action-bar-sep'].forEach(id => {
     document.getElementById(id).style.display = showDay ? '' : 'none'
   })
@@ -552,10 +567,169 @@ export async function unpublishWeek() {
   } finally { updateActionBar() }
 }
 
-window.changeWeek     = changeWeek
-window.publishDay     = publishDay
-window.unpublishDay   = unpublishDay
-window.publishWeek    = publishWeek
-window.unpublishWeek  = unpublishWeek
-window.setShiftsView  = setShiftsView
-window.assignInTable  = assignInTable
+// ── Week roster view ──────────────────────────────────────────────────────────
+
+export async function renderWeekView() {
+  const key = toYMD(state.currentWeek)
+  const allShifts = state.shiftsCache[key] || []
+  const el = document.getElementById('shifts-content')
+
+  if (!state.orgWorkers || !_availRosterCache[key]) {
+    el.innerHTML = '<div class="loader-inline"><div class="spinner"></div></div>'
+    await Promise.all([
+      state.orgWorkers ? null : ensureOrgWorkers(),
+      _availRosterCache[key] ? null : apiFetch(`/availability/week-roster/${key}`)
+        .then(r => r?.ok ? r.json() : null)
+        .then(d => { if (d) _availRosterCache[key] = d })
+        .catch(() => {}),
+    ].filter(Boolean))
+  }
+
+  const workers = state.orgWorkers || []
+  if (workers.length === 0) {
+    el.innerHTML = '<div class="empty-state"><p>No workers found.</p></div>'
+    return
+  }
+
+  const weekDays = getWeekViewDays()
+  const today    = new Date()
+
+  const shiftsByDay = new Map()
+  allShifts.filter(s => s.status !== 'CANCELLED').forEach(s => {
+    const ymd = s.date.substring(0, 10)
+    if (!shiftsByDay.has(ymd)) shiftsByDay.set(ymd, [])
+    shiftsByDay.get(ymd).push(s)
+  })
+
+  const workerAvail = new Map(
+    (_availRosterCache[key] || []).map(r => {
+      const m = new Map()
+      if (r.availability) (r.availability.slots || []).forEach(s => m.set(s.day, s.preference))
+      return [r.worker.id, m]
+    })
+  )
+
+  const dayHeaders = weekDays.map(({ date }) => {
+    const isToday = isSameDay(date, today)
+    return `<th class="wv-day-th${isToday ? ' wv-today' : ''}">
+      <div class="wv-day-name">${DAYS[date.getDay()]}</div>
+      <div class="wv-day-num">${date.getDate()}</div>
+    </th>`
+  }).join('')
+
+  const bodyRows = workers.map(w => {
+    const initials = esc(getInitials(w.name))
+
+    const cells = weekDays.map(({ date, ymd }) => {
+      const dayShifts = (shiftsByDay.get(ymd) || []).sort((a, b) => a.startTime.localeCompare(b.startTime))
+      const isOff = workerAvail.get(w.id)?.get(DAY_FULL[date.getDay()]) === 'off'
+
+      if (dayShifts.length === 0) {
+        return `<td class="wv-cell${isOff ? ' wv-cell-off' : ''}"><span class="wv-empty">—</span></td>`
+      }
+
+      const assignedIds = new Set(
+        dayShifts.filter(s => (s.assignments || []).some(a => (a.worker?.id || a.id) === w.id)).map(s => s.id)
+      )
+
+      const assignedRanges = dayShifts
+        .filter(s => assignedIds.has(s.id))
+        .map(s => {
+          const a   = (s.assignments || []).find(a => (a.worker?.id || a.id) === w.id)
+          const sS  = toMins(s.startTime)
+          const aS  = a?.blockStart ? toMins(a.blockStart) : sS
+          const aE  = a?.blockEnd   ? normEnd(aS, toMins(a.blockEnd)) : normEnd(sS, toMins(s.endTime))
+          return { startMins: aS, endMins: aE }
+        })
+
+      const pills = dayShifts.map(s => {
+        const start  = s.startTime.substring(0, 5)
+        const end    = s.endTime.substring(0, 5)
+        const dColor = getDeptColor(s.department?.id)
+        const sColor = STATUS_COLORS[s.status] || '#94a3b8'
+
+        if (assignedIds.has(s.id)) {
+          return `<div class="wv-pill wv-pill-assigned" style="border-color:${dColor};background:${dColor}14" onclick="openShiftModal('${s.id}')">
+            <span class="wv-pill-dot" style="background:${sColor}"></span>
+            <span class="wv-pill-time">${start}–${end}</span>
+          </div>`
+        }
+
+        const isFull = (s.assignments || []).length >= (s.requiredWorkers || 1)
+        if (isFull) return null
+
+        const sStart      = toMins(s.startTime)
+        const sEnd        = normEnd(sStart, toMins(s.endTime))
+        const hasConflict = assignedRanges.some(r => r.startMins < sEnd && r.endMins > sStart)
+        if (hasConflict) return null
+
+        return `<div class="wv-pill wv-pill-open" data-assign="${s.id}::${w.id}" onclick="assignInWeekView('${s.id}','${w.id}')">
+          <span class="wv-pill-plus">+</span>
+          <span class="wv-pill-time">${start}–${end}</span>
+        </div>`
+      }).filter(Boolean).join('')
+
+      return `<td class="wv-cell${isOff ? ' wv-cell-off' : ''}">${pills || '<span class="wv-empty">—</span>'}</td>`
+    }).join('')
+
+    return `<tr>
+      <td class="wv-worker-cell">
+        <div class="wv-worker-avatar" data-avatar="${esc(w.avatarUrl || '')}">${initials}</div>
+        <div class="wv-worker-name">${esc(w.name.split(' ')[0])}</div>
+      </td>
+      ${cells}
+    </tr>`
+  }).join('')
+
+  el.innerHTML = `
+    <div class="wv-outer">
+      <div class="wv-scroll">
+        <table class="wv-table">
+          <thead><tr>
+            <th class="wv-corner">Workers</th>
+            ${dayHeaders}
+          </tr></thead>
+          <tbody>${bodyRows}</tbody>
+        </table>
+      </div>
+    </div>`
+  applyAvatars(el)
+}
+
+export async function assignInWeekView(shiftId, workerId) {
+  const pill = document.querySelector(`.wv-pill-open[data-assign="${shiftId}::${workerId}"]`)
+  if (!pill || pill.dataset.assigning) return
+  pill.dataset.assigning = '1'
+  const prev = pill.innerHTML
+  pill.innerHTML = '<div class="spinner" style="width:12px;height:12px;border-width:2px"></div>'
+  pill.style.pointerEvents = 'none'
+
+  try {
+    const res = await apiFetch(`/shifts/${shiftId}/assign`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ workerId }),
+    })
+    if (res?.ok) {
+      delete state.shiftsCache[toYMD(state.currentWeek)]
+      await loadShifts()
+    } else {
+      pill.innerHTML = prev
+      pill.style.pointerEvents = ''
+      delete pill.dataset.assigning
+    }
+  } catch {
+    pill.innerHTML = prev
+    pill.style.pointerEvents = ''
+    delete pill.dataset.assigning
+  }
+}
+
+window.changeWeek       = changeWeek
+window.publishDay       = publishDay
+window.unpublishDay     = unpublishDay
+window.publishWeek      = publishWeek
+window.unpublishWeek    = unpublishWeek
+window.setShiftsView    = setShiftsView
+window.assignInTable    = assignInTable
+window.assignInWeekView = assignInWeekView
