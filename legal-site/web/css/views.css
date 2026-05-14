@@ -219,6 +219,7 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .wv-dept-label { padding: 5px 14px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--primary); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); white-space: nowrap; }
 .wv-dept-stripe { display: inline-block; width: 3px; height: 13px; border-radius: 2px; margin-right: 8px; vertical-align: middle; flex-shrink: 0; }
 .wv-dept-unassigned span:last-child { color: var(--muted); }
+.wv-dept-empty { padding: 10px 14px; font-size: 0.78rem; color: var(--muted); font-style: italic; border-bottom: 1px solid var(--border); }
 
 /* ── Profile view ── */
 .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 860px; }

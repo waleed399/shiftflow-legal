@@ -630,8 +630,13 @@ export async function renderWeekView() {
     })
   })
 
-  // Group workers into dept sections; workers with no assignments go last
+  // Seed dept sections from shifts — every dept with shifts this week gets a band
   const deptMap = new Map() // deptId → {dept, workers[]}
+  allShifts.filter(s => s.status !== 'CANCELLED' && s.department).forEach(s => {
+    if (!deptMap.has(s.department.id)) deptMap.set(s.department.id, { dept: s.department, workers: [] })
+  })
+
+  // Place each worker under their primary dept (most assignments); rest go to unassigned
   const unassigned = []
   workers.forEach(w => {
     const counts = workerDeptCounts.get(w.id)
@@ -709,8 +714,8 @@ export async function renderWeekView() {
   }
 
   const bodyRows = deptGroups.map(({ dept, workers: grp }) => {
-    const color   = getDeptColor(dept?.id)
-    const band    = dept
+    const color = getDeptColor(dept?.id)
+    const band  = dept
       ? `<tr class="wv-dept-band"><td colspan="${colSpan}" class="wv-dept-label">
           <span class="wv-dept-stripe" style="background:${color}"></span>
           <span style="color:${color}">${esc(dept.name)}</span>
@@ -719,7 +724,10 @@ export async function renderWeekView() {
           <span class="wv-dept-stripe" style="background:#94a3b8"></span>
           <span>Unassigned this week</span>
         </td></tr>`
-    return band + grp.map(workerRow).join('')
+    const emptyRow = grp.length === 0
+      ? `<tr><td colspan="${colSpan}" class="wv-dept-empty">No workers assigned to this department yet</td></tr>`
+      : ''
+    return band + emptyRow + grp.map(workerRow).join('')
   }).join('')
 
   el.innerHTML = `
