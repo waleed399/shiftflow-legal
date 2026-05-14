@@ -617,9 +617,37 @@ export async function renderWeekView() {
     </th>`
   }).join('')
 
-  const bodyRows = workers.map(w => {
-    const initials = esc(getInitials(w.name))
+  // Infer each worker's primary department from this week's assignments
+  const workerDeptCounts = new Map() // workerId → Map<deptId, {count, dept}>
+  allShifts.filter(s => s.status !== 'CANCELLED' && s.department).forEach(s => {
+    ;(s.assignments || []).forEach(a => {
+      const wid = a.worker?.id || a.id
+      if (!workerDeptCounts.has(wid)) workerDeptCounts.set(wid, new Map())
+      const m   = workerDeptCounts.get(wid)
+      const did = s.department.id
+      const prev = m.get(did) || { count: 0, dept: s.department }
+      m.set(did, { count: prev.count + 1, dept: s.department })
+    })
+  })
 
+  // Group workers into dept sections; workers with no assignments go last
+  const deptMap = new Map() // deptId → {dept, workers[]}
+  const unassigned = []
+  workers.forEach(w => {
+    const counts = workerDeptCounts.get(w.id)
+    if (!counts?.size) { unassigned.push(w); return }
+    let best = null, bestCount = 0
+    counts.forEach(({ count, dept }) => { if (count > bestCount) { bestCount = count; best = dept } })
+    if (!deptMap.has(best.id)) deptMap.set(best.id, { dept: best, workers: [] })
+    deptMap.get(best.id).workers.push(w)
+  })
+  const deptGroups = [...deptMap.values()].sort((a, b) => a.dept.name.localeCompare(b.dept.name))
+  if (unassigned.length) deptGroups.push({ dept: null, workers: unassigned })
+
+  const colSpan = weekDays.length + 1
+
+  function workerRow(w) {
+    const initials = esc(getInitials(w.name))
     const cells = weekDays.map(({ date, ymd }) => {
       const dayShifts = (shiftsByDay.get(ymd) || []).sort((a, b) => a.startTime.localeCompare(b.startTime))
       const isOff = workerAvail.get(w.id)?.get(DAY_FULL[date.getDay()]) === 'off'
@@ -631,14 +659,13 @@ export async function renderWeekView() {
       const assignedIds = new Set(
         dayShifts.filter(s => (s.assignments || []).some(a => (a.worker?.id || a.id) === w.id)).map(s => s.id)
       )
-
       const assignedRanges = dayShifts
         .filter(s => assignedIds.has(s.id))
         .map(s => {
-          const a   = (s.assignments || []).find(a => (a.worker?.id || a.id) === w.id)
-          const sS  = toMins(s.startTime)
-          const aS  = a?.blockStart ? toMins(a.blockStart) : sS
-          const aE  = a?.blockEnd   ? normEnd(aS, toMins(a.blockEnd)) : normEnd(sS, toMins(s.endTime))
+          const a  = (s.assignments || []).find(a => (a.worker?.id || a.id) === w.id)
+          const sS = toMins(s.startTime)
+          const aS = a?.blockStart ? toMins(a.blockStart) : sS
+          const aE = a?.blockEnd   ? normEnd(aS, toMins(a.blockEnd)) : normEnd(sS, toMins(s.endTime))
           return { startMins: aS, endMins: aE }
         })
 
@@ -655,9 +682,8 @@ export async function renderWeekView() {
           </div>`
         }
 
-        const isFull = (s.assignments || []).length >= (s.requiredWorkers || 1)
+        const isFull      = (s.assignments || []).length >= (s.requiredWorkers || 1)
         if (isFull) return null
-
         const sStart      = toMins(s.startTime)
         const sEnd        = normEnd(sStart, toMins(s.endTime))
         const hasConflict = assignedRanges.some(r => r.startMins < sEnd && r.endMins > sStart)
@@ -679,6 +705,20 @@ export async function renderWeekView() {
       </td>
       ${cells}
     </tr>`
+  }
+
+  const bodyRows = deptGroups.map(({ dept, workers: grp }) => {
+    const color   = getDeptColor(dept?.id)
+    const band    = dept
+      ? `<tr class="wv-dept-band"><td colspan="${colSpan}" class="wv-dept-label">
+          <span class="wv-dept-stripe" style="background:${color}"></span>
+          <span style="color:${color}">${esc(dept.name)}</span>
+        </td></tr>`
+      : `<tr class="wv-dept-band"><td colspan="${colSpan}" class="wv-dept-label wv-dept-unassigned">
+          <span class="wv-dept-stripe" style="background:#94a3b8"></span>
+          <span>Unassigned this week</span>
+        </td></tr>`
+    return band + grp.map(workerRow).join('')
   }).join('')
 
   el.innerHTML = `

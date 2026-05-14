@@ -213,6 +213,10 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .wv-pill-open:hover { border-color: #1a2d4f; background: #eff6ff; color: #1a2d4f; }
 .wv-pill-plus { font-size: 0.9rem; font-weight: 700; line-height: 1; color: #cbd5e1; }
 .wv-pill-open:hover .wv-pill-plus { color: #1a2d4f; }
+.wv-dept-band { background: #f8fafc; }
+.wv-dept-label { padding: 5px 14px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--primary); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); white-space: nowrap; }
+.wv-dept-stripe { display: inline-block; width: 3px; height: 13px; border-radius: 2px; margin-right: 8px; vertical-align: middle; flex-shrink: 0; }
+.wv-dept-unassigned span:last-child { color: var(--muted); }
 
 /* ── Profile view ── */
 .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 860px; }
