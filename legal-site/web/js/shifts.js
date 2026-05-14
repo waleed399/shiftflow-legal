@@ -88,9 +88,9 @@ export function setShiftsView(view) {
 
   const contentArea = document.getElementById('shifts-content').parentElement
   if (view === 'table') {
-    document.getElementById('action-bar').style.display = 'none'
     contentArea.classList.add('content-area-flush')
     renderTableView()
+    updateActionBar()
   } else {
     contentArea.classList.remove('content-area-flush')
     renderShiftsForDay()
@@ -483,13 +483,20 @@ export function updateActionBar() {
   const all = state.shiftsCache[key] || []
   const weekActive = all.filter(s => s.status !== 'CANCELLED')
   const bar = document.getElementById('action-bar')
-  if (shiftsView === 'table' || weekActive.length === 0) { bar.style.display = 'none'; return }
+  if (weekActive.length === 0) { bar.style.display = 'none'; return }
   bar.style.display = 'flex'
 
-  const selectedYMD = toYMD(state.selectedDay)
-  const dayShifts = weekActive.filter(s => s.date.substring(0, 10) === selectedYMD)
-  document.getElementById('btn-publish-day').disabled   = !dayShifts.some(s => s.status === 'DRAFT')
-  document.getElementById('btn-unpublish-day').disabled = !dayShifts.some(s => s.status === 'PUBLISHED')
+  const showDay = shiftsView !== 'table'
+  ;['action-label-day', 'btn-publish-day', 'btn-unpublish-day', 'action-bar-sep'].forEach(id => {
+    document.getElementById(id).style.display = showDay ? '' : 'none'
+  })
+
+  if (showDay) {
+    const selectedYMD = toYMD(state.selectedDay)
+    const dayShifts = weekActive.filter(s => s.date.substring(0, 10) === selectedYMD)
+    document.getElementById('btn-publish-day').disabled   = !dayShifts.some(s => s.status === 'DRAFT')
+    document.getElementById('btn-unpublish-day').disabled = !dayShifts.some(s => s.status === 'PUBLISHED')
+  }
 
   const weekDraftCount = weekActive.filter(s => s.status === 'DRAFT').length
   document.getElementById('publish-week-label').textContent = `Publish week (${weekDraftCount})`
