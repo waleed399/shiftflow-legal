@@ -146,7 +146,10 @@ function deptListHtml() {
   }
   return _allDepts.map(d => {
     const color      = deptColor(d.id)
-    const memberCount = _allWorkers.filter(w => (w.departmentIds || []).includes(d.id)).length
+    const memberCount = _allWorkers.filter(w => {
+      const ids = w.departmentIds || []
+      return ids.length === 0 || ids.includes(d.id)
+    }).length
     return `
       <div class="dept-item" id="dept-item-${esc(d.id)}">
         <div class="dept-item-stripe" style="background:${color}"></div>
