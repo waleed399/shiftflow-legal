@@ -481,19 +481,26 @@ export async function assignInTable(shiftId, workerId) {
 export function updateActionBar() {
   const key = toYMD(state.currentWeek)
   const all = state.shiftsCache[key] || []
-  const selectedYMD = toYMD(state.selectedDay)
-  const dayShifts = all.filter(s => s.date.substring(0, 10) === selectedYMD && s.status !== 'CANCELLED')
+  const weekActive = all.filter(s => s.status !== 'CANCELLED')
   const bar = document.getElementById('action-bar')
-  if (shiftsView === 'table' || dayShifts.length === 0) { bar.style.display = 'none'; return }
+  if (shiftsView === 'table' || weekActive.length === 0) { bar.style.display = 'none'; return }
   bar.style.display = 'flex'
+
+  const selectedYMD = toYMD(state.selectedDay)
+  const dayShifts = weekActive.filter(s => s.date.substring(0, 10) === selectedYMD)
   document.getElementById('btn-publish-day').disabled   = !dayShifts.some(s => s.status === 'DRAFT')
   document.getElementById('btn-unpublish-day').disabled = !dayShifts.some(s => s.status === 'PUBLISHED')
+
+  const weekDraftCount = weekActive.filter(s => s.status === 'DRAFT').length
+  document.getElementById('publish-week-label').textContent = `Publish week (${weekDraftCount})`
+  document.getElementById('btn-publish-week').disabled  = weekDraftCount === 0
+  document.getElementById('btn-unpublish-week').disabled = !weekActive.some(s => s.status === 'PUBLISHED')
 }
 
 export async function publishDay() {
   document.getElementById('btn-publish-day').disabled = true
   try {
-    const res = await apiFetch('/shifts/publish-day', { method: 'POST', body: JSON.stringify({ date: toYMD(state.selectedDay) }) })
+    const res = await apiFetch('/shifts/publish-day', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ date: toYMD(state.selectedDay) }) })
     if (res?.ok) { delete state.shiftsCache[toYMD(state.currentWeek)]; await loadShifts() }
   } finally { updateActionBar() }
 }
@@ -501,13 +508,47 @@ export async function publishDay() {
 export async function unpublishDay() {
   document.getElementById('btn-unpublish-day').disabled = true
   try {
-    const res = await apiFetch('/shifts/unpublish-day', { method: 'POST', body: JSON.stringify({ date: toYMD(state.selectedDay) }) })
+    const res = await apiFetch('/shifts/unpublish-day', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ date: toYMD(state.selectedDay) }) })
     if (res?.ok) { delete state.shiftsCache[toYMD(state.currentWeek)]; await loadShifts() }
   } finally { updateActionBar() }
 }
 
-window.changeWeek    = changeWeek
-window.publishDay    = publishDay
-window.unpublishDay  = unpublishDay
-window.setShiftsView = setShiftsView
-window.assignInTable = assignInTable
+export async function publishWeek() {
+  const key = toYMD(state.currentWeek)
+  const draftCount = (state.shiftsCache[key] || []).filter(s => s.status === 'DRAFT').length
+  if (!confirm(`Publish ${draftCount} draft shift${draftCount !== 1 ? 's' : ''} for this week? Workers will be notified.`)) return
+
+  const btn = document.getElementById('btn-publish-week')
+  btn.disabled = true
+  const label = document.getElementById('publish-week-label')
+  const prevText = label.textContent
+  label.textContent = 'Publishing…'
+
+  try {
+    const res = await apiFetch('/shifts/publish-week', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ weekOf: key }) })
+    if (res?.ok) { delete state.shiftsCache[key]; await loadShifts() }
+  } finally {
+    label.textContent = prevText
+    updateActionBar()
+  }
+}
+
+export async function unpublishWeek() {
+  if (!confirm('Unpublish all published shifts for this week?')) return
+
+  const key = toYMD(state.currentWeek)
+  document.getElementById('btn-unpublish-week').disabled = true
+
+  try {
+    const res = await apiFetch('/shifts/unpublish-week', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ weekOf: key }) })
+    if (res?.ok) { delete state.shiftsCache[key]; await loadShifts() }
+  } finally { updateActionBar() }
+}
+
+window.changeWeek     = changeWeek
+window.publishDay     = publishDay
+window.unpublishDay   = unpublishDay
+window.publishWeek    = publishWeek
+window.unpublishWeek  = unpublishWeek
+window.setShiftsView  = setShiftsView
+window.assignInTable  = assignInTable
