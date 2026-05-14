@@ -257,31 +257,76 @@ async function doAction(fn) {
   } catch { alert('Network error — try again'); return false }
 }
 
+function disableSwapBtns(id) {
+  document.getElementById(`swap-${id}`)?.querySelectorAll('.req-btn').forEach(b => { b.disabled = true })
+}
+function enableSwapBtns(id) {
+  document.getElementById(`swap-${id}`)?.querySelectorAll('.req-btn').forEach(b => { b.disabled = false })
+}
+function disableTimeOffBtns(id) {
+  document.getElementById(`timeoff-${id}`)?.querySelectorAll('.req-btn').forEach(b => { b.disabled = true })
+}
+function enableTimeOffBtns(id) {
+  document.getElementById(`timeoff-${id}`)?.querySelectorAll('.req-btn').forEach(b => { b.disabled = false })
+}
+
+function patchCachedSwap(id, status) {
+  if (_cachedSwaps) _cachedSwaps = _cachedSwaps.map(s => s.id === id ? { ...s, status } : s)
+}
+function patchCachedTimeOff(id, status) {
+  if (_cachedTimeoff) _cachedTimeoff = _cachedTimeoff.map(t => t.id === id ? { ...t, status } : t)
+}
+
 async function approveSwap(id) {
-  if (await doAction(() => apiFetch(`/swaps/${id}/approve`, { method: 'PATCH', body: '{}' })))
-    renderRequests()
+  disableSwapBtns(id)
+  if (await doAction(() => apiFetch(`/swaps/${id}/approve`, { method: 'PATCH', body: '{}' }))) {
+    patchCachedSwap(id, 'APPROVED')
+    renderTab(_cachedSwaps, _cachedTimeoff)
+  } else {
+    enableSwapBtns(id)
+  }
 }
 
 async function approveSwapOpen(id) {
   const vol = document.getElementById(`vol-${id}`)?.value
   if (!vol) { alert('Pick a volunteer first'); return }
-  if (await doAction(() => apiFetch(`/swaps/${id}/approve`, { method: 'PATCH', body: JSON.stringify({ replacementWorkerId: vol }) })))
-    renderRequests()
+  disableSwapBtns(id)
+  if (await doAction(() => apiFetch(`/swaps/${id}/approve`, { method: 'PATCH', body: JSON.stringify({ replacementWorkerId: vol }) }))) {
+    patchCachedSwap(id, 'APPROVED')
+    renderTab(_cachedSwaps, _cachedTimeoff)
+  } else {
+    enableSwapBtns(id)
+  }
 }
 
 async function denySwap(id) {
-  if (await doAction(() => apiFetch(`/swaps/${id}/deny`, { method: 'PATCH', body: '{}' })))
-    renderRequests()
+  disableSwapBtns(id)
+  if (await doAction(() => apiFetch(`/swaps/${id}/deny`, { method: 'PATCH', body: '{}' }))) {
+    patchCachedSwap(id, 'DENIED')
+    renderTab(_cachedSwaps, _cachedTimeoff)
+  } else {
+    enableSwapBtns(id)
+  }
 }
 
 async function approveTimeOff(id) {
-  if (await doAction(() => apiFetch(`/time-off/${id}/approve`, { method: 'PATCH', body: '{}' })))
-    renderRequests()
+  disableTimeOffBtns(id)
+  if (await doAction(() => apiFetch(`/time-off/${id}/approve`, { method: 'PATCH', body: '{}' }))) {
+    patchCachedTimeOff(id, 'APPROVED')
+    renderTab(_cachedSwaps, _cachedTimeoff)
+  } else {
+    enableTimeOffBtns(id)
+  }
 }
 
 async function denyTimeOff(id) {
-  if (await doAction(() => apiFetch(`/time-off/${id}/deny`, { method: 'PATCH', body: '{}' })))
-    renderRequests()
+  disableTimeOffBtns(id)
+  if (await doAction(() => apiFetch(`/time-off/${id}/deny`, { method: 'PATCH', body: '{}' }))) {
+    patchCachedTimeOff(id, 'DENIED')
+    renderTab(_cachedSwaps, _cachedTimeoff)
+  } else {
+    enableTimeOffBtns(id)
+  }
 }
 
 export async function loadPendingCount() {
@@ -327,28 +372,16 @@ export async function loadMoreRequests() {
     const newItems = isTimeoff ? (page.requests || []) : (page.swaps || [])
 
     if (isTimeoff) {
-      _timeoffCursor = page.nextCursor
+      _cachedTimeoff  = [...(_cachedTimeoff || []), ...newItems]
+      _timeoffCursor  = page.nextCursor
       _timeoffHasMore = page.hasMore
     } else {
-      _swapsCursor = page.nextCursor
+      _cachedSwaps  = [...(_cachedSwaps || []), ...newItems]
+      _swapsCursor  = page.nextCursor
       _swapsHasMore = page.hasMore
     }
 
-    // Append history cards after the existing history section
-    const wrap = document.querySelector('.req-load-more-wrap')
-    if (wrap) {
-      const historyCards = newItems
-        .filter(x => x.status !== 'PENDING')
-        .map(x => isTimeoff ? timeOffHistoryCard(x) : swapHistoryCard(x))
-        .join('')
-      wrap.insertAdjacentHTML('beforebegin', historyCards)
-
-      if (page.hasMore) {
-        if (btn) { btn.disabled = false; btn.textContent = 'Load more' }
-      } else {
-        wrap.remove()
-      }
-    }
+    renderTab(_cachedSwaps, _cachedTimeoff)
   } catch {
     if (btn) { btn.disabled = false; btn.textContent = 'Load more' }
   }

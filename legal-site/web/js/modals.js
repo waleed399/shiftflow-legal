@@ -78,7 +78,7 @@ function renderModalWorkers(shift) {
 
     const removable = shift.status !== 'COMPLETED' && shift.status !== 'CANCELLED'
     const removeBtn = removable ? `
-      <button class="remove-btn" title="Remove" onclick="removeWorker('${shift.id}','${a.worker.id}')">
+      <button class="remove-btn" title="Remove" onclick="removeWorker('${shift.id}','${a.worker.id}',this)">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>` : ''
 
@@ -120,24 +120,35 @@ function renderModalFooter(shift) {
 }
 
 export async function publishShift(shiftId, unpublish = false) {
+  const btn = document.querySelector(`#modal-footer ${unpublish ? '.btn-warning' : '.btn-success'}`)
+  if (btn) btn.disabled = true
   const key = toYMD(state.currentWeek)
-  if (unpublish) {
-    const shift = (state.shiftsCache[key] || []).find(s => s.id === shiftId)
-    if (!shift) return
-    await apiFetch('/shifts/unpublish-day', { method: 'POST', body: JSON.stringify({ date: shift.date.substring(0, 10) }) })
-  } else {
-    await apiFetch(`/shifts/${shiftId}/publish`, { method: 'POST' })
+  try {
+    if (unpublish) {
+      const shift = (state.shiftsCache[key] || []).find(s => s.id === shiftId)
+      if (!shift) return
+      await apiFetch('/shifts/unpublish-day', { method: 'POST', body: JSON.stringify({ date: shift.date.substring(0, 10) }) })
+    } else {
+      await apiFetch(`/shifts/${shiftId}/publish`, { method: 'POST' })
+    }
+    delete state.shiftsCache[key]
+    await loadShifts()
+    const updated = (state.shiftsCache[key] || []).find(s => s.id === shiftId)
+    if (updated) { state.activeShiftData = updated; renderShiftModal(updated) }
+    updateActionBar()
+  } catch {
+    if (btn) btn.disabled = false
   }
-  delete state.shiftsCache[key]
-  await loadShifts()
-  const updated = (state.shiftsCache[key] || []).find(s => s.id === shiftId)
-  if (updated) { state.activeShiftData = updated; renderShiftModal(updated) }
-  updateActionBar()
 }
 
-export async function removeWorker(shiftId, workerId) {
+export async function removeWorker(shiftId, workerId, btn) {
+  if (btn) btn.disabled = true
   const res = await apiFetch(`/shifts/${shiftId}/assign/${workerId}`, { method: 'DELETE' })
-  if (!res?.ok) return
+  if (!res?.ok) {
+    if (btn) btn.disabled = false
+    showToast('Failed to remove worker — try again')
+    return
+  }
   const key = toYMD(state.currentWeek)
   delete state.shiftsCache[key]
   await loadShifts()
@@ -150,7 +161,7 @@ export async function markAttendance(shiftId, workerId, status) {
     method: 'PATCH',
     body: JSON.stringify({ workerId, attendance: status }),
   })
-  if (!res?.ok) return
+  if (!res?.ok) { showToast('Failed to update attendance — try again'); return }
   const shift = (state.shiftsCache[toYMD(state.currentWeek)] || []).find(s => s.id === shiftId)
   if (shift) {
     const a = (shift.assignments || []).find(a => a.worker?.id === workerId)

@@ -699,6 +699,9 @@ export async function renderWeekView() {
         const sEnd        = normEnd(sStart, toMins(s.endTime))
         const hasConflict = assignedRanges.some(r => r.startMins < sEnd && r.endMins > sStart)
         if (hasConflict) return null
+        const wDeptIds    = w.departmentIds || []
+        const isWrongDept = s.department?.id && wDeptIds.length > 0 && !wDeptIds.includes(s.department.id)
+        if (isWrongDept) return null
 
         return `<div class="wv-pill wv-pill-open" data-assign="${s.id}::${w.id}" onclick="assignInWeekView('${s.id}','${w.id}')">
           <span class="wv-pill-plus">+</span>

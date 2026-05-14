@@ -19,7 +19,7 @@ export async function openCreateShiftModal(prefillDeptId) {
   await ensureDepartments()
   const depts = state.departments || []
   if (depts.length === 0) {
-    dept.innerHTML = '<option value="">No departments yet — create one in the mobile app</option>'
+    dept.innerHTML = '<option value="">No departments yet — create one in the Workers tab</option>'
     dept.disabled = true
     return
   }

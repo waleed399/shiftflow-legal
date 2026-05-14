@@ -535,18 +535,30 @@ export async function submitInvite() {
 // ── Invitation actions ────────────────────────────────────────────────────────
 
 export async function resendInvite(id) {
-  const res = await apiFetch(`/organization/invitations/${id}/resend`, { method: 'POST', body: '{}' })
-  if (!res?.ok) { alert('Failed to resend — try again'); return }
   const row = document.getElementById(`inv-${id}`)
-  if (row) {
-    const meta = row.querySelector('.pending-invite-meta')
-    if (meta) meta.textContent = 'Sent just now · expires in 7 days'
+  const btn = row?.querySelector('.btn-ghost')
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending…' }
+  const res = await apiFetch(`/organization/invitations/${id}/resend`, { method: 'POST', body: '{}' })
+  if (!res?.ok) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Resend' }
+    alert('Failed to resend — try again')
+    return
   }
+  if (btn) { btn.disabled = false; btn.textContent = 'Resend' }
+  const meta = row?.querySelector('.pending-invite-meta')
+  if (meta) meta.textContent = 'Sent just now · expires in 7 days'
 }
 
 export async function cancelInvite(id) {
+  const row = document.getElementById(`inv-${id}`)
+  const btn = row?.querySelector('.btn-danger')
+  if (btn) btn.disabled = true
   const res = await apiFetch(`/organization/invitations/${id}`, { method: 'DELETE' })
-  if (!res?.ok) { alert('Failed to cancel — try again'); return }
+  if (!res?.ok) {
+    if (btn) btn.disabled = false
+    alert('Failed to cancel — try again')
+    return
+  }
   _allInvitations = _allInvitations.filter(i => i.id !== id)
   document.getElementById('invitations-section').innerHTML = invitationsHtml(_allInvitations)
 }
