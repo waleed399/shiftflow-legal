@@ -365,6 +365,38 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .worker-card-shifts-none { background: #f1f5f9; color: #94a3b8; }
 .workers-empty-filter { font-size: 0.85rem; color: var(--muted); padding: 24px 0; }
 
+.invite-form {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  max-width: 860px; margin-bottom: 16px;
+  background: #f8fafc; border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 16px;
+}
+.invite-form.hidden { display: none; }
+.invite-form .form-input { flex: 1; min-width: 220px; margin: 0; }
+.invite-error { font-size: 0.78rem; color: #dc2626; }
+
+.workers-section-divider {
+  display: flex; align-items: center; gap: 12px;
+  max-width: 860px; margin: 24px 0 14px;
+  color: var(--muted); font-size: 0.72rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.workers-section-divider::before,
+.workers-section-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.pending-invites { display: flex; flex-direction: column; gap: 8px; max-width: 860px; }
+.pending-invite-row {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 16px;
+  animation: slideUp 0.28s ease both;
+}
+.pending-invite-row svg { color: var(--muted); flex-shrink: 0; }
+.pending-invite-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.pending-invite-email { font-size: 0.875rem; font-weight: 600; color: var(--text); }
+.pending-invite-meta { font-size: 0.75rem; color: var(--muted); }
+.pending-invite-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
 /* ── FAB ── */
 .fab {
   position: absolute; bottom: 28px; right: 32px;
