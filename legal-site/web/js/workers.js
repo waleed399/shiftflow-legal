@@ -394,7 +394,7 @@ export async function toggleDeptMembership(deptId) {
   if (toggleEl) { toggleEl.style.opacity = '0.45'; toggleEl.style.pointerEvents = 'none' }
 
   const res = await apiFetch(
-    `/workers/${_drawerWorkerId}/departments${isOn ? `/${deptId}` : ''}`,
+    `/users/${_drawerWorkerId}/departments${isOn ? `/${deptId}` : ''}`,
     {
       method:  isOn ? 'DELETE' : 'POST',
       headers: !isOn ? { 'Content-Type': 'application/json' } : undefined,
