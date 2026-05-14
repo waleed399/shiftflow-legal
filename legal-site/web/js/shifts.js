@@ -651,10 +651,12 @@ export async function renderWeekView() {
 
   const colSpan = weekDays.length + 1
 
-  function workerRow(w) {
+  function workerRow(w, deptId = null) {
     const initials = esc(getInitials(w.name))
     const cells = weekDays.map(({ date, ymd }) => {
-      const dayShifts = (shiftsByDay.get(ymd) || []).sort((a, b) => a.startTime.localeCompare(b.startTime))
+      const dayShifts = (shiftsByDay.get(ymd) || [])
+        .filter(s => deptId === null || s.department?.id === deptId)
+        .sort((a, b) => a.startTime.localeCompare(b.startTime))
       const isOff = workerAvail.get(w.id)?.get(DAY_FULL[date.getDay()]) === 'off'
 
       if (dayShifts.length === 0) {
@@ -727,7 +729,7 @@ export async function renderWeekView() {
     const emptyRow = grp.length === 0
       ? `<tr><td colspan="${colSpan}" class="wv-dept-empty">No workers assigned to this department yet</td></tr>`
       : ''
-    return band + emptyRow + grp.map(workerRow).join('')
+    return band + emptyRow + grp.map(w => workerRow(w, dept?.id ?? null)).join('')
   }).join('')
 
   el.innerHTML = `
