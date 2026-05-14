@@ -98,6 +98,7 @@ export function setShiftsView(view) {
   document.getElementById('view-list-btn')?.classList.toggle('active',  view === 'list')
   document.getElementById('view-table-btn')?.classList.toggle('active', view === 'table')
   document.getElementById('view-week-btn')?.classList.toggle('active',  view === 'week')
+  document.getElementById('day-tabs').style.display = view === 'week' ? 'none' : ''
 
   const contentArea = document.getElementById('shifts-content').parentElement
   if (view === 'list') {
