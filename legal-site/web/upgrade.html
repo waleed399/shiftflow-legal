@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://shift-right-production.up.railway.app; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <title>ShiftRight — Upgrade Plan</title>
+  <link rel="stylesheet" href="css/base.css">
+  <style>
+    body { display: block; height: auto; min-height: 100vh; overflow: auto; background: var(--bg); }
+
+    /* ── Shared states ── */
+    .state { display: none; }
+    .state.visible { display: block; }
+
+    /* ── Loading ── */
+    #state-loading {
+      min-height: 100vh;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 18px;
+      background: linear-gradient(160deg, #1e3358 0%, #0d1b35 100%);
+    }
+    #state-loading.visible { display: flex; }
+    #state-loading .logo { font-size: 2rem; font-weight: 800; color: white; letter-spacing: -0.5px; }
+    #state-loading .logo span { color: var(--red); }
+    #state-loading p { color: rgba(255,255,255,0.45); font-size: 0.82rem; }
+
+    /* ── Error ── */
+    #state-error {
+      min-height: 100vh;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 14px;
+      padding: 32px 24px;
+      text-align: center;
+    }
+    #state-error.visible { display: flex; }
+    #state-error .err-icon { font-size: 2.5rem; }
+    #state-error h2 { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+    #state-error p { font-size: 0.85rem; color: var(--muted); line-height: 1.55; max-width: 320px; }
+
+    /* ── Ready ── */
+    #state-ready { padding: 0 0 48px; }
+    #state-ready.visible { display: block; }
+
+    /* Header */
+    .upgrade-header {
+      background: linear-gradient(160deg, #1e3358 0%, #0d1b35 100%);
+      padding: 36px 24px 28px;
+      text-align: center;
+    }
+    .upgrade-header .logo { font-size: 1.6rem; font-weight: 800; color: white; letter-spacing: -0.5px; margin-bottom: 16px; }
+    .upgrade-header .logo span { color: var(--red); }
+    .user-pill {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 50px; padding: 8px 16px 8px 8px;
+    }
+    .user-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--red); color: white;
+      font-size: 0.75rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .user-info { text-align: left; }
+    .user-name { font-size: 0.82rem; font-weight: 600; color: white; }
+    .user-org  { font-size: 0.72rem; color: rgba(255,255,255,0.5); margin-top: 1px; }
+
+    /* Section label */
+    .section-label {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted);
+      padding: 28px 24px 10px;
+    }
+
+    /* Plan cards */
+    .plan-card {
+      margin: 0 16px 16px;
+      background: white;
+      border-radius: 16px;
+      border: 1.5px solid var(--border);
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .plan-card.popular { border-color: var(--red); }
+
+    .plan-hero {
+      padding: 20px 20px 16px;
+      display: flex; align-items: flex-start; justify-content: space-between;
+    }
+    .plan-badge {
+      font-size: 0.65rem; font-weight: 800; letter-spacing: 0.06em;
+      text-transform: uppercase; color: white;
+      background: var(--red); border-radius: 50px;
+      padding: 3px 9px;
+    }
+    .plan-name { font-size: 1.25rem; font-weight: 800; color: var(--text); margin-bottom: 2px; }
+    .plan-price { font-size: 0.82rem; color: var(--muted); }
+    .plan-price strong { font-size: 1.5rem; font-weight: 800; color: var(--text); }
+
+    .plan-features { padding: 0 20px 4px; }
+    .plan-feature {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 6px 0; border-top: 1px solid #f1f5f9;
+      font-size: 0.82rem; color: #475569; line-height: 1.4;
+    }
+    .plan-feature:first-child { border-top: none; }
+    .feat-check {
+      width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0; margin-top: 1px;
+      background: #dcfce7; display: flex; align-items: center; justify-content: center;
+    }
+    .feat-check svg { width: 10px; height: 10px; stroke: #16a34a; stroke-width: 3; fill: none; }
+
+    .plan-cta { padding: 16px 20px 20px; }
+    .btn-upgrade {
+      width: 100%; padding: 14px;
+      border: none; border-radius: 12px;
+      font-size: 0.9rem; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: opacity 0.15s;
+    }
+    .btn-upgrade:active { opacity: 0.8; }
+    .btn-upgrade.pro { background: var(--red); color: white; }
+    .btn-upgrade.biz { background: #d97706; color: white; }
+    .btn-upgrade:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* Annual toggle */
+    .period-toggle {
+      display: flex; margin: 0 16px 4px;
+      background: #e2e8f0; border-radius: 12px; padding: 3px; gap: 3px;
+    }
+    .period-btn {
+      flex: 1; padding: 8px; border: none; border-radius: 9px;
+      font-size: 0.8rem; font-weight: 600; cursor: pointer;
+      background: transparent; color: var(--muted); transition: all 0.15s;
+    }
+    .period-btn.active { background: white; color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .save-badge { font-size: 0.65rem; font-weight: 800; color: #16a34a; background: #dcfce7; border-radius: 4px; padding: 1px 5px; margin-left: 4px; }
+
+    /* Footer */
+    .upgrade-footer { padding: 24px 24px 0; text-align: center; }
+    .upgrade-footer p { font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
+
+    /* Loading button spinner */
+    .btn-spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  </style>
+</head>
+<body>
+
+  <!-- Loading state -->
+  <div id="state-loading" class="visible">
+    <div class="logo">Shift<span>Right</span></div>
+    <div class="spinner"></div>
+    <p>Logging you in…</p>
+  </div>
+
+  <!-- Error state -->
+  <div id="state-error">
+    <div class="err-icon">🔗</div>
+    <h2>Link expired</h2>
+    <p id="error-msg">This link has expired or already been used. Please open the ShiftRight app and tap "Open Pricing Page" again.</p>
+  </div>
+
+  <!-- Ready state -->
+  <div id="state-ready">
+
+    <div class="upgrade-header">
+      <div class="logo">Shift<span>Right</span></div>
+      <div class="user-pill">
+        <div class="user-avatar" id="user-avatar"></div>
+        <div class="user-info">
+          <div class="user-name" id="user-name"></div>
+          <div class="user-org"  id="user-org"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Choose a billing period</div>
+    <div class="period-toggle">
+      <button class="period-btn active" id="btn-monthly" onclick="setPeriod('monthly')">Monthly</button>
+      <button class="period-btn" id="btn-annual" onclick="setPeriod('annual')">
+        Annual <span class="save-badge">Save 20%</span>
+      </button>
+    </div>
+
+    <div class="section-label">Select your plan</div>
+
+    <!-- Pro card -->
+    <div class="plan-card popular">
+      <div class="plan-hero">
+        <div>
+          <div class="plan-name">Pro</div>
+          <div class="plan-price" id="pro-price"><strong>$49.99</strong> / month</div>
+        </div>
+        <div class="plan-badge">Popular</div>
+      </div>
+      <div class="plan-features">
+        <div class="plan-feature"><div class="feat-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Up to 50 workers</div>
+        <div class="plan-feature"><div class="feat-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Unlimited departments</div>
+        <div class="plan-feature"><div class="feat-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Coverage builder</div>
+        <div class="plan-feature"><div class="feat-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Auto-scheduling</div>
+        <div class="plan-feature"><div class="feat-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Web app access</div>
+      </div>
+      <div class="plan-cta">
+        <button class="btn-upgrade pro" id="btn-pro" onclick="upgrade('PRO')">
+          Upgrade to Pro
+        </button>
+      </div>
+    </div>
+
+    <!-- Business card -->
+    <div class="plan-card">
+      <div class="plan-hero">
+        <div>
+          <div class="plan-name">Business</div>
+          <div class="plan-price" id="biz-price"><strong>$99.99</strong> / month</div>
+        </div>
+      </div>
+      <div class="plan-features">
+        <div class="plan-feature"><div class="feat-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Everything in Pro</div>
+        <div class="plan-feature"><div class="feat-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Unlimited workers</div>
+        <div class="plan-feature"><div class="feat-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Priority support</div>
+      </div>
+      <div class="plan-cta">
+        <button class="btn-upgrade biz" id="btn-biz" onclick="upgrade('BUSINESS')">
+          Upgrade to Business
+        </button>
+      </div>
+    </div>
+
+    <div class="upgrade-footer">
+      <p>🔒 Secure checkout &nbsp;·&nbsp; Cancel anytime<br>
+      After purchase, return to the ShiftRight app — your plan updates automatically.</p>
+    </div>
+
+  </div>
+
+  <script src="js/upgrade.js"></script>
+</body>
+</html>
