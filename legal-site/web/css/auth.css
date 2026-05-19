@@ -1,0 +1,211 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   auth.css — Shared styles for all unauthenticated/onboarding pages:
+   signup.html, login.html, forgot-password.html, onboarding.html.
+
+   Page-specific styles (onboarding wizard chrome, etc.) stay in their own
+   <style> blocks. This file owns layout chrome (page bg, nav, card) and
+   common form components (fields, buttons, alerts, stepper, strength meter).
+
+   Relies on CSS variables defined in base.css.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* ── Page chrome ──────────────────────────────────────────────────────────── */
+
+body.auth-page {
+  display: block; height: auto; min-height: 100vh; overflow: auto;
+  background: linear-gradient(160deg, #1e3358 0%, #0d1b35 100%);
+}
+
+.orb { position: fixed; border-radius: 50%; filter: blur(40px); pointer-events: none; z-index: 0; }
+.orb-1 {
+  width: 520px; height: 520px; top: -160px; right: -160px;
+  background: radial-gradient(circle, rgba(191,31,58,0.18) 0%, transparent 70%);
+}
+.orb-2 {
+  width: 460px; height: 460px; bottom: -180px; left: -160px;
+  background: radial-gradient(circle, rgba(34,54,96,0.55) 0%, transparent 70%);
+}
+
+.auth-nav {
+  position: relative; z-index: 10;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 22px 32px; max-width: 980px; margin: 0 auto;
+}
+.auth-nav .logo {
+  font-size: 1.4rem; font-weight: 800; color: white; letter-spacing: -0.5px;
+  text-decoration: none;
+}
+.auth-nav .logo span { color: var(--red); }
+.nav-back, .nav-org {
+  color: rgba(255,255,255,0.7); font-size: 0.85rem; text-decoration: none;
+  font-weight: 500; transition: color 0.15s;
+}
+.nav-back:hover { color: white; }
+.nav-org strong { color: white; font-weight: 700; }
+
+.auth-card {
+  position: relative; z-index: 5;
+  max-width: 460px; margin: 14px auto 60px;
+  background: white; border-radius: 20px; padding: 38px 32px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.32);
+}
+.auth-card.wide { max-width: 640px; padding: 36px 32px; }
+.auth-card h1 {
+  font-size: 1.55rem; font-weight: 800; letter-spacing: -0.4px;
+  text-align: center; margin-bottom: 6px; color: var(--text);
+}
+.auth-card.wide h1 { text-align: left; font-size: 1.7rem; }
+.auth-card .subtitle {
+  text-align: center; color: var(--muted); font-size: 0.88rem;
+  margin-bottom: 26px; line-height: 1.5;
+}
+.auth-card.wide .subtitle { text-align: left; font-size: 0.92rem; }
+
+/* ── Pip stepper (signup, forgot-password) ────────────────────────────────── */
+
+.pip-stepper { display: flex; justify-content: center; gap: 8px; margin-bottom: 26px; }
+.pip-stepper .pip {
+  width: 36px; height: 4px; border-radius: 2px; background: #e2e8f0;
+  transition: background 0.25s;
+}
+.pip-stepper .pip.active { background: var(--red); }
+.pip-stepper .pip.done   { background: #16a34a; }
+
+/* ── Form fields ──────────────────────────────────────────────────────────── */
+
+.field { margin-bottom: 16px; }
+.field label {
+  display: block; font-size: 0.78rem; font-weight: 600;
+  color: var(--text); margin-bottom: 6px;
+}
+.field input {
+  width: 100%; padding: 12px 14px; font-size: 0.95rem; color: var(--text);
+  background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius-btn);
+  font-family: inherit; transition: border-color 0.15s, background 0.15s;
+}
+.field input:focus {
+  outline: none; border-color: var(--red); background: white;
+  box-shadow: 0 0 0 3px rgba(191,31,58,0.12);
+}
+.field input.error { border-color: #ef4444; background: #fef2f2; }
+.field-hint  { font-size: 0.75rem; color: var(--muted);   margin-top: 5px; line-height: 1.4; }
+.field-error { font-size: 0.75rem; color: #ef4444;        margin-top: 5px; font-weight: 500; }
+
+.password-wrap { position: relative; }
+.password-wrap input { padding-right: 44px; }
+.password-toggle {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; padding: 4px;
+  color: var(--muted); font-size: 0.78rem; font-weight: 600;
+}
+.password-toggle:hover { color: var(--text); }
+
+/* ── Password strength meter (signup, forgot-password) ───────────────────── */
+
+.strength {
+  margin-top: 10px; padding: 12px; background: #f8fafc;
+  border: 1px solid var(--border); border-radius: 10px;
+}
+.strength-bar { display: flex; gap: 4px; margin-bottom: 10px; }
+.strength-bar .seg {
+  flex: 1; height: 3px; border-radius: 2px; background: #e2e8f0;
+  transition: background 0.2s;
+}
+.strength-rule {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 0.72rem; color: var(--muted); margin-bottom: 4px;
+}
+.strength-rule:last-child { margin-bottom: 0; }
+.strength-rule .dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  border: 1.5px solid #cbd5e1; flex-shrink: 0;
+}
+.strength-rule.met { color: #16a34a; font-weight: 600; }
+.strength-rule.met .dot {
+  background: #16a34a; border-color: #16a34a; position: relative;
+}
+.strength-rule.met .dot::after {
+  content: '✓'; position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%); color: white; font-size: 8px; font-weight: 700;
+}
+
+/* ── OTP entry (signup, forgot-password) ──────────────────────────────────── */
+
+.otp-icon {
+  width: 64px; height: 64px; background: #fff1f2; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 14px; font-size: 1.8rem;
+}
+.otp-input {
+  font-size: 1.6rem !important; font-weight: 700 !important;
+  text-align: center; letter-spacing: 10px;
+}
+.otp-target {
+  text-align: center; color: var(--muted); font-size: 0.88rem;
+  margin-bottom: 20px; line-height: 1.5;
+}
+.otp-target strong { color: var(--text); font-weight: 700; }
+
+/* ── Buttons ──────────────────────────────────────────────────────────────── */
+
+.btn-primary {
+  width: 100%; padding: 13px; font-size: 0.95rem; font-weight: 700;
+  color: white; background: var(--red); border: none; border-radius: var(--radius-btn);
+  cursor: pointer; font-family: inherit;
+  transition: transform 0.1s, box-shadow 0.2s, opacity 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-primary:hover:not(:disabled)  { box-shadow: 0 8px 22px rgba(191,31,58,0.32); }
+.btn-primary:active:not(:disabled) { transform: translateY(1px); }
+.btn-primary:disabled              { opacity: 0.45; cursor: not-allowed; }
+
+.btn-spinner {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.3); border-top-color: white;
+  border-radius: 50%; animation: spin 0.6s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.btn-ghost {
+  width: 100%; padding: 11px; font-size: 0.85rem; font-weight: 600;
+  color: var(--muted); background: none; border: none; border-radius: var(--radius-btn);
+  cursor: pointer; font-family: inherit; margin-top: 10px;
+}
+.btn-ghost:hover     { color: var(--text); }
+.btn-ghost:disabled  { color: #cbd5e1; cursor: not-allowed; }
+
+/* ── Alert / inline errors ────────────────────────────────────────────────── */
+
+.alert {
+  padding: 12px 14px; background: #fef2f2; border: 1px solid #fecaca;
+  border-radius: 10px; color: #dc2626; font-size: 0.85rem;
+  margin-bottom: 16px; line-height: 1.45;
+}
+
+/* ── Bottom links ─────────────────────────────────────────────────────────── */
+
+.bottom-link {
+  text-align: center; margin-top: 22px; padding-top: 22px;
+  border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--muted);
+}
+.bottom-link a { color: var(--red); font-weight: 700; text-decoration: none; }
+.bottom-link a:hover { text-decoration: underline; }
+
+/* ── Step containers (slide-in animation) ─────────────────────────────────── */
+
+.step          { display: none; }
+.step.visible  { display: block; animation: slideUp 0.3s ease both; }
+
+/* slideUp is also defined in base.css; redeclared here so this stylesheet
+   stands alone if base.css ever ships first or is dropped on a page. */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 520px) {
+  .auth-card { margin: 10px 14px 40px; padding: 28px 22px; border-radius: 16px; }
+  .auth-nav  { padding: 18px 20px; }
+}

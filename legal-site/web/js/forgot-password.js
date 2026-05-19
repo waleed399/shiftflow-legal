@@ -1,37 +1,34 @@
 import {
   $, postJson, showAlert, setBtnLoading,
   EMAIL_RE, ERROR_MAP,
-  getToken, saveSession,
   createResendCooldown,
 } from './auth-common.js'
 import { renderStrengthMeter, wirePasswordToggle } from './password-strength.js'
 
 let _email = ''
 let _verifiedToken = ''
-let _resend = null   // cooldown handle, assigned in init()
+let _resend = null
 
 function showStep(name) {
-  ;['step-email', 'step-otp', 'step-details', 'step-success'].forEach((s) => {
+  ;['step-email', 'step-otp', 'step-password', 'step-success'].forEach((s) => {
     $(s).classList.toggle('visible', s === `step-${name}`)
   })
-  const map = { email: 1, otp: 2, details: 3, success: 3 }
+  const map = { email: 1, otp: 2, password: 3, success: 3 }
   for (let i = 1; i <= 3; i++) {
     const pip = $(`pip-${i}`)
     pip.classList.remove('active', 'done')
-    if (i < map[name])  pip.classList.add('done')
+    if (i < map[name])   pip.classList.add('done')
     if (i === map[name]) pip.classList.add('active')
   }
 }
 
 // ── Step 1: Send OTP ─────────────────────────────────────────────────────────
 async function handleSendOtp() {
-  const email   = $('email').value.trim().toLowerCase()
-  const confirm = $('email-confirm').value.trim().toLowerCase()
+  const email = $('email').value.trim().toLowerCase()
   const alertEl = $('alert-1')
   showAlert(alertEl, '')
 
-  if (!EMAIL_RE.test(email)) { showAlert(alertEl, ERROR_MAP.invalid_email);   return }
-  if (email !== confirm)     { showAlert(alertEl, ERROR_MAP.email_mismatch);  return }
+  if (!EMAIL_RE.test(email)) { showAlert(alertEl, ERROR_MAP.invalid_email); return }
 
   const btn = $('btn-send-otp')
   setBtnLoading(btn, true)
@@ -78,8 +75,8 @@ async function handleVerifyOtp() {
   try {
     const data = await postJson('/auth/verify-otp', { email: _email, code })
     _verifiedToken = data.verifiedToken
-    showStep('details')
-    $('org-name').focus()
+    showStep('password')
+    $('password').focus()
   } catch (e) {
     showAlert(alertEl, e.friendly || ERROR_MAP.generic)
   } finally {
@@ -89,14 +86,11 @@ async function handleVerifyOtp() {
 
 // ── Step 3: Form state ───────────────────────────────────────────────────────
 function evaluateForm() {
-  const orgName = $('org-name').value.trim()
-  const fullName = $('full-name').value.trim()
-  const pw  = $('password').value
-  const cf  = $('password-confirm').value
+  const pw = $('password').value
+  const cf = $('password-confirm').value
   const { allOk: strong } = renderStrengthMeter(pw)
   const match = pw.length > 0 && pw === cf
-  $('btn-create').disabled = !(orgName.length >= 2 && fullName.length >= 2 && strong && match)
-  return orgName.length >= 2 && fullName.length >= 2 && strong && match
+  $('btn-reset').disabled = !(strong && match)
 }
 
 function updateConfirmState() {
@@ -104,39 +98,30 @@ function updateConfirmState() {
   const cf = $('password-confirm').value
   const mismatch = cf.length > 0 && pw !== cf
   $('pwd-mismatch').style.display = mismatch ? 'block' : 'none'
-  $('password-confirm').classList.toggle('error', mismatch)
 }
 
-async function handleCreateOrg() {
-  if (!evaluateForm()) return
+async function handleReset() {
   const alertEl = $('alert-3')
   showAlert(alertEl, '')
-  const btn = $('btn-create')
+  const btn = $('btn-reset')
   setBtnLoading(btn, true)
-
   try {
-    const data = await postJson('/auth/register-manager', {
-      name: $('full-name').value.trim(),
+    await postJson('/auth/reset-password', {
       email: _email,
-      password: $('password').value,
-      organizationName: $('org-name').value.trim(),
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
       verifiedToken: _verifiedToken,
+      newPassword: $('password').value,
     })
-    saveSession(data)
     showStep('success')
-    setTimeout(() => { window.location.href = '/web/onboarding.html' }, 1200)
   } catch (e) {
     showAlert(alertEl, e.friendly || ERROR_MAP.generic)
-    setBtnLoading(btn, false, '<span>Create organization</span>')
+    setBtnLoading(btn, false, '<span>Reset password</span>')
   }
 }
 
 // ── Wiring ───────────────────────────────────────────────────────────────────
 function wireEvents() {
   $('btn-send-otp').addEventListener('click', handleSendOtp)
-  $('email').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('email-confirm').focus() })
-  $('email-confirm').addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSendOtp() })
+  $('email').addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSendOtp() })
 
   $('btn-verify-otp').addEventListener('click', handleVerifyOtp)
   $('otp-code').addEventListener('keydown', (e) => { if (e.key === 'Enter') handleVerifyOtp() })
@@ -152,20 +137,20 @@ function wireEvents() {
     $('email').focus()
   })
 
-  ;['org-name', 'full-name', 'password', 'password-confirm'].forEach((id) => {
-    $(id).addEventListener('input', evaluateForm)
+  $('password').addEventListener('input', () => { evaluateForm(); updateConfirmState() })
+  $('password-confirm').addEventListener('input', () => { evaluateForm(); updateConfirmState() })
+  $('btn-reset').addEventListener('click', handleReset)
+  $('password-confirm').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !$('btn-reset').disabled) handleReset()
   })
-  $('password').addEventListener('input', updateConfirmState)
-  $('password-confirm').addEventListener('input', updateConfirmState)
-  $('btn-create').addEventListener('click', handleCreateOrg)
-  $('password-confirm').addEventListener('keydown', (e) => { if (e.key === 'Enter') handleCreateOrg() })
 
   wirePasswordToggle('password', 'toggle-password')
   wirePasswordToggle('password-confirm', 'toggle-password-confirm')
+
+  $('btn-go-login').addEventListener('click', () => { window.location.href = '/web/login.html' })
 }
 
 function init() {
-  if (getToken()) { window.location.href = '/web/'; return }
   _resend = createResendCooldown($('btn-resend'))
   wireEvents()
   showStep('email')

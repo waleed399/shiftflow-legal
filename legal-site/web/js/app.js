@@ -30,6 +30,17 @@ async function init() {
     localStorage.setItem('shiftflow_user', JSON.stringify(state.currentUser))
     localStorage.setItem('shiftflow_org',  JSON.stringify(state.currentOrg))
 
+    // First-run managers haven't finished setup yet — send them to the wizard.
+    // Workers always skip this check (they joined an org that's already set up).
+    if (
+      state.currentOrg &&
+      state.currentOrg.onboardingComplete === false &&
+      state.currentUser?.role === 'MANAGER'
+    ) {
+      window.location.href = '/web/onboarding.html'
+      return
+    }
+
     renderSidebar()
 
     const today = new Date()

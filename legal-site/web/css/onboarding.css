@@ -1,0 +1,270 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   onboarding.css — Styles unique to the org setup wizard
+   (/web/onboarding.html). Common chrome (orbs, nav, card, fields, btn-primary,
+   alerts, step animation) lives in auth.css.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* ── Numbered stepper (3 circles connected by lines) ──────────────────────── */
+
+.num-stepper { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 32px; }
+.num-stepper .num {
+  width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.82rem; font-weight: 700;
+  background: #e2e8f0; color: #94a3b8; transition: all 0.2s;
+}
+.num-stepper .num.active { background: var(--red); color: white; }
+.num-stepper .num.done   { background: #16a34a; color: white; }
+.num-stepper .num.done::before { content: '✓'; }
+.num-stepper .num.done > span  { display: none; }
+.num-stepper .line { width: 36px; height: 2px; background: #e2e8f0; transition: background 0.25s; }
+.num-stepper .line.done { background: var(--red); }
+
+/* ── Section labels ───────────────────────────────────────────────────────── */
+
+.section-label {
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
+}
+
+/* ── Step 1: Work-week chips, day circles, two-col cards ─────────────────── */
+
+.chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+.chip {
+  padding: 9px 14px; font-size: 0.84rem; font-weight: 500;
+  color: var(--muted); background: #f8fafc;
+  border: 1px solid var(--border); border-radius: 10px;
+  cursor: pointer; transition: all 0.15s; user-select: none;
+}
+.chip:hover  { background: white; border-color: #cbd5e1; }
+.chip.active { color: var(--red); background: #fff1f2; border-color: var(--red); font-weight: 600; }
+
+.day-row { display: flex; justify-content: space-between; gap: 6px; margin-bottom: 28px; }
+.day-item {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  cursor: pointer; flex: 1; user-select: none;
+}
+.day-label { font-size: 0.72rem; color: #94a3b8; font-weight: 500; }
+.day-circle {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: #f1f5f9; transition: background 0.15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.day-item.active .day-circle { background: var(--red); }
+.day-item.active .day-circle::after {
+  content: '✓'; color: white; font-size: 0.9rem; font-weight: 700;
+}
+
+.two-col { display: flex; gap: 12px; margin-bottom: 32px; }
+.two-col .opt {
+  flex: 1; padding: 14px; text-align: center; cursor: pointer;
+  background: white; border: 1px solid var(--border); border-radius: 12px;
+  font-size: 0.92rem; font-weight: 500; color: var(--muted); transition: all 0.15s;
+  user-select: none;
+}
+.two-col .opt:hover  { border-color: #cbd5e1; }
+.two-col .opt.active { color: var(--red); background: #fff1f2; border-color: var(--red); font-weight: 600; }
+
+/* ── Step 2: Department chips + input row ─────────────────────────────────── */
+
+.input-row { display: flex; gap: 8px; margin-bottom: 20px; }
+.input-row input {
+  flex: 1; padding: 11px 14px; font-size: 0.92rem; color: var(--text);
+  background: #f8fafc; border: 1px solid var(--border); border-radius: 10px;
+  font-family: inherit;
+}
+.input-row input:focus {
+  outline: none; border-color: var(--red); background: white;
+  box-shadow: 0 0 0 3px rgba(191,31,58,0.12);
+}
+.icon-btn {
+  width: 42px; height: 42px; border-radius: 10px;
+  background: var(--red); color: white; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; font-weight: 700;
+}
+.icon-btn:hover { box-shadow: 0 6px 18px rgba(191,31,58,0.28); }
+
+.dept-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.dept-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px; background: #f1f5f9; border: 1px solid var(--border);
+  border-radius: 20px; font-size: 0.84rem; color: var(--text);
+}
+.dept-chip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); }
+.dept-chip button {
+  background: none; border: none; color: #94a3b8; cursor: pointer;
+  font-size: 1.1rem; line-height: 1; padding: 0 0 0 4px;
+}
+.dept-chip button:hover { color: #ef4444; }
+
+/* ── Step 2: Template cards ───────────────────────────────────────────────── */
+
+.tmpl {
+  background: #f8fafc; border: 1px solid var(--border);
+  border-radius: 14px; padding: 16px; margin-bottom: 12px;
+}
+.tmpl-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+}
+.color-row { display: flex; gap: 6px; }
+.color-dot {
+  width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.15s;
+}
+.color-dot:hover { transform: scale(1.1); }
+.color-dot.active::after {
+  content: '✓'; color: white; font-size: 0.7rem; font-weight: 700;
+}
+.remove-btn {
+  background: none; border: none; cursor: pointer; padding: 4px; color: #ef4444;
+  font-size: 1rem;
+}
+.tmpl input[type="text"],
+.tmpl input[type="time"] {
+  width: 100%; padding: 10px 12px; font-size: 0.9rem; color: var(--text);
+  background: white; border: 1px solid var(--border); border-radius: 10px;
+  font-family: inherit; margin-bottom: 10px;
+}
+.tmpl input:focus {
+  outline: none; border-color: var(--red);
+  box-shadow: 0 0 0 3px rgba(191,31,58,0.12);
+}
+.time-row { display: flex; gap: 8px; }
+.time-row > div { flex: 1; }
+.time-label { font-size: 0.72rem; font-weight: 600; color: var(--muted); margin-bottom: 5px; }
+
+.tmpl-locs { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+.loc-pill {
+  padding: 5px 10px; border-radius: 16px; font-size: 0.78rem;
+  background: #f1f5f9; color: var(--muted); border: 1px solid var(--border);
+  cursor: pointer; user-select: none;
+}
+.loc-pill.active { background: var(--red); color: white; border-color: var(--red); font-weight: 600; }
+
+.workers-section { margin-top: 4px; }
+.workers-section .lbl { font-size: 0.72rem; color: var(--muted); margin-bottom: 6px; }
+.worker-row {
+  display: flex; align-items: center; gap: 8px;
+  background: white; border: 1px solid var(--border); border-radius: 10px;
+  padding: 6px 12px; margin-bottom: 6px;
+}
+.worker-row .loc-name { flex: 1; font-size: 0.84rem; font-weight: 600; color: var(--text); }
+.worker-row .counter { display: flex; align-items: center; gap: 4px; }
+.worker-row button {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: #fff1f2; color: var(--red); border: none; cursor: pointer;
+  font-size: 1rem; font-weight: 700;
+}
+.worker-row button:hover { background: #ffe4e6; }
+.worker-row .count { min-width: 22px; text-align: center; font-weight: 700; font-size: 0.92rem; }
+
+.add-tmpl-btn {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; padding: 12px; background: none;
+  border: 1.5px dashed var(--red); border-radius: 14px;
+  color: var(--red); font-weight: 600; font-size: 0.9rem;
+  cursor: pointer; margin-bottom: 20px;
+}
+.add-tmpl-btn:hover { background: #fff1f2; }
+
+/* ── Actions footer ───────────────────────────────────────────────────────── */
+
+.actions { display: flex; gap: 10px; margin-top: 28px; }
+.btn-back, .btn-skip {
+  flex: 1; padding: 13px; font-size: 0.9rem; font-weight: 600;
+  color: var(--muted); background: white;
+  border: 1px solid var(--border); border-radius: 10px;
+  cursor: pointer; font-family: inherit;
+}
+.btn-back:hover, .btn-skip:hover { background: #f8fafc; }
+
+/* When two buttons exist in .actions, .btn-primary should grow more than .btn-back. */
+.actions .btn-primary { flex: 2; }
+
+.skip-row { text-align: center; margin-top: 14px; }
+.skip-row a { color: #94a3b8; font-size: 0.84rem; cursor: pointer; }
+.skip-row a:hover { color: var(--text); }
+
+/* ── Step 3: Success state, invite, next-steps cards ─────────────────────── */
+
+.success { text-align: center; padding: 20px 0; }
+.success > h1 { font-size: 1.7rem; text-align: center; }
+.success > .subtitle { text-align: center; }
+.check-ring {
+  width: 84px; height: 84px; margin: 0 auto 22px;
+  background: #f0fdf4; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.6rem; color: #16a34a;
+}
+
+.invite-box {
+  background: #fff1f2; border: 1px solid #fecdd3; border-radius: 14px;
+  padding: 18px; margin: 22px 0;
+}
+.invite-label {
+  font-size: 0.74rem; font-weight: 700; color: #9f1239;
+  text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;
+  text-align: center;
+}
+.invite-code {
+  background: white; border: 1px solid #fecdd3; border-radius: 10px;
+  padding: 14px; text-align: center; margin-bottom: 12px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 1.5rem; font-weight: 800; letter-spacing: 6px;
+  color: var(--text);
+}
+.invite-hint {
+  font-size: 0.78rem; color: #be123c; text-align: center;
+  line-height: 1.5; margin-bottom: 12px;
+}
+.copy-btn {
+  width: 100%; padding: 11px; border-radius: 10px;
+  background: white; border: 1px solid #fecdd3;
+  color: var(--red); font-weight: 600; font-size: 0.88rem;
+  cursor: pointer; transition: background 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.copy-btn:hover  { background: #ffe4e6; }
+.copy-btn.copied { background: #f0fdf4; color: #16a34a; border-color: #bbf7d0; }
+
+.go-dashboard {
+  width: 100%; padding: 14px; border-radius: 10px;
+  background: var(--navy); color: white; border: none;
+  font-size: 0.95rem; font-weight: 700; cursor: pointer;
+}
+.go-dashboard:hover { background: var(--navy-deep); }
+
+/* Next-steps cards (mobile app, cross-platform sync) */
+.next-card {
+  background: white; border: 1px solid var(--border); border-radius: 14px;
+  padding: 18px; margin-bottom: 14px; text-align: left;
+}
+.next-card-title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.9rem; font-weight: 800; color: var(--text); margin-bottom: 6px;
+}
+.next-card-title .icon { font-size: 1.1rem; }
+.next-card-body { font-size: 0.82rem; color: var(--muted); line-height: 1.55; }
+
+.store-row { display: flex; gap: 10px; margin-top: 12px; }
+.store-btn {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 10px 14px; background: #0f172a; color: white; border: none; border-radius: 10px;
+  cursor: pointer; text-decoration: none; transition: background 0.15s;
+  min-width: 0;
+}
+.store-btn:hover { background: #1e293b; }
+.store-btn .store-text { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.1; }
+.store-btn .store-sub  { font-size: 0.62rem; color: rgba(255,255,255,0.7); font-weight: 500; }
+.store-btn .store-name { font-size: 0.92rem; font-weight: 700; }
+.store-btn svg { flex-shrink: 0; }
+
+/* ── Responsive overrides (auth.css handles the base mobile rules) ────────── */
+
+@media (max-width: 640px) {
+  .auth-card.wide { margin: 10px 14px 40px; padding: 28px 22px; border-radius: 16px; }
+  .day-circle     { width: 34px; height: 34px; }
+  .num-stepper .line { width: 24px; }
+}
