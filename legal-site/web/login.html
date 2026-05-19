@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://shift-right-production.up.railway.app; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>ShiftRight — Sign in</title>
+  <link rel="stylesheet" href="css/base.css">
+  <style>
+    body { display: block; height: auto; min-height: 100vh; overflow: auto;
+           background: linear-gradient(160deg, #1e3358 0%, #0d1b35 100%); }
+
+    .orb { position: fixed; border-radius: 50%; filter: blur(40px); pointer-events: none; z-index: 0; }
+    .orb-1 { width: 520px; height: 520px; top: -160px; right: -160px;
+             background: radial-gradient(circle, rgba(191,31,58,0.18) 0%, transparent 70%); }
+    .orb-2 { width: 460px; height: 460px; bottom: -180px; left: -160px;
+             background: radial-gradient(circle, rgba(34,54,96,0.55) 0%, transparent 70%); }
+
+    nav { position: relative; z-index: 10; display: flex; justify-content: space-between;
+          align-items: center; padding: 22px 32px; max-width: 980px; margin: 0 auto; }
+    .logo { font-size: 1.4rem; font-weight: 800; color: white; letter-spacing: -0.5px; text-decoration: none; }
+    .logo span { color: var(--red); }
+    .nav-back { color: rgba(255,255,255,0.7); font-size: 0.85rem; text-decoration: none;
+                font-weight: 500; transition: color 0.15s; }
+    .nav-back:hover { color: white; }
+
+    .card {
+      position: relative; z-index: 5; max-width: 440px; margin: 32px auto 60px;
+      background: white; border-radius: 20px; padding: 38px 32px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.32);
+    }
+    .card h1 { font-size: 1.55rem; font-weight: 800; letter-spacing: -0.4px;
+               text-align: center; margin-bottom: 6px; color: var(--text); }
+    .subtitle { text-align: center; color: var(--muted); font-size: 0.88rem;
+                margin-bottom: 26px; line-height: 1.5; }
+
+    .field { margin-bottom: 16px; }
+    .field label {
+      display: block; font-size: 0.78rem; font-weight: 600;
+      color: var(--text); margin-bottom: 6px;
+    }
+    .field input {
+      width: 100%; padding: 12px 14px; font-size: 0.95rem; color: var(--text);
+      background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius-btn);
+      font-family: inherit; transition: border-color 0.15s, background 0.15s;
+    }
+    .field input:focus {
+      outline: none; border-color: var(--red); background: white;
+      box-shadow: 0 0 0 3px rgba(191,31,58,0.12);
+    }
+
+    .password-wrap { position: relative; }
+    .password-wrap input { padding-right: 44px; }
+    .password-toggle {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; padding: 4px;
+      color: var(--muted); font-size: 0.78rem; font-weight: 600;
+    }
+    .password-toggle:hover { color: var(--text); }
+
+    .btn-primary {
+      width: 100%; padding: 13px; font-size: 0.95rem; font-weight: 700;
+      color: white; background: var(--red); border: none; border-radius: var(--radius-btn);
+      cursor: pointer; transition: transform 0.1s, box-shadow 0.2s, opacity 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin-top: 6px;
+    }
+    .btn-primary:hover:not(:disabled) { box-shadow: 0 8px 22px rgba(191,31,58,0.32); }
+    .btn-primary:active:not(:disabled) { transform: translateY(1px); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3);
+                   border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; }
+
+    .alert {
+      padding: 12px 14px; background: #fef2f2; border: 1px solid #fecaca;
+      border-radius: 10px; color: #dc2626; font-size: 0.85rem; margin-bottom: 16px;
+      line-height: 1.45;
+    }
+
+    .bottom-link { text-align: center; margin-top: 22px; padding-top: 22px;
+                   border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--muted); }
+    .bottom-link a { color: var(--red); font-weight: 700; text-decoration: none; }
+    .bottom-link a:hover { text-decoration: underline; }
+
+    .qr-hint {
+      margin-top: 14px; padding: 14px; background: #f1f5f9; border-radius: 12px;
+      text-align: center; font-size: 0.82rem; color: var(--muted); line-height: 1.5;
+    }
+    .qr-hint a { color: var(--red); font-weight: 600; text-decoration: none; }
+    .qr-hint a:hover { text-decoration: underline; }
+
+    @media (max-width: 480px) {
+      .card { margin: 14px 14px 40px; padding: 28px 22px; border-radius: 16px; }
+      nav { padding: 18px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<nav>
+  <a href="/" class="logo">Shift<span>Right</span></a>
+  <a href="/" class="nav-back">← Back to site</a>
+</nav>
+
+<div class="card">
+  <h1>Welcome back</h1>
+  <p class="subtitle">Sign in to manage your team's schedule.</p>
+
+  <div class="alert" id="alert" style="display:none"></div>
+
+  <div class="field">
+    <label for="email">Email</label>
+    <input type="email" id="email" autocomplete="email" placeholder="you@company.com" autofocus>
+  </div>
+
+  <div class="field">
+    <label for="password">Password</label>
+    <div class="password-wrap">
+      <input type="password" id="password" autocomplete="current-password" placeholder="••••••••">
+      <button type="button" class="password-toggle" id="toggle-password">Show</button>
+    </div>
+  </div>
+
+  <button class="btn-primary" id="btn-login">
+    <span>Sign in</span>
+  </button>
+
+  <div class="qr-hint">
+    Have the iOS app already? <a href="/app/">Link with QR code</a>
+  </div>
+
+  <p class="bottom-link">
+    Don't have an account? <a href="/web/signup.html">Create your organization</a>
+  </p>
+</div>
+
+<script src="js/login.js"></script>
+</body>
+</html>

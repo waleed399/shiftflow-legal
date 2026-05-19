@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://shift-right-production.up.railway.app; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>ShiftRight — Create your organization</title>
+  <link rel="stylesheet" href="css/base.css">
+  <style>
+    body { display: block; height: auto; min-height: 100vh; overflow: auto;
+           background: linear-gradient(160deg, #1e3358 0%, #0d1b35 100%); }
+
+    /* Orbs */
+    .orb { position: fixed; border-radius: 50%; filter: blur(40px); pointer-events: none; z-index: 0; }
+    .orb-1 { width: 520px; height: 520px; top: -160px; right: -160px;
+             background: radial-gradient(circle, rgba(191,31,58,0.18) 0%, transparent 70%); }
+    .orb-2 { width: 460px; height: 460px; bottom: -180px; left: -160px;
+             background: radial-gradient(circle, rgba(34,54,96,0.55) 0%, transparent 70%); }
+
+    /* Nav */
+    nav { position: relative; z-index: 10; display: flex; justify-content: space-between;
+          align-items: center; padding: 22px 32px; max-width: 980px; margin: 0 auto; }
+    .logo { font-size: 1.4rem; font-weight: 800; color: white; letter-spacing: -0.5px; text-decoration: none; }
+    .logo span { color: var(--red); }
+    .nav-back { color: rgba(255,255,255,0.7); font-size: 0.85rem; text-decoration: none;
+                font-weight: 500; transition: color 0.15s; }
+    .nav-back:hover { color: white; }
+
+    /* Card */
+    .card {
+      position: relative; z-index: 5; max-width: 480px; margin: 14px auto 60px;
+      background: white; border-radius: 20px; padding: 38px 32px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.32);
+    }
+    .card h1 { font-size: 1.55rem; font-weight: 800; letter-spacing: -0.4px;
+               text-align: center; margin-bottom: 6px; color: var(--text); }
+    .subtitle { text-align: center; color: var(--muted); font-size: 0.88rem;
+                margin-bottom: 26px; line-height: 1.5; }
+
+    /* Stepper */
+    .stepper { display: flex; justify-content: center; gap: 8px; margin-bottom: 26px; }
+    .stepper .pip { width: 36px; height: 4px; border-radius: 2px; background: #e2e8f0; transition: background 0.25s; }
+    .stepper .pip.active { background: var(--red); }
+    .stepper .pip.done   { background: #16a34a; }
+
+    /* Form */
+    .field { margin-bottom: 16px; }
+    .field label {
+      display: block; font-size: 0.78rem; font-weight: 600;
+      color: var(--text); margin-bottom: 6px;
+    }
+    .field input {
+      width: 100%; padding: 12px 14px; font-size: 0.95rem; color: var(--text);
+      background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius-btn);
+      font-family: inherit; transition: border-color 0.15s, background 0.15s;
+    }
+    .field input:focus {
+      outline: none; border-color: var(--red); background: white;
+      box-shadow: 0 0 0 3px rgba(191,31,58,0.12);
+    }
+    .field input.error { border-color: #ef4444; background: #fef2f2; }
+    .field-hint { font-size: 0.75rem; color: var(--muted); margin-top: 5px; line-height: 1.4; }
+    .field-error { font-size: 0.75rem; color: #ef4444; margin-top: 5px; font-weight: 500; }
+
+    .password-wrap { position: relative; }
+    .password-wrap input { padding-right: 44px; }
+    .password-toggle {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; padding: 4px;
+      color: var(--muted); font-size: 0.78rem; font-weight: 600;
+    }
+    .password-toggle:hover { color: var(--text); }
+
+    /* Strength meter */
+    .strength { margin-top: 10px; padding: 12px; background: #f8fafc;
+                border: 1px solid var(--border); border-radius: 10px; }
+    .strength-bar { display: flex; gap: 4px; margin-bottom: 10px; }
+    .strength-bar .seg { flex: 1; height: 3px; border-radius: 2px; background: #e2e8f0;
+                         transition: background 0.2s; }
+    .strength-rule { display: flex; align-items: center; gap: 7px; font-size: 0.72rem;
+                     color: var(--muted); margin-bottom: 4px; }
+    .strength-rule:last-child { margin-bottom: 0; }
+    .strength-rule .dot { width: 12px; height: 12px; border-radius: 50%;
+                          border: 1.5px solid #cbd5e1; flex-shrink: 0; }
+    .strength-rule.met { color: #16a34a; font-weight: 600; }
+    .strength-rule.met .dot { background: #16a34a; border-color: #16a34a; position: relative; }
+    .strength-rule.met .dot::after {
+      content: '✓'; position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%); color: white; font-size: 8px; font-weight: 700;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      width: 100%; padding: 13px; font-size: 0.95rem; font-weight: 700;
+      color: white; background: var(--red); border: none; border-radius: var(--radius-btn);
+      cursor: pointer; transition: transform 0.1s, box-shadow 0.2s, opacity 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-primary:hover:not(:disabled) { box-shadow: 0 8px 22px rgba(191,31,58,0.32); }
+    .btn-primary:active:not(:disabled) { transform: translateY(1px); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3);
+                   border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; }
+
+    .btn-ghost {
+      width: 100%; padding: 11px; font-size: 0.85rem; font-weight: 600;
+      color: var(--muted); background: none; border: none; border-radius: var(--radius-btn);
+      cursor: pointer; margin-top: 10px;
+    }
+    .btn-ghost:hover { color: var(--text); }
+    .btn-ghost:disabled { color: #cbd5e1; cursor: not-allowed; }
+
+    /* OTP code box */
+    .otp-icon {
+      width: 64px; height: 64px; background: #fff1f2; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 14px; font-size: 1.8rem;
+    }
+    .otp-input {
+      font-size: 1.6rem !important; font-weight: 700 !important;
+      text-align: center; letter-spacing: 10px;
+    }
+    .otp-target { text-align: center; color: var(--muted); font-size: 0.88rem;
+                  margin-bottom: 20px; line-height: 1.5; }
+    .otp-target strong { color: var(--text); font-weight: 700; }
+
+    /* State error */
+    .alert {
+      padding: 12px 14px; background: #fef2f2; border: 1px solid #fecaca;
+      border-radius: 10px; color: #dc2626; font-size: 0.85rem; margin-bottom: 16px;
+      line-height: 1.45;
+    }
+
+    /* Bottom link */
+    .bottom-link { text-align: center; margin-top: 22px; padding-top: 22px;
+                   border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--muted); }
+    .bottom-link a { color: var(--red); font-weight: 700; text-decoration: none; }
+    .bottom-link a:hover { text-decoration: underline; }
+
+    /* Success */
+    .success-state { text-align: center; padding: 16px 0; }
+    .check-ring { width: 72px; height: 72px; margin: 0 auto 16px;
+                  background: #f0fdf4; border-radius: 50%;
+                  display: flex; align-items: center; justify-content: center;
+                  font-size: 2.2rem; color: #16a34a; }
+    .success-state h2 { font-size: 1.3rem; font-weight: 800; margin-bottom: 8px; color: var(--text); }
+    .success-state p { color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+
+    /* Step containers */
+    .step { display: none; }
+    .step.visible { display: block; animation: slideUp 0.3s ease both; }
+
+    @media (max-width: 520px) {
+      .card { margin: 10px 14px 40px; padding: 28px 22px; border-radius: 16px; }
+      nav { padding: 18px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<nav>
+  <a href="/" class="logo">Shift<span>Right</span></a>
+  <a href="/" class="nav-back">← Back to site</a>
+</nav>
+
+<div class="card">
+
+  <!-- STEPPER -->
+  <div class="stepper">
+    <div class="pip active" id="pip-1"></div>
+    <div class="pip" id="pip-2"></div>
+    <div class="pip" id="pip-3"></div>
+  </div>
+
+  <!-- STEP 1: EMAIL -->
+  <div class="step visible" id="step-email">
+    <h1>Create your organization</h1>
+    <p class="subtitle">Start with your email — we'll send a 6-digit code to verify.</p>
+
+    <div class="alert" id="alert-1" style="display:none"></div>
+
+    <div class="field">
+      <label for="email">Work email</label>
+      <input type="email" id="email" autocomplete="email" placeholder="you@company.com" autofocus>
+    </div>
+
+    <div class="field">
+      <label for="email-confirm">Confirm email</label>
+      <input type="email" id="email-confirm" autocomplete="off" placeholder="you@company.com">
+      <p class="field-hint">We'll send a 6-digit code to verify it's really you.</p>
+    </div>
+
+    <button class="btn-primary" id="btn-send-otp">
+      <span>Send verification code</span>
+    </button>
+
+    <p class="bottom-link">
+      Already have an account? <a href="/web/login.html">Sign in</a>
+    </p>
+  </div>
+
+  <!-- STEP 2: OTP -->
+  <div class="step" id="step-otp">
+    <div class="otp-icon">📧</div>
+    <h1>Check your email</h1>
+    <p class="otp-target">We sent a 6-digit code to<br><strong id="otp-target-email">you@example.com</strong></p>
+
+    <div class="alert" id="alert-2" style="display:none"></div>
+
+    <div class="field">
+      <input type="text" id="otp-code" class="otp-input" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="000000" autocomplete="one-time-code">
+    </div>
+
+    <button class="btn-primary" id="btn-verify-otp">
+      <span>Verify code</span>
+    </button>
+
+    <button class="btn-ghost" id="btn-resend">Resend code</button>
+    <button class="btn-ghost" id="btn-change-email">Change email</button>
+  </div>
+
+  <!-- STEP 3: DETAILS -->
+  <div class="step" id="step-details">
+    <h1>Tell us about your organization</h1>
+    <p class="subtitle">A few details and you're in. You can change everything later.</p>
+
+    <div class="alert" id="alert-3" style="display:none"></div>
+
+    <div class="field">
+      <label for="org-name">Organization name</label>
+      <input type="text" id="org-name" autocomplete="organization" placeholder="Acme Logistics">
+    </div>
+
+    <div class="field">
+      <label for="full-name">Your full name</label>
+      <input type="text" id="full-name" autocomplete="name" placeholder="John Smith">
+    </div>
+
+    <div class="field">
+      <label for="password">Create a password</label>
+      <div class="password-wrap">
+        <input type="password" id="password" autocomplete="new-password" placeholder="••••••••">
+        <button type="button" class="password-toggle" id="toggle-password">Show</button>
+      </div>
+      <div class="strength" id="strength" style="display:none">
+        <div class="strength-bar">
+          <div class="seg" id="seg-1"></div>
+          <div class="seg" id="seg-2"></div>
+          <div class="seg" id="seg-3"></div>
+          <div class="seg" id="seg-4"></div>
+          <div class="seg" id="seg-5"></div>
+        </div>
+        <div class="strength-rule" id="rule-len"><div class="dot"></div>Minimum 8 characters</div>
+        <div class="strength-rule" id="rule-up"><div class="dot"></div>Uppercase letter (A–Z)</div>
+        <div class="strength-rule" id="rule-low"><div class="dot"></div>Lowercase letter (a–z)</div>
+        <div class="strength-rule" id="rule-num"><div class="dot"></div>Number (0–9)</div>
+        <div class="strength-rule" id="rule-spc"><div class="dot"></div>Special character (!@#$%…)</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="password-confirm">Confirm password</label>
+      <div class="password-wrap">
+        <input type="password" id="password-confirm" autocomplete="new-password" placeholder="••••••••">
+        <button type="button" class="password-toggle" id="toggle-password-confirm">Show</button>
+      </div>
+      <p class="field-error" id="pwd-mismatch" style="display:none">Passwords do not match</p>
+    </div>
+
+    <button class="btn-primary" id="btn-create" disabled>
+      <span>Create organization</span>
+    </button>
+
+    <p class="bottom-link" style="font-size:0.78rem;">
+      By creating an account, you agree to our
+      <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.
+    </p>
+  </div>
+
+  <!-- STEP 4: SUCCESS -->
+  <div class="step" id="step-success">
+    <div class="success-state">
+      <div class="check-ring">✓</div>
+      <h2>Welcome to ShiftRight!</h2>
+      <p>Setting up your workspace…</p>
+    </div>
+  </div>
+
+</div>
+
+<script src="js/signup.js"></script>
+</body>
+</html>
