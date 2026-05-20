@@ -1,6 +1,7 @@
 import { state, ensureOrgWorkers } from './state.js'
 import { apiFetch } from './api.js'
 import { DAYS, MONTHS, DEPT_COLORS, DAY_FULL, AVAIL_ICONS, addDays, isSameDay, toYMD, fmtDate, getWeekStartOf, esc, getInitials, applyAvatars, showToast } from './utils.js'
+import { t } from './i18n.js'
 
 let shiftsView = 'list'
 
@@ -51,13 +52,12 @@ const STATUS_COLORS = {
   COMPLETED: '#22c55e', CANCELLED: '#ef4444',
 }
 
-const AVAIL_PREF = {
-  morning:   { color: '#f59e0b', label: 'Morning'   },
-  afternoon: { color: '#f97316', label: 'Afternoon' },
-  night:     { color: '#60a5fa', label: 'Night'     },
-  any:       { color: '#22c55e', label: 'Any time'  },
-  custom:    { color: '#3b82f6', label: 'Custom'    },
-  off:       { color: '#ef4444', label: 'Day off'   },
+const AVAIL_PREF_COLORS = {
+  morning: '#f59e0b', afternoon: '#f97316', night: '#60a5fa',
+  any: '#22c55e', custom: '#3b82f6', off: '#ef4444',
+}
+function availPref(key) {
+  return { color: AVAIL_PREF_COLORS[key], label: t(`availability.pref.${key}`) }
 }
 
 let _availRosterCache = {}
@@ -141,7 +141,7 @@ export async function loadShifts() {
     else if (shiftsView === 'week') renderWeekView()
     else renderShiftsForDay()
   } catch {
-    document.getElementById('shifts-content').innerHTML = '<div class="empty-state"><p>Failed to load shifts.</p></div>'
+    document.getElementById('shifts-content').innerHTML = `<div class="empty-state"><p>${t('shifts.failedLoad')}</p></div>`
   }
 }
 
@@ -161,10 +161,10 @@ export function renderShiftsForDay() {
     el.innerHTML = `
       <div class="empty-state">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <p>No shifts scheduled for ${fmtDate(state.selectedDay)}</p>
+        <p>${t('shifts.noShiftsForDay', { date: fmtDate(state.selectedDay) })}</p>
         <button class="btn btn-success" style="margin-top:14px" onclick="openCreateShiftModal()">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Create the first shift
+          ${t('shifts.createFirst')}
         </button>
       </div>`
     updateActionBar()
@@ -192,15 +192,15 @@ function renderDayStats(dayShifts) {
     <div class="day-stats">
       <div class="stat-chip">
         <span class="stat-chip-num">${dayShifts.length}</span>
-        <span class="stat-chip-label">Shifts today</span>
+        <span class="stat-chip-label">${t('shifts.shiftsToday')}</span>
       </div>
       <div class="stat-chip">
         <span class="stat-chip-num">${totalAssigned}</span>
-        <span class="stat-chip-label">Workers assigned</span>
+        <span class="stat-chip-label">${t('shifts.workersAssigned')}</span>
       </div>
       <div class="stat-chip">
         <span class="stat-chip-num" style="color:${coverageColor}">${pct}%</span>
-        <span class="stat-chip-label">Coverage</span>
+        <span class="stat-chip-label">${t('shifts.coverage')}</span>
       </div>
     </div>`
 }
@@ -214,8 +214,8 @@ function deptSection(group, color, index = 0) {
       <div class="dept-header" style="background:${color}10">
         <div class="dept-stripe" style="background:${color}"></div>
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        <span class="dept-name" style="color:${color}">${esc(group.dept?.name || 'Unknown')}</span>
-        <span class="dept-worker-badge" style="background:${badgeColor}22;color:${badgeColor}">${totalAssigned}/${totalRequired} workers</span>
+        <span class="dept-name" style="color:${color}">${esc(group.dept?.name || t('common.unknown'))}</span>
+        <span class="dept-worker-badge" style="background:${badgeColor}22;color:${badgeColor}">${t('shifts.workerCountSlash', { assigned: totalAssigned, required: totalRequired })}</span>
       </div>
       ${group.shifts.map(s => shiftRow(s, color)).join('')}
     </div>`
@@ -227,8 +227,8 @@ function shiftRow(shift, color) {
   const required = shift.requiredWorkers || 1
   const pct      = Math.min(100, Math.round(count / required * 100))
   const workerColor = count === 0 ? '#dc2626' : count < required ? '#d97706' : '#059669'
-  const workerText  = count === 0 ? 'No workers' : `${count} / ${required}`
-  const understaffed = shift.understaffed ? '<span class="understaffed-badge">⚠ Understaffed</span>' : ''
+  const workerText  = count === 0 ? t('shifts.noWorkers') : `${count} / ${required}`
+  const understaffed = shift.understaffed ? `<span class="understaffed-badge">${t('shifts.understaffed')}</span>` : ''
   const borderColor  = STATUS_COLORS[shift.status] || '#94a3b8'
   const start = shift.startTime.substring(0, 5)
   const end   = shift.endTime.substring(0, 5)
@@ -241,7 +241,7 @@ function shiftRow(shift, color) {
       </div>
       <div class="shift-row-body">
         <div class="shift-row-top">
-          <span class="status-pill status-${shift.status}">${shift.status.toLowerCase()}</span>
+          <span class="status-pill status-${shift.status}">${t(`shifts.status.${shift.status}`)}</span>
           ${understaffed}
         </div>
         <div class="shift-coverage">
@@ -271,10 +271,10 @@ export async function renderTableView() {
     el.innerHTML = `
       <div class="empty-state">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <p>No shifts scheduled for ${fmtDate(state.selectedDay)}</p>
+        <p>${t('shifts.noShiftsForDay', { date: fmtDate(state.selectedDay) })}</p>
         <button class="btn btn-success" style="margin-top:14px" onclick="openCreateShiftModal()">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Create the first shift
+          ${t('shifts.createFirst')}
         </button>
       </div>`
     return
@@ -294,7 +294,7 @@ export async function renderTableView() {
 
   const workers = state.orgWorkers || []
   if (workers.length === 0) {
-    el.innerHTML = '<div class="empty-state"><p>No workers found in this organization.</p></div>'
+    el.innerHTML = `<div class="empty-state"><p>${t('shifts.noWorkersFound')}</p></div>`
     return
   }
 
@@ -332,7 +332,7 @@ export async function renderTableView() {
   const byDept = new Map()
   dayShifts.forEach(s => {
     const deptId = s.department?.id || 'unknown'
-    if (!byDept.has(deptId)) byDept.set(deptId, { name: s.department?.name || 'Unknown', shifts: [] })
+    if (!byDept.has(deptId)) byDept.set(deptId, { name: s.department?.name || t('common.unknown'), shifts: [] })
     byDept.get(deptId).shifts.push(s)
   })
 
@@ -340,7 +340,7 @@ export async function renderTableView() {
   const workerCols = workers.map(w => {
     const initials = esc(getInitials(w.name))
     const pref     = workerDayPrefs.get(w.id)
-    const cfg      = pref?.preference ? AVAIL_PREF[pref.preference] : null
+    const cfg      = pref?.preference ? availPref(pref.preference) : null
     const isOff    = pref?.preference === 'off'
     const badge    = cfg ? `<span class="dt-avail-badge" style="background:${cfg.color}22;border-color:${cfg.color};color:${cfg.color}">${AVAIL_ICONS[pref.preference]}</span>` : ''
     const label    = cfg
@@ -383,7 +383,7 @@ export async function renderTableView() {
           <div class="dt-shift-dur">${dur}</div>
           <div class="dt-shift-meta">
             <span style="color:${staffColor};font-weight:700">${!isFull ? '⚠ ' : ''}${assigned}/${required}</span>
-            <span class="dt-status-pill" style="background:${sColor}18;color:${sColor}">${s.status.toLowerCase()}</span>
+            <span class="dt-status-pill" style="background:${sColor}18;color:${sColor}">${t(`shifts.status.${s.status}`)}</span>
           </div>
         </td>`
 
@@ -408,15 +408,15 @@ export async function renderTableView() {
         } else if (isWrongDept) {
           bg = '#f8fafc'
           clickAttr = ''
-          content = `<div class="dt-cell-blocked"><span class="dt-blocked-icon">🔒</span><span class="dt-blocked-label" style="color:#94a3b8">dept</span></div>`
+          content = `<div class="dt-cell-blocked"><span class="dt-blocked-icon">🔒</span><span class="dt-blocked-label" style="color:#94a3b8">${t('shifts.cell.dept')}</span></div>`
         } else if (isAtLimit) {
           bg = '#fff7ed'
           clickAttr = ''
-          content = `<div class="dt-cell-blocked"><span class="dt-blocked-icon">🕐</span><span class="dt-blocked-label" style="color:#d97706">12h</span></div>`
+          content = `<div class="dt-cell-blocked"><span class="dt-blocked-icon">🕐</span><span class="dt-blocked-label" style="color:#d97706">${t('shifts.cell.twelveH')}</span></div>`
         } else if (hasConflict) {
           bg = '#fff7ed'
           clickAttr = ''
-          content = `<div class="dt-cell-blocked"><span class="dt-blocked-icon">🕐</span><span class="dt-blocked-label" style="color:#d97706">busy</span></div>`
+          content = `<div class="dt-cell-blocked"><span class="dt-blocked-icon">🕐</span><span class="dt-blocked-label" style="color:#d97706">${t('shifts.cell.busy')}</span></div>`
         } else if (canAssign) {
           bg = 'transparent'
           clickAttr = `onclick="assignInTable('${s.id}','${w.id}')"`
@@ -444,9 +444,9 @@ export async function renderTableView() {
             <tr>
               <th class="dt-corner">
                 <div class="dt-corner-inner">
-                  <span class="dt-corner-label dt-corner-top">Workers</span>
+                  <span class="dt-corner-label dt-corner-top">${t('shifts.cell.workers')}</span>
                   <div class="dt-corner-line"></div>
-                  <span class="dt-corner-label dt-corner-bottom">Shifts</span>
+                  <span class="dt-corner-label dt-corner-bottom">${t('shifts.cell.shiftsCorner')}</span>
                 </div>
               </th>
               ${workerCols}
@@ -456,15 +456,15 @@ export async function renderTableView() {
         </table>
       </div>
       <div class="dt-legend">
-        <span class="dt-legend-item"><span class="dt-legend-dot" style="background:#1a2d4f"></span>Published</span>
-        <span class="dt-legend-item"><span class="dt-legend-dot" style="background:#94a3b8"></span>Draft</span>
-        <span class="dt-legend-item"><span class="dt-legend-dot" style="background:#f59e0b"></span>Active</span>
+        <span class="dt-legend-item"><span class="dt-legend-dot" style="background:#1a2d4f"></span>${t('shifts.legend.published')}</span>
+        <span class="dt-legend-item"><span class="dt-legend-dot" style="background:#94a3b8"></span>${t('shifts.legend.draft')}</span>
+        <span class="dt-legend-item"><span class="dt-legend-dot" style="background:#f59e0b"></span>${t('shifts.legend.active')}</span>
         <span class="dt-legend-sep">·</span>
-        <span class="dt-legend-item"><span class="dt-check-mini">✓</span> Assigned — click to view</span>
-        <span class="dt-legend-item"><span class="dt-plus-mini">+</span> Click to assign</span>
-        <span class="dt-legend-item" style="color:#d97706">🕐 busy / 12h = unavailable</span>
-        <span class="dt-legend-item" style="color:#94a3b8">🔒 dept = wrong department</span>
-        <span class="dt-legend-item" style="color:#94a3b8">— = shift full</span>
+        <span class="dt-legend-item"><span class="dt-check-mini">✓</span> ${t('shifts.legend.assigned')}</span>
+        <span class="dt-legend-item"><span class="dt-plus-mini">+</span> ${t('shifts.legend.clickToAssign')}</span>
+        <span class="dt-legend-item" style="color:#d97706">${t('shifts.legend.busyOrLimit')}</span>
+        <span class="dt-legend-item" style="color:#94a3b8">${t('shifts.legend.wrongDept')}</span>
+        <span class="dt-legend-item" style="color:#94a3b8">${t('shifts.legend.shiftFull')}</span>
       </div>
     </div>`
   applyAvatars(el)
@@ -489,12 +489,12 @@ export async function assignInTable(shiftId, workerId) {
       await loadShifts()
     } else {
       const d = await res?.json().catch(() => ({}))
-      showToast(d?.error || 'Failed to assign worker')
+      showToast(d?.error || t('shifts.failedAssign'))
       cell.innerHTML = '<div class="dt-cell-plus">+</div>'
       cell.style.cursor = 'pointer'
     }
   } catch {
-    showToast('Network error — try again')
+    showToast(t('common.networkError'))
     cell.innerHTML = '<div class="dt-cell-plus">+</div>'
     cell.style.cursor = 'pointer'
   } finally {
@@ -525,7 +525,7 @@ export function updateActionBar() {
   }
 
   const weekDraftCount = weekActive.filter(s => s.status === 'DRAFT').length
-  document.getElementById('publish-week-label').textContent = `Publish week (${weekDraftCount})`
+  document.getElementById('publish-week-label').textContent = t('shifts.publishWeekCount', { count: weekDraftCount })
   document.getElementById('btn-publish-week').disabled  = weekDraftCount === 0
   document.getElementById('btn-unpublish-week').disabled = !weekActive.some(s => s.status === 'PUBLISHED')
 }
@@ -549,13 +549,16 @@ export async function unpublishDay() {
 export async function publishWeek() {
   const key = toYMD(state.currentWeek)
   const draftCount = (state.shiftsCache[key] || []).filter(s => s.status === 'DRAFT').length
-  if (!confirm(`Publish ${draftCount} draft shift${draftCount !== 1 ? 's' : ''} for this week? Workers will be notified.`)) return
+  const msg = draftCount === 1
+    ? t('shifts.confirmPublishWeekOne', { count: draftCount })
+    : t('shifts.confirmPublishWeek', { count: draftCount })
+  if (!confirm(msg)) return
 
   const btn = document.getElementById('btn-publish-week')
   btn.disabled = true
   const label = document.getElementById('publish-week-label')
   const prevText = label.textContent
-  label.textContent = 'Publishing…'
+  label.textContent = t('shifts.publishing')
 
   try {
     const res = await apiFetch('/shifts/publish-week', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ weekOf: key }) })
@@ -567,7 +570,7 @@ export async function publishWeek() {
 }
 
 export async function unpublishWeek() {
-  if (!confirm('Unpublish all published shifts for this week?')) return
+  if (!confirm(t('shifts.confirmUnpublishWeek'))) return
 
   const key = toYMD(state.currentWeek)
   document.getElementById('btn-unpublish-week').disabled = true
@@ -598,7 +601,7 @@ export async function renderWeekView() {
 
   const workers = state.orgWorkers || []
   if (workers.length === 0) {
-    el.innerHTML = '<div class="empty-state"><p>No workers found.</p></div>'
+    el.innerHTML = `<div class="empty-state"><p>${t('shifts.noWorkersFoundShort')}</p></div>`
     return
   }
 
@@ -730,10 +733,10 @@ export async function renderWeekView() {
         </td></tr>`
       : `<tr class="wv-dept-band"><td colspan="${colSpan}" class="wv-dept-label wv-dept-unassigned">
           <span class="wv-dept-stripe" style="background:#94a3b8"></span>
-          <span>Unassigned this week</span>
+          <span>${t('shifts.unassignedThisWeek')}</span>
         </td></tr>`
     const emptyRow = grp.length === 0
-      ? `<tr><td colspan="${colSpan}" class="wv-dept-empty">No workers assigned to this department yet</td></tr>`
+      ? `<tr><td colspan="${colSpan}" class="wv-dept-empty">${t('shifts.deptNoWorkers')}</td></tr>`
       : ''
     return band + emptyRow + grp.map(w => workerRow(w, dept?.id ?? null)).join('')
   }).join('')
@@ -743,7 +746,7 @@ export async function renderWeekView() {
       <div class="wv-scroll">
         <table class="wv-table">
           <thead><tr>
-            <th class="wv-corner">Workers</th>
+            <th class="wv-corner">${t('shifts.cell.workers')}</th>
             ${dayHeaders}
           </tr></thead>
           <tbody>${bodyRows}</tbody>
@@ -772,13 +775,13 @@ export async function assignInWeekView(shiftId, workerId) {
       await loadShifts()
     } else {
       const d = await res?.json().catch(() => ({}))
-      showToast(d?.error || 'Failed to assign worker')
+      showToast(d?.error || t('shifts.failedAssign'))
       pill.innerHTML = prev
       pill.style.pointerEvents = ''
       delete pill.dataset.assigning
     }
   } catch {
-    showToast('Network error — try again')
+    showToast(t('common.networkError'))
     pill.innerHTML = prev
     pill.style.pointerEvents = ''
     delete pill.dataset.assigning

@@ -1,6 +1,7 @@
 import { state } from './state.js'
 import { apiFetch } from './api.js'
-import { esc } from './utils.js'
+import { esc, MONTHS } from './utils.js'
+import { t } from './i18n.js'
 
 let activeTab = 'timeoff'
 
@@ -17,8 +18,7 @@ let _timeoffHasMore = false
 function fmtDate(iso) {
   if (!iso) return '?'
   const [, m, d] = iso.slice(0, 10).split('-')
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-  return `${parseInt(d, 10)} ${months[parseInt(m, 10) - 1]}`
+  return `${parseInt(d, 10)} ${MONTHS[parseInt(m, 10) - 1]}`
 }
 
 // ── Render ────────────────────────────────────────────────────────────────────
@@ -58,7 +58,7 @@ export async function renderRequests() {
 
     renderTab(_cachedSwaps, _cachedTimeoff)
   } catch {
-    container.innerHTML = '<div class="empty-state"><p>Failed to load requests — try again</p></div>'
+    container.innerHTML = `<div class="empty-state"><p>${t('requests.failedLoad')}</p></div>`
   }
 }
 
@@ -71,7 +71,7 @@ function renderTab(allSwaps, allTimeoff) {
   const hasMore    = isTimeoff ? _timeoffHasMore : _swapsHasMore
 
   if (!pending.length && !history.length) {
-    container.innerHTML = '<div class="empty-state"><p>No requests yet</p></div>'
+    container.innerHTML = `<div class="empty-state"><p>${t('requests.noRequests')}</p></div>`
     return
   }
 
@@ -80,16 +80,16 @@ function renderTab(allSwaps, allTimeoff) {
   if (pending.length) {
     html += pending.map(x => isTimeoff ? timeOffCard(x) : swapCard(x)).join('')
   } else {
-    html += '<div class="req-no-pending">No pending requests</div>'
+    html += `<div class="req-no-pending">${t('requests.noPending')}</div>`
   }
 
   if (history.length) {
-    html += `<div class="req-history-divider"><span>History</span></div>`
+    html += `<div class="req-history-divider"><span>${t('requests.history')}</span></div>`
     html += history.map(x => isTimeoff ? timeOffHistoryCard(x) : swapHistoryCard(x)).join('')
   }
 
   if (hasMore) {
-    html += `<div class="req-load-more-wrap"><button class="req-load-more-btn" onclick="loadMoreRequests()">Load more</button></div>`
+    html += `<div class="req-load-more-wrap"><button class="req-load-more-btn" onclick="loadMoreRequests()">${t('requests.loadMore')}</button></div>`
   }
 
   container.innerHTML = html
@@ -99,9 +99,9 @@ function renderTab(allSwaps, allTimeoff) {
 
 function swapCard(s) {
   const shift      = s.requesterAssignment?.shift
-  const dept       = shift?.department?.name || '—'
+  const dept       = shift?.department?.name || t('common.dash')
   const date       = fmtDate(shift?.date)
-  const time       = shift ? `${shift.startTime}–${shift.endTime}` : '—'
+  const time       = shift ? `${shift.startTime}–${shift.endTime}` : t('common.dash')
   const isOpen     = !s.targetWorkerId
   const volunteers = s.volunteers || []
 
@@ -110,16 +110,17 @@ function swapCard(s) {
 
   if (isOpen) {
     if (volunteers.length) {
-      meta = `<div class="req-meta">${volunteers.length} volunteer${volunteers.length > 1 ? 's' : ''}</div>`
+      const volLabel = volunteers.length === 1 ? t('requests.volunteerOne', { n: 1 }) : t('requests.volunteerMany', { n: volunteers.length })
+      meta = `<div class="req-meta">${volLabel}</div>`
       volSelect = `<select class="req-select" id="vol-${esc(s.id)}">
-        <option value="">Pick volunteer…</option>
+        <option value="">${t('requests.pickVolunteer')}</option>
         ${volunteers.map(v => `<option value="${esc(v.worker.id)}">${esc(v.worker.name)}</option>`).join('')}
       </select>`
     } else {
-      meta = `<div class="req-meta req-dim">Open — no volunteers yet</div>`
+      meta = `<div class="req-meta req-dim">${t('requests.openNoVolunteers')}</div>`
     }
   } else {
-    meta = `<div class="req-meta">→ ${esc(s.targetWorker?.name || 'Unknown')}</div>`
+    meta = `<div class="req-meta">→ ${esc(s.targetWorker?.name || t('common.unknown'))}</div>`
   }
 
   const canApprove   = !isOpen || volunteers.length > 0
@@ -127,34 +128,34 @@ function swapCard(s) {
 
   return `<div class="req-card req-card-swap" id="swap-${esc(s.id)}">
     <div class="req-body">
-      <div class="req-who">${esc(s.requester?.name || 'Unknown')}</div>
+      <div class="req-who">${esc(s.requester?.name || t('common.unknown'))}</div>
       <div class="req-details">${esc(dept)} · ${esc(date)} · ${esc(time)}</div>
       ${meta}
       ${s.reason ? `<div class="req-reason">&ldquo;${esc(s.reason)}&rdquo;</div>` : ''}
       ${volSelect}
     </div>
     <div class="req-actions">
-      <button class="req-btn req-approve" onclick="${approveClick}" ${canApprove ? '' : 'disabled'}>Approve</button>
-      <button class="req-btn req-deny" onclick="denySwap('${s.id}')">Deny</button>
+      <button class="req-btn req-approve" onclick="${approveClick}" ${canApprove ? '' : 'disabled'}>${t('requests.approve')}</button>
+      <button class="req-btn req-deny" onclick="denySwap('${s.id}')">${t('requests.deny')}</button>
     </div>
   </div>`
 }
 
-function timeOffCard(t) {
-  const start = fmtDate(t.startDate)
-  const end   = fmtDate(t.endDate)
-  const same  = t.startDate?.slice(0, 10) === t.endDate?.slice(0, 10)
+function timeOffCard(req) {
+  const start = fmtDate(req.startDate)
+  const end   = fmtDate(req.endDate)
+  const same  = req.startDate?.slice(0, 10) === req.endDate?.slice(0, 10)
   const range = same ? start : `${start} – ${end}`
 
-  return `<div class="req-card req-card-timeoff" id="timeoff-${esc(t.id)}">
+  return `<div class="req-card req-card-timeoff" id="timeoff-${esc(req.id)}">
     <div class="req-body">
-      <div class="req-who">${esc(t.worker?.name || 'Unknown')}</div>
+      <div class="req-who">${esc(req.worker?.name || t('common.unknown'))}</div>
       <div class="req-details">${range}</div>
-      ${t.reason ? `<div class="req-reason">&ldquo;${esc(t.reason)}&rdquo;</div>` : ''}
+      ${req.reason ? `<div class="req-reason">&ldquo;${esc(req.reason)}&rdquo;</div>` : ''}
     </div>
     <div class="req-actions">
-      <button class="req-btn req-approve" onclick="approveTimeOff('${t.id}')">Approve</button>
-      <button class="req-btn req-deny" onclick="denyTimeOff('${t.id}')">Deny</button>
+      <button class="req-btn req-approve" onclick="approveTimeOff('${req.id}')">${t('requests.approve')}</button>
+      <button class="req-btn req-deny" onclick="denyTimeOff('${req.id}')">${t('requests.deny')}</button>
     </div>
   </div>`
 }
@@ -164,27 +165,26 @@ function timeOffCard(t) {
 function statusBadge(status) {
   const map = { APPROVED: 'approved', DENIED: 'denied', CANCELLED: 'cancelled' }
   const cls   = map[status] || 'cancelled'
-  const label = status.charAt(0) + status.slice(1).toLowerCase()
-  return `<span class="req-status-badge req-status-${cls}">${label}</span>`
+  return `<span class="req-status-badge req-status-${cls}">${t(`requests.statusBadge.${status}`)}</span>`
 }
 
 function swapHistoryCard(s) {
   const shift = s.requesterAssignment?.shift
-  const dept  = shift?.department?.name || '—'
+  const dept  = shift?.department?.name || t('common.dash')
   const date  = fmtDate(shift?.date)
-  const time  = shift ? `${shift.startTime}–${shift.endTime}` : '—'
+  const time  = shift ? `${shift.startTime}–${shift.endTime}` : t('common.dash')
 
   let meta = s.targetWorker ? `<div class="req-meta">→ ${esc(s.targetWorker.name)}</div>` : ''
 
   let reviewer = ''
   if (s.reviewedBy?.name && s.status !== 'CANCELLED') {
-    const verb = s.status === 'APPROVED' ? 'Approved' : 'Denied'
-    reviewer = `<div class="req-reviewer">${verb} by ${esc(s.reviewedBy.name)}</div>`
+    const key = s.status === 'APPROVED' ? 'requests.approvedBy' : 'requests.deniedBy'
+    reviewer = `<div class="req-reviewer">${t(key, { name: esc(s.reviewedBy.name) })}</div>`
   }
 
   return `<div class="req-card req-card-history">
     <div class="req-body">
-      <div class="req-who">${esc(s.requester?.name || 'Unknown')}</div>
+      <div class="req-who">${esc(s.requester?.name || t('common.unknown'))}</div>
       <div class="req-details">${esc(dept)} · ${esc(date)} · ${esc(time)}</div>
       ${meta}
       ${s.reason ? `<div class="req-reason">&ldquo;${esc(s.reason)}&rdquo;</div>` : ''}
@@ -194,26 +194,26 @@ function swapHistoryCard(s) {
   </div>`
 }
 
-function timeOffHistoryCard(t) {
-  const start = fmtDate(t.startDate)
-  const end   = fmtDate(t.endDate)
-  const same  = t.startDate?.slice(0, 10) === t.endDate?.slice(0, 10)
+function timeOffHistoryCard(req) {
+  const start = fmtDate(req.startDate)
+  const end   = fmtDate(req.endDate)
+  const same  = req.startDate?.slice(0, 10) === req.endDate?.slice(0, 10)
   const range = same ? start : `${start} – ${end}`
 
   let reviewer = ''
-  if (t.reviewedBy?.name && t.status !== 'CANCELLED') {
-    const verb = t.status === 'APPROVED' ? 'Approved' : 'Denied'
-    reviewer = `<div class="req-reviewer">${verb} by ${esc(t.reviewedBy.name)}</div>`
+  if (req.reviewedBy?.name && req.status !== 'CANCELLED') {
+    const key = req.status === 'APPROVED' ? 'requests.approvedBy' : 'requests.deniedBy'
+    reviewer = `<div class="req-reviewer">${t(key, { name: esc(req.reviewedBy.name) })}</div>`
   }
 
   return `<div class="req-card req-card-history">
     <div class="req-body">
-      <div class="req-who">${esc(t.worker?.name || 'Unknown')}</div>
+      <div class="req-who">${esc(req.worker?.name || t('common.unknown'))}</div>
       <div class="req-details">${range}</div>
-      ${t.reason ? `<div class="req-reason">&ldquo;${esc(t.reason)}&rdquo;</div>` : ''}
+      ${req.reason ? `<div class="req-reason">&ldquo;${esc(req.reason)}&rdquo;</div>` : ''}
       ${reviewer}
     </div>
-    <div class="req-actions">${statusBadge(t.status)}</div>
+    <div class="req-actions">${statusBadge(req.status)}</div>
   </div>`
 }
 
@@ -250,11 +250,11 @@ async function doAction(fn) {
     const res = await fn()
     if (!res?.ok) {
       const d = await res?.json().catch(() => ({}))
-      alert(d?.error || 'Action failed')
+      alert(d?.error || t('requests.actionFailed'))
       return false
     }
     return true
-  } catch { alert('Network error — try again'); return false }
+  } catch { alert(t('common.networkError')); return false }
 }
 
 function disableSwapBtns(id) {
@@ -289,7 +289,7 @@ async function approveSwap(id) {
 
 async function approveSwapOpen(id) {
   const vol = document.getElementById(`vol-${id}`)?.value
-  if (!vol) { alert('Pick a volunteer first'); return }
+  if (!vol) { alert(t('requests.pickVolunteerFirst')); return }
   disableSwapBtns(id)
   if (await doAction(() => apiFetch(`/swaps/${id}/approve`, { method: 'PATCH', body: JSON.stringify({ replacementWorkerId: vol }) }))) {
     patchCachedSwap(id, 'APPROVED')
@@ -361,7 +361,7 @@ export async function loadMoreRequests() {
   if (!hasMore || !cursor) return
 
   const btn = document.querySelector('.req-load-more-btn')
-  if (btn) { btn.disabled = true; btn.textContent = 'Loading…' }
+  if (btn) { btn.disabled = true; btn.textContent = t('requests.loading') }
 
   try {
     const path = isTimeoff ? `/time-off?limit=20&cursor=${cursor}` : `/swaps?limit=20&cursor=${cursor}`
@@ -383,7 +383,7 @@ export async function loadMoreRequests() {
 
     renderTab(_cachedSwaps, _cachedTimeoff)
   } catch {
-    if (btn) { btn.disabled = false; btn.textContent = 'Load more' }
+    if (btn) { btn.disabled = false; btn.textContent = t('requests.loadMore') }
   }
 }
 

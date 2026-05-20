@@ -7,8 +7,12 @@ export function getInitials(name) {
   return (name || '?').split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase()
 }
 
-export const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+import { t } from './i18n.js'
+
+const DAY_CODES = ['SUN','MON','TUE','WED','THU','FRI','SAT']
 export const DAY_FULL = ['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY']
+// Index-based proxy so legacy `DAYS[i]` callers transparently get the current locale.
+export const DAYS = new Proxy([], { get(_, k) { const i = Number(k); return Number.isInteger(i) ? t(`days.short.${DAY_CODES[i]}`) : undefined } })
 
 export const AVAIL_ICONS = {
   morning:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
@@ -18,7 +22,8 @@ export const AVAIL_ICONS = {
   custom:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
   off:       `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
 }
-export const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+// Index-based proxy so legacy `MONTHS[i]` callers transparently get the current locale.
+export const MONTHS = new Proxy([], { get(_, k) { const i = Number(k); if (!Number.isInteger(i)) return undefined; const arr = t('months.short'); return Array.isArray(arr) ? arr[i] : undefined } })
 export const DEPT_COLORS = ['#1a2d4f', '#f59e0b', '#0ea5e9', '#22c55e', '#ec4899', '#f97316', '#8b5cf6', '#14b8a6']
 
 export function getWeekStartOf(date, weekStartsOn = 'MONDAY') {

@@ -3,10 +3,11 @@ import {
   ERROR_MAP,
   getToken, getUser, getOrg, updateOrg,
 } from './auth-common.js'
+import { initI18n, mountLanguageSwitcher, t } from './i18n.js'
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
-const DAY_LABELS = { MON: 'Mo', TUE: 'Tu', WED: 'We', THU: 'Th', FRI: 'Fr', SAT: 'Sa', SUN: 'Su' }
+const DAY_LABELS = new Proxy({}, { get: (_, code) => typeof code === 'string' ? t(`days.twoLetter.${code}`) : undefined })
 const DAYS_FROM_MONDAY = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
 const DAYS_FROM_SUNDAY = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
 
@@ -122,7 +123,7 @@ function setWeekStart(start) {
 
 function handleStep1Next() {
   if (state.activeDays.length === 0) {
-    alert('Pick at least one working day.')
+    alert(t('onboarding.pickOneDay'))
     return
   }
   showStep(2)
@@ -206,17 +207,17 @@ function buildTemplateCard(tpl, idx) {
   wrap.innerHTML = `
     <div class="tmpl-header">
       <div class="color-row">${colorRow}</div>
-      ${state.templates.length > 1 ? `<button type="button" class="remove-btn" title="Remove">🗑</button>` : ''}
+      ${state.templates.length > 1 ? `<button type="button" class="remove-btn" title="${t('onboarding.removeTooltip')}">🗑</button>` : ''}
     </div>
-    <input type="text" placeholder="Shift name (e.g. Morning, Evening)" value="${escapeHtml(tpl.name)}" data-field="name">
+    <input type="text" placeholder="${t('onboarding.shiftNamePlaceholder')}" value="${escapeHtml(tpl.name)}" data-field="name">
     <div class="time-row">
-      <div><div class="time-label">Start time</div><input type="time" value="${tpl.startTime}" data-field="startTime"></div>
-      <div><div class="time-label">End time</div>  <input type="time" value="${tpl.endTime}"   data-field="endTime"></div>
+      <div><div class="time-label">${t('modals.startTime')}</div><input type="time" value="${tpl.startTime}" data-field="startTime"></div>
+      <div><div class="time-label">${t('modals.endTime')}</div>  <input type="time" value="${tpl.endTime}"   data-field="endTime"></div>
     </div>
     ${state.departments.length > 0 ? `<div class="tmpl-locs">${locPills}</div>` : ''}
     ${tpl.locations.length > 0 ? `
       <div class="workers-section">
-        <div class="lbl">Workers per department</div>
+        <div class="lbl">${t('onboarding.workersPerDept')}</div>
         ${workerRows}
       </div>
     ` : ''}
@@ -276,7 +277,7 @@ async function saveOrgSettings() {
       onboardingComplete: true,
     }),
   })
-  if (!res || !res.ok) throw new Error('Could not save organization settings.')
+  if (!res || !res.ok) throw new Error(t('onboarding.saveOrgFailed'))
   const data = await res.json().catch(() => null)
   updateOrg({
     workDays: state.activeDays,
@@ -287,12 +288,12 @@ async function saveOrgSettings() {
 }
 
 function validateStep2() {
-  if (state.departments.length === 0) return 'Add at least one department.'
+  if (state.departments.length === 0) return t('onboarding.addOneDept')
   for (const tpl of state.templates) {
-    if (!tpl.name.trim())             return 'Give each shift type a name.'
-    if (!TIME_RE.test(tpl.startTime)) return `"${tpl.name}" needs a valid start time.`
-    if (!TIME_RE.test(tpl.endTime))   return `"${tpl.name}" needs a valid end time.`
-    if (tpl.locations.length === 0)   return `Pick at least one department for "${tpl.name}".`
+    if (!tpl.name.trim())             return t('onboarding.shiftNeedName')
+    if (!TIME_RE.test(tpl.startTime)) return t('onboarding.shiftNeedStart', { name: tpl.name })
+    if (!TIME_RE.test(tpl.endTime))   return t('onboarding.shiftNeedEnd',   { name: tpl.name })
+    if (tpl.locations.length === 0)   return t('onboarding.shiftNeedDept',  { name: tpl.name })
   }
   return null
 }
@@ -302,7 +303,7 @@ async function createDepartmentApi(name) {
     method: 'POST',
     body: JSON.stringify({ name }),
   })
-  if (!res || !res.ok) throw new Error(`Could not create department "${name}".`)
+  if (!res || !res.ok) throw new Error(t('onboarding.createDeptFailed', { name }))
   return res.json()
 }
 
@@ -364,7 +365,7 @@ async function handleFinish() {
   } catch (e) {
     showAlert($('alert-2'), e.message || ERROR_MAP.generic)
   } finally {
-    setBtnLoading(btn, false, '<span>Finish setup</span>')
+    setBtnLoading(btn, false, `<span>${t('onboarding.finishSetup')}</span>`)
     state.saving = false
   }
 }
@@ -383,10 +384,10 @@ async function copyInviteCode() {
     await navigator.clipboard.writeText(code)
     const btn = $('copy-btn')
     btn.classList.add('copied')
-    $('copy-label').textContent = '✓ Copied!'
+    $('copy-label').textContent = t('onboarding.copied')
     setTimeout(() => {
       btn.classList.remove('copied')
-      $('copy-label').textContent = 'Copy invite code'
+      $('copy-label').textContent = t('onboarding.copyInviteCode')
     }, 1800)
   } catch {
     // Selection fallback for browsers that block clipboard without permission.
@@ -440,6 +441,10 @@ function init() {
     window.location.href = '/web/'
     return
   }
+
+  initI18n()
+  mountLanguageSwitcher(document.getElementById('auth-lang-switcher'), { variant: 'auth' })
+  document.addEventListener('languagechange', () => { renderDays(); renderTemplates() })
 
   loadOrgIntoNav()
   wireEvents()

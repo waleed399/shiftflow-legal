@@ -6,9 +6,10 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://shift-right-production.up.railway.app https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'none'">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <title>ShiftRight — Sign in</title>
+  <title data-i18n="login.docTitle">ShiftRight — Sign in</title>
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/i18n.css">
   <style>
     /* Page-specific: QR-linker hint, only shown on the login screen. */
     .qr-hint {
@@ -28,42 +29,43 @@
 <div class="orb orb-2"></div>
 
 <nav class="auth-nav">
-  <a href="/" class="nav-back">← Back to site</a>
+  <a href="/" class="nav-back" data-i18n="login.navBack">← Back to site</a>
   <a href="/" class="logo">Shift<span>Right</span></a>
+  <div id="auth-lang-switcher"></div>
 </nav>
 
 <div class="auth-card">
-  <h1>Welcome back</h1>
-  <p class="subtitle">Sign in to manage your team's schedule.</p>
+  <h1 data-i18n="login.title">Welcome back</h1>
+  <p class="subtitle" data-i18n="login.subtitle">Sign in to manage your team's schedule.</p>
 
   <div class="alert" id="alert" style="display:none"></div>
 
   <div class="field">
-    <label for="email">Email</label>
-    <input type="email" id="email" autocomplete="email" placeholder="you@company.com" autofocus>
+    <label for="email" data-i18n="login.email">Email</label>
+    <input type="email" id="email" autocomplete="email" data-i18n-placeholder="login.emailPlaceholder" placeholder="you@company.com" autofocus>
   </div>
 
   <div class="field">
     <label for="password" style="display:flex; justify-content:space-between; align-items:center;">
-      <span>Password</span>
-      <a href="/web/forgot-password.html" class="forgot-link">Forgot?</a>
+      <span data-i18n="login.password">Password</span>
+      <a href="/web/forgot-password.html" class="forgot-link" data-i18n="login.forgot">Forgot?</a>
     </label>
     <div class="password-wrap">
       <input type="password" id="password" autocomplete="current-password" placeholder="••••••••">
-      <button type="button" class="password-toggle" id="toggle-password">Show</button>
+      <button type="button" class="password-toggle" id="toggle-password" data-i18n="common.show">Show</button>
     </div>
   </div>
 
   <button class="btn-primary" id="btn-login">
-    <span>Sign in</span>
+    <span data-i18n="login.signIn">Sign in</span>
   </button>
 
   <div class="qr-hint">
-    Have the iOS app already? <a href="/app/">Link with QR code</a>
+    <span data-i18n="login.qrHintBefore">Have the iOS app already?</span> <a href="/app/" data-i18n="login.qrHintLink">Link with QR code</a>
   </div>
 
   <p class="bottom-link">
-    Don't have an account? <a href="/web/signup.html">Create your organization</a>
+    <span data-i18n="login.noAccount">Don't have an account?</span> <a href="/web/signup.html" data-i18n="login.createOrg">Create your organization</a>
   </p>
 </div>
 

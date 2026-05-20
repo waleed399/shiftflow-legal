@@ -1,11 +1,13 @@
+import { initI18n, t } from './i18n.js'
+
 const API = 'https://shift-right-production.up.railway.app/api'
 
 let _token = null
 let _period = 'monthly'
 
 const PRICES = {
-  monthly: { PRO: '$49.99', BIZ: '$99.99', PRO_SUB: '/ month', BIZ_SUB: '/ month' },
-  annual:  { PRO: '$39.99', BIZ: '$79.99', PRO_SUB: '/ month (billed $479.88/yr)', BIZ_SUB: '/ month (billed $959.88/yr)' },
+  monthly: { PRO: '$49.99', BIZ: '$99.99', PRO_SUB: () => t('upgrade.perMonth'), BIZ_SUB: () => t('upgrade.perMonth') },
+  annual:  { PRO: '$39.99', BIZ: '$79.99', PRO_SUB: () => t('upgrade.perMonthAnnual', { total: '$479.88' }), BIZ_SUB: () => t('upgrade.perMonthAnnual', { total: '$959.88' }) },
 }
 
 function show(id) {
@@ -23,8 +25,8 @@ function setPeriod(period) {
   document.getElementById('btn-monthly').classList.toggle('active', period === 'monthly')
   document.getElementById('btn-annual').classList.toggle('active', period === 'annual')
   const p = PRICES[period]
-  document.getElementById('pro-price').innerHTML = `<strong>${p.PRO}</strong> ${p.PRO_SUB}`
-  document.getElementById('biz-price').innerHTML = `<strong>${p.BIZ}</strong> ${p.BIZ_SUB}`
+  document.getElementById('pro-price').innerHTML = `<strong>${p.PRO}</strong> ${p.PRO_SUB()}`
+  document.getElementById('biz-price').innerHTML = `<strong>${p.BIZ}</strong> ${p.BIZ_SUB()}`
 }
 
 async function upgrade(plan) {
@@ -44,18 +46,19 @@ async function upgrade(plan) {
     window.location.href = url
   } catch {
     btn.disabled = false
-    btn.textContent = plan === 'PRO' ? 'Upgrade to Pro' : 'Upgrade to Business'
-    alert('Could not start checkout. Please try again.')
+    btn.textContent = plan === 'PRO' ? t('upgrade.upgradePro') : t('upgrade.upgradeBusiness')
+    alert(t('upgrade.checkoutFailed'))
   }
 }
 
 async function init() {
+  initI18n()
+
   const params = new URLSearchParams(window.location.search)
   const token = params.get('token')
 
   if (!token) {
-    document.getElementById('error-msg').textContent =
-      'No login token found. Please open the ShiftRight app and tap "Open Pricing Page" again.'
+    document.getElementById('error-msg').textContent = t('upgrade.noToken')
     show('state-error')
     return
   }
@@ -64,8 +67,7 @@ async function init() {
     const res = await fetch(`${API}/auth/magic-link/consume/${encodeURIComponent(token)}`)
     if (!res.ok) {
       const data = await res.json().catch(() => ({}))
-      document.getElementById('error-msg').textContent =
-        data.error || 'This link has expired. Please open the ShiftRight app and try again.'
+      document.getElementById('error-msg').textContent = data.error || t('upgrade.linkExpired')
       show('state-error')
       return
     }
@@ -82,16 +84,16 @@ async function init() {
     // Populate header
     document.getElementById('user-avatar').textContent = getInitials(data.user.name)
     document.getElementById('user-name').textContent = data.user.name
-    document.getElementById('user-org').textContent =
-      `${data.organization.name} · ${data.organization.plan === 'FREE' ? 'Free plan' : data.organization.plan + ' plan'}`
+    document.getElementById('user-org').textContent = data.organization.plan === 'FREE'
+      ? t('upgrade.orgFree', { name: data.organization.name })
+      : t('upgrade.orgPlan', { name: data.organization.name, plan: data.organization.plan })
 
     // Remove token from URL without reloading (security hygiene)
     history.replaceState({}, '', window.location.pathname)
 
     show('state-ready')
   } catch {
-    document.getElementById('error-msg').textContent =
-      'Could not connect to ShiftRight. Please check your connection and try again.'
+    document.getElementById('error-msg').textContent = t('upgrade.cannotConnect')
     show('state-error')
   }
 }

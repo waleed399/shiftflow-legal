@@ -8,8 +8,10 @@ import './createShift.js' // registers window.openCreateShiftModal and submit ha
 import { renderRequests, loadPendingCount } from './requests.js'
 import { renderWorkers } from './workers.js'
 import { renderAvailability } from './availability.js'
+import { initI18n, mountLanguageSwitcher } from './i18n.js'
 
 async function init() {
+  initI18n()
   if (!getToken()) { window.location.href = '/app/'; return }
 
   // Detect return from Lemon Squeezy checkout
@@ -109,9 +111,19 @@ function renderSidebar() {
   const planEl = document.getElementById('sb-plan')
   planEl.textContent = plan
   planEl.className = `plan-badge plan-${plan}`
+
+  mountLanguageSwitcher(document.getElementById('sb-lang-switcher'), { variant: 'sidebar' })
 }
 
 const ON_ENTER = { profile: renderProfile, requests: renderRequests, workers: renderWorkers, availability: renderAvailability }
+
+function getActiveView() {
+  for (const v of ['shifts', 'profile', 'requests', 'workers', 'availability']) {
+    const el = document.getElementById(`view-${v}`)
+    if (el && el.style.display !== 'none') return v
+  }
+  return 'shifts'
+}
 
 function showView(view) {
   for (const v of ['shifts', 'profile', 'requests', 'workers', 'availability']) {
@@ -124,6 +136,19 @@ function showView(view) {
   el.classList.add('view-enter')
   ON_ENTER[view]?.()
 }
+
+// On language switch, re-render the currently active view so dynamic strings flip.
+// The static shell is already retranslated by i18n's applyTranslations.
+document.addEventListener('languagechange', () => {
+  const view = getActiveView()
+  if (view === 'shifts') {
+    renderWeekLabel()
+    renderDayTabs()
+    loadShifts()
+  } else {
+    ON_ENTER[view]?.()
+  }
+})
 
 function signOut() {
   const refresh = getRefreshToken()

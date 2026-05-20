@@ -13,19 +13,11 @@ export const EMAIL_RE = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/
 // internal details. Each page imports this map and translates by status / known
 // substrings.
 
-export const ERROR_MAP = {
-  invalid_email:    'Please enter a valid email address.',
-  email_mismatch:   'The two email addresses do not match.',
-  email_in_use:     'An account with this email already exists. Try signing in instead.',
-  missing_password: 'Please enter your password.',
-  bad_credentials:  'That email or password didn\'t match. Please try again.',
-  invalid_otp:      'That code is incorrect. Please try again.',
-  expired_otp:      'This code has expired. Please request a new one.',
-  weak_password:    'Your password doesn\'t meet our strength requirements.',
-  rate_limited:     'Too many attempts. Please wait a few minutes and try again.',
-  network:          'Could not connect. Please check your internet and try again.',
-  generic:          'Something went wrong. Please try again.',
-}
+import { t } from './i18n.js'
+
+// Proxy reads errors.<key> from the active locale on every access, so messages
+// stay in sync if the language is switched after the page loads.
+export const ERROR_MAP = new Proxy({}, { get: (_, key) => typeof key === 'string' ? t(`errors.${key}`) : undefined })
 
 // Classify a backend response into a user-safe message. Login flows should
 // prefer `classifyLoginError` (which returns generic for 400/401 to prevent
@@ -164,14 +156,17 @@ export function clearSession() {
 // Manages a "Resend in Ns" cooldown for OTP-based pages. Caller supplies the
 // button element and a label callback that renders the current state.
 
-export function createResendCooldown(btn, { seconds = 60, idleLabel = 'Resend code', activeLabel = (s) => `Resend code in ${s}s` } = {}) {
+export function createResendCooldown(btn, { seconds = 60, idleLabel, activeLabel } = {}) {
+  const getIdle   = () => idleLabel   ?? t('resend.idle')
+  const getActive = (s) => activeLabel ? activeLabel(s) : t('resend.countdown', { s })
   let remaining = 0
   let interval = null
 
   function render() {
-    if (remaining > 0) { btn.disabled = true;  btn.textContent = activeLabel(remaining) }
-    else               { btn.disabled = false; btn.textContent = idleLabel }
+    if (remaining > 0) { btn.disabled = true;  btn.textContent = getActive(remaining) }
+    else               { btn.disabled = false; btn.textContent = getIdle() }
   }
+  document.addEventListener('languagechange', render)
 
   return {
     start(s = seconds) {

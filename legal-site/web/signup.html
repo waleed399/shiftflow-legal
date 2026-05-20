@@ -6,9 +6,10 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://shift-right-production.up.railway.app https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'none'">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <title>ShiftRight — Create your organization</title>
+  <title data-i18n="signup.docTitle">ShiftRight — Create your organization</title>
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/i18n.css">
 </head>
 <body class="auth-page">
 
@@ -16,8 +17,9 @@
 <div class="orb orb-2"></div>
 
 <nav class="auth-nav">
-  <a href="/" class="nav-back">← Back to site</a>
+  <a href="/" class="nav-back" data-i18n="signup.navBack">← Back to site</a>
   <a href="/" class="logo">Shift<span>Right</span></a>
+  <div id="auth-lang-switcher"></div>
 </nav>
 
 <div class="auth-card">
@@ -30,36 +32,36 @@
 
   <!-- STEP 1: EMAIL -->
   <div class="step visible" id="step-email">
-    <h1>Create your organization</h1>
-    <p class="subtitle">Start with your email — we'll send a 6-digit code to verify.</p>
+    <h1 data-i18n="signup.step1Title">Create your organization</h1>
+    <p class="subtitle" data-i18n="signup.step1Subtitle">Start with your email — we'll send a 6-digit code to verify.</p>
 
     <div class="alert" id="alert-1" style="display:none"></div>
 
     <div class="field">
-      <label for="email">Work email</label>
-      <input type="email" id="email" autocomplete="email" placeholder="you@company.com" autofocus>
+      <label for="email" data-i18n="signup.workEmail">Work email</label>
+      <input type="email" id="email" autocomplete="email" data-i18n-placeholder="signup.emailPlaceholder" placeholder="you@company.com" autofocus>
     </div>
 
     <div class="field">
-      <label for="email-confirm">Confirm email</label>
-      <input type="email" id="email-confirm" autocomplete="off" placeholder="you@company.com">
-      <p class="field-hint">We'll send a 6-digit code to verify it's really you.</p>
+      <label for="email-confirm" data-i18n="signup.confirmEmail">Confirm email</label>
+      <input type="email" id="email-confirm" autocomplete="off" data-i18n-placeholder="signup.emailPlaceholder" placeholder="you@company.com">
+      <p class="field-hint" data-i18n="signup.fieldHint">We'll send a 6-digit code to verify it's really you.</p>
     </div>
 
     <button class="btn-primary" id="btn-send-otp">
-      <span>Send verification code</span>
+      <span data-i18n="signup.sendCode">Send verification code</span>
     </button>
 
     <p class="bottom-link">
-      Already have an account? <a href="/web/login.html">Sign in</a>
+      <span data-i18n="signup.alreadyAccount">Already have an account?</span> <a href="/web/login.html" data-i18n="signup.signIn">Sign in</a>
     </p>
   </div>
 
   <!-- STEP 2: OTP -->
   <div class="step" id="step-otp">
     <div class="otp-icon">📧</div>
-    <h1>Check your email</h1>
-    <p class="otp-target">We sent a 6-digit code to<br><strong id="otp-target-email">you@example.com</strong></p>
+    <h1 data-i18n="signup.step2Title">Check your email</h1>
+    <p class="otp-target"><span data-i18n="signup.step2SentTo">We sent a 6-digit code to</span><br><strong id="otp-target-email">you@example.com</strong></p>
 
     <div class="alert" id="alert-2" style="display:none"></div>
 
@@ -68,35 +70,35 @@
     </div>
 
     <button class="btn-primary" id="btn-verify-otp">
-      <span>Verify code</span>
+      <span data-i18n="signup.verifyCode">Verify code</span>
     </button>
 
-    <button class="btn-ghost" id="btn-resend">Resend code</button>
-    <button class="btn-ghost" id="btn-change-email">Change email</button>
+    <button class="btn-ghost" id="btn-resend" data-i18n="signup.resendCode">Resend code</button>
+    <button class="btn-ghost" id="btn-change-email" data-i18n="signup.changeEmail">Change email</button>
   </div>
 
   <!-- STEP 3: DETAILS -->
   <div class="step" id="step-details">
-    <h1>Tell us about your organization</h1>
-    <p class="subtitle">A few details and you're in. You can change everything later.</p>
+    <h1 data-i18n="signup.step3Title">Tell us about your organization</h1>
+    <p class="subtitle" data-i18n="signup.step3Subtitle">A few details and you're in. You can change everything later.</p>
 
     <div class="alert" id="alert-3" style="display:none"></div>
 
     <div class="field">
-      <label for="org-name">Organization name</label>
-      <input type="text" id="org-name" autocomplete="organization" placeholder="Acme Logistics">
+      <label for="org-name" data-i18n="signup.orgName">Organization name</label>
+      <input type="text" id="org-name" autocomplete="organization" data-i18n-placeholder="signup.orgNamePlaceholder" placeholder="Acme Logistics">
     </div>
 
     <div class="field">
-      <label for="full-name">Your full name</label>
-      <input type="text" id="full-name" autocomplete="name" placeholder="John Smith">
+      <label for="full-name" data-i18n="signup.fullName">Your full name</label>
+      <input type="text" id="full-name" autocomplete="name" data-i18n-placeholder="signup.fullNamePlaceholder" placeholder="John Smith">
     </div>
 
     <div class="field">
-      <label for="password">Create a password</label>
+      <label for="password" data-i18n="signup.createPassword">Create a password</label>
       <div class="password-wrap">
         <input type="password" id="password" autocomplete="new-password" placeholder="••••••••">
-        <button type="button" class="password-toggle" id="toggle-password">Show</button>
+        <button type="button" class="password-toggle" id="toggle-password" data-i18n="common.show">Show</button>
       </div>
       <div class="strength" id="strength" style="display:none">
         <div class="strength-bar">
@@ -106,30 +108,30 @@
           <div class="seg" id="seg-4"></div>
           <div class="seg" id="seg-5"></div>
         </div>
-        <div class="strength-rule" id="rule-len"><div class="dot"></div>Minimum 8 characters</div>
-        <div class="strength-rule" id="rule-up"><div class="dot"></div>Uppercase letter (A–Z)</div>
-        <div class="strength-rule" id="rule-low"><div class="dot"></div>Lowercase letter (a–z)</div>
-        <div class="strength-rule" id="rule-num"><div class="dot"></div>Number (0–9)</div>
-        <div class="strength-rule" id="rule-spc"><div class="dot"></div>Special character (!@#$%…)</div>
+        <div class="strength-rule" id="rule-len"><div class="dot"></div><span data-i18n="password.minLength">Minimum 8 characters</span></div>
+        <div class="strength-rule" id="rule-up"><div class="dot"></div><span data-i18n="password.upper">Uppercase letter (A–Z)</span></div>
+        <div class="strength-rule" id="rule-low"><div class="dot"></div><span data-i18n="password.lower">Lowercase letter (a–z)</span></div>
+        <div class="strength-rule" id="rule-num"><div class="dot"></div><span data-i18n="password.number">Number (0–9)</span></div>
+        <div class="strength-rule" id="rule-spc"><div class="dot"></div><span data-i18n="password.special">Special character (!@#$%…)</span></div>
       </div>
     </div>
 
     <div class="field">
-      <label for="password-confirm">Confirm password</label>
+      <label for="password-confirm" data-i18n="signup.confirmPassword">Confirm password</label>
       <div class="password-wrap">
         <input type="password" id="password-confirm" autocomplete="new-password" placeholder="••••••••">
-        <button type="button" class="password-toggle" id="toggle-password-confirm">Show</button>
+        <button type="button" class="password-toggle" id="toggle-password-confirm" data-i18n="common.show">Show</button>
       </div>
-      <p class="field-error" id="pwd-mismatch" style="display:none">Passwords do not match</p>
+      <p class="field-error" id="pwd-mismatch" style="display:none" data-i18n="signup.passwordsDoNotMatch">Passwords do not match</p>
     </div>
 
     <button class="btn-primary" id="btn-create" disabled>
-      <span>Create organization</span>
+      <span data-i18n="signup.createOrgButton">Create organization</span>
     </button>
 
     <p class="bottom-link" style="font-size:0.78rem;">
-      By creating an account, you agree to our
-      <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.
+      <span data-i18n="signup.termsPrefix">By creating an account, you agree to our</span>
+      <a href="/terms" data-i18n="signup.termsLink">Terms</a> <span data-i18n="signup.termsAnd">and</span> <a href="/privacy" data-i18n="signup.privacyLink">Privacy Policy</a>.
     </p>
   </div>
 
@@ -137,8 +139,8 @@
   <div class="step" id="step-success">
     <div style="text-align:center; padding: 16px 0;">
       <div style="width:72px; height:72px; margin:0 auto 16px; background:#f0fdf4; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:2.2rem; color:#16a34a;">✓</div>
-      <h2 style="font-size:1.3rem; font-weight:800; margin-bottom:8px; color:var(--text);">Welcome to ShiftRight!</h2>
-      <p style="color:var(--muted); font-size:0.9rem; line-height:1.5;">Setting up your workspace…</p>
+      <h2 style="font-size:1.3rem; font-weight:800; margin-bottom:8px; color:var(--text);" data-i18n="signup.step4Welcome">Welcome to ShiftRight!</h2>
+      <p style="color:var(--muted); font-size:0.9rem; line-height:1.5;" data-i18n="signup.step4Setting">Setting up your workspace…</p>
     </div>
   </div>
 

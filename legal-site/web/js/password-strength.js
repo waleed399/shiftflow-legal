@@ -45,13 +45,22 @@ export function renderStrengthMeter(pw) {
 
 // Wire the eye-toggle on a password field. Mutates the input's `type` between
 // "password" and "text"; updates the button label.
+import { t } from './i18n.js'
+
 export function wirePasswordToggle(inputId, btnId) {
   const input = document.getElementById(inputId)
   const btn   = document.getElementById(btnId)
   if (!input || !btn) return
+  const setLabel = () => {
+    const isPw = input.type === 'password'
+    btn.setAttribute('data-i18n', isPw ? 'common.show' : 'common.hide')
+    btn.textContent = isPw ? t('common.show') : t('common.hide')
+  }
+  setLabel()
   btn.addEventListener('click', () => {
     const isPw = input.type === 'password'
     input.type = isPw ? 'text' : 'password'
-    btn.textContent = isPw ? 'Hide' : 'Show'
+    setLabel()
   })
+  document.addEventListener('languagechange', setLabel)
 }

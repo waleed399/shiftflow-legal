@@ -4,6 +4,7 @@ import {
   getToken, saveSession,
 } from './auth-common.js'
 import { wirePasswordToggle } from './password-strength.js'
+import { initI18n, mountLanguageSwitcher } from './i18n.js'
 
 async function handleLogin() {
   const alertEl = $('alert')
@@ -30,6 +31,9 @@ async function handleLogin() {
 
 function init() {
   if (getToken()) { window.location.href = '/web/'; return }
+
+  initI18n()
+  mountLanguageSwitcher(document.getElementById('auth-lang-switcher'), { variant: 'auth' })
 
   $('btn-login').addEventListener('click', handleLogin)
   $('email').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('password').focus() })

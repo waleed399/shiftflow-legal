@@ -1,6 +1,7 @@
 import { state, ensureOrgWorkers } from './state.js'
 import { apiFetch } from './api.js'
 import { esc, getInitials, applyAvatars, toYMD } from './utils.js'
+import { t } from './i18n.js'
 
 // ── Module state ──────────────────────────────────────────────────────────────
 
@@ -81,41 +82,41 @@ function renderPage() {
 
       <div class="dept-panel">
         <div class="dept-panel-header">
-          <span class="dept-panel-title">Departments</span>
+          <span class="dept-panel-title">${t('workers.departments')}</span>
         </div>
         <div class="dept-list" id="dept-list">
           ${deptListHtml()}
         </div>
         <div class="dept-add-form" id="dept-add-form">
           <input class="form-input dept-add-input" id="dept-add-input"
-                 placeholder="New department name…" maxlength="60"
+                 placeholder="${t('workers.deptPlaceholder')}" maxlength="60"
                  onkeydown="onDeptAddKey(event)">
           <div class="dept-add-row">
-            <button class="btn btn-success btn-sm" id="dept-add-btn" onclick="submitCreateDept()">Add</button>
-            <button class="btn btn-ghost btn-sm" onclick="cancelCreateDept()">Cancel</button>
+            <button class="btn btn-success btn-sm" id="dept-add-btn" onclick="submitCreateDept()">${t('workers.addDept')}</button>
+            <button class="btn btn-ghost btn-sm" onclick="cancelCreateDept()">${t('common.cancel')}</button>
           </div>
           <div class="dept-add-error" id="dept-add-error"></div>
         </div>
         <button class="dept-add-trigger" onclick="openCreateDept()">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          New department
+          ${t('workers.newDept')}
         </button>
       </div>
 
       <div class="workers-panel">
         <div class="workers-toolbar">
-          <span class="workers-count">${_allWorkers.length} worker${_allWorkers.length !== 1 ? 's' : ''}</span>
-          <input class="workers-search" id="workers-search" placeholder="Search…" oninput="filterWorkers(this.value)">
+          <span class="workers-count">${_allWorkers.length === 1 ? t('workers.workerCountOne', { n: 1 }) : t('workers.workerCountMany', { n: _allWorkers.length })}</span>
+          <input class="workers-search" id="workers-search" placeholder="${t('workers.searchPlaceholder')}" oninput="filterWorkers(this.value)">
           <button class="btn btn-success btn-sm" onclick="openInviteForm()">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Invite worker
+            ${t('workers.inviteWorker')}
           </button>
         </div>
 
         <div class="invite-form hidden" id="invite-form">
-          <input class="form-input" type="email" id="invite-email" placeholder="worker@email.com" onkeydown="onInviteKey(event)">
-          <button class="btn btn-success btn-sm" id="invite-submit-btn" onclick="submitInvite()">Send invite</button>
-          <button class="btn btn-ghost btn-sm" onclick="closeInviteForm()">Cancel</button>
+          <input class="form-input" type="email" id="invite-email" placeholder="${t('workers.invitePlaceholder')}" onkeydown="onInviteKey(event)">
+          <button class="btn btn-success btn-sm" id="invite-submit-btn" onclick="submitInvite()">${t('workers.sendInvite')}</button>
+          <button class="btn btn-ghost btn-sm" onclick="closeInviteForm()">${t('common.cancel')}</button>
           <span class="invite-error" id="invite-error"></span>
         </div>
 
@@ -123,8 +124,8 @@ function renderPage() {
           ${_allWorkers.length === 0 ? `
             <div class="empty-state">
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              <p>No workers yet</p>
-              <p style="font-size:0.8rem;margin-top:6px;max-width:260px;margin-left:auto;margin-right:auto">Use the Invite button above or share your invite code from <strong>Profile</strong>.</p>
+              <p>${t('workers.noWorkersTitle')}</p>
+              <p style="font-size:0.8rem;margin-top:6px;max-width:260px;margin-left:auto;margin-right:auto">${t('workers.noWorkersHint')}</p>
             </div>` : `
             <div class="workers-grid" id="workers-grid">
               ${_allWorkers.map(w => workerCard(w, counts.get(w.id) || 0)).join('')}
@@ -142,7 +143,7 @@ function renderPage() {
 
 function deptListHtml() {
   if (!_allDepts.length) {
-    return '<div class="dept-empty">No departments yet</div>'
+    return `<div class="dept-empty">${t('workers.noDepts')}</div>`
   }
   return _allDepts.map(d => {
     const color      = deptColor(d.id)
@@ -155,13 +156,13 @@ function deptListHtml() {
         <div class="dept-item-stripe" style="background:${color}"></div>
         <div class="dept-item-body">
           <div class="dept-item-name" id="dept-name-${esc(d.id)}">${esc(d.name)}</div>
-          <div class="dept-item-count">${memberCount} worker${memberCount !== 1 ? 's' : ''}</div>
+          <div class="dept-item-count">${memberCount === 1 ? t('workers.workerCountOne', { n: 1 }) : t('workers.workerCountMany', { n: memberCount })}</div>
         </div>
         <div class="dept-item-actions">
-          <button class="dept-action-btn" title="Rename" onclick="renameDept('${esc(d.id)}')">
+          <button class="dept-action-btn" title="${t('workers.rename')}" onclick="renameDept('${esc(d.id)}')">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>
-          <button class="dept-action-btn dept-action-delete" title="Delete" onclick="deleteDept('${esc(d.id)}','${esc(d.name)}')">
+          <button class="dept-action-btn dept-action-delete" title="${t('common.delete')}" onclick="deleteDept('${esc(d.id)}','${esc(d.name)}')">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
           </button>
         </div>
@@ -174,13 +175,13 @@ function deptListHtml() {
 function workerCard(w, shiftCount) {
   const initials   = esc(getInitials(w.name))
   const shiftLabel = shiftCount > 0
-    ? `<span class="worker-card-shifts-badge">${shiftCount} shift${shiftCount !== 1 ? 's' : ''} this week</span>`
-    : `<span class="worker-card-shifts-badge worker-card-shifts-none">No shifts this week</span>`
+    ? `<span class="worker-card-shifts-badge">${shiftCount === 1 ? t('workers.shiftsThisWeekOne', { n: 1 }) : t('workers.shiftsThisWeekMany', { n: shiftCount })}</span>`
+    : `<span class="worker-card-shifts-badge worker-card-shifts-none">${t('workers.noShiftsThisWeek')}</span>`
 
   const deptIds = w.departmentIds || []
   let deptBadges
   if (deptIds.length === 0) {
-    deptBadges = `<span class="worker-dept-badge worker-dept-any">All departments</span>`
+    deptBadges = `<span class="worker-dept-badge worker-dept-any">${t('workers.allDepartments')}</span>`
   } else {
     deptBadges = deptIds.map(id => {
       const dept  = _allDepts.find(d => d.id === id)
@@ -194,7 +195,7 @@ function workerCard(w, shiftCount) {
     <div class="worker-card worker-card-clickable" onclick="openWorkerDrawer('${esc(w.id)}')">
       <div class="worker-card-avatar" data-avatar="${esc(w.avatarUrl || '')}">${initials}</div>
       <div class="worker-card-info">
-        <div class="worker-card-name">${esc(w.name || '—')}</div>
+        <div class="worker-card-name">${esc(w.name || t('common.dash'))}</div>
         <div class="worker-card-email">${esc(w.email || '')}</div>
         <div class="worker-card-dept-badges">${deptBadges}</div>
         ${shiftLabel}
@@ -226,7 +227,7 @@ export async function submitCreateDept() {
   const errEl = document.getElementById('dept-add-error')
   const btn   = document.getElementById('dept-add-btn')
   const name  = input.value.trim()
-  if (!name) { errEl.textContent = 'Enter a department name'; return }
+  if (!name) { errEl.textContent = t('workers.deptNeedName'); return }
   errEl.textContent = ''
   btn.disabled = true
   btn.textContent = '…'
@@ -239,7 +240,7 @@ export async function submitCreateDept() {
     })
     if (!res?.ok) {
       const d = await res?.json().catch(() => ({}))
-      errEl.textContent = d?.error || 'Failed to create department'
+      errEl.textContent = d?.error || t('workers.deptCreateFailed')
       return
     }
     const dept = await res.json()
@@ -248,7 +249,7 @@ export async function submitCreateDept() {
     document.getElementById('dept-list').innerHTML = deptListHtml()
   } finally {
     btn.disabled = false
-    btn.textContent = 'Add'
+    btn.textContent = t('workers.addDept')
   }
 }
 
@@ -287,7 +288,7 @@ export async function submitRenameDept(id) {
   })
   if (!res?.ok) {
     if (nameEl) nameEl.textContent = dept.name
-    alert('Failed to rename — try again')
+    alert(t('workers.deptRenameFailed'))
     return
   }
   _allDepts = _allDepts.map(d => d.id === id ? { ...d, name: newName } : d)
@@ -306,11 +307,11 @@ export function onDeptRenameKey(e, id) {
 
 export function deleteDept(id, name) {
   showConfirmDialog(
-    `Delete "${name}"?`,
-    `Removing this department will unassign all workers from it and cancel any upcoming shifts tagged to <strong>${esc(name)}</strong>. This cannot be undone.`,
+    t('workers.confirmDeleteTitle', { name }),
+    t('workers.confirmDeleteBody', { name: esc(name) }),
     async () => {
       const res = await apiFetch(`/departments/${id}`, { method: 'DELETE' })
-      if (!res?.ok) { alert('Failed to delete department — try again'); return }
+      if (!res?.ok) { alert(t('workers.deptDeleteFailed')); return }
       _allDepts   = _allDepts.filter(d => d.id !== id)
       _allWorkers = _allWorkers.map(w => ({
         ...w,
@@ -338,7 +339,7 @@ export function openWorkerDrawer(workerId) {
       <div class="drawer-worker-info">
         <div class="drawer-avatar" data-avatar="${esc(worker.avatarUrl || '')}">${esc(getInitials(worker.name))}</div>
         <div>
-          <div class="drawer-worker-name">${esc(worker.name || '—')}</div>
+          <div class="drawer-worker-name">${esc(worker.name || t('common.dash'))}</div>
           <div class="drawer-worker-email">${esc(worker.email || '')}</div>
         </div>
       </div>
@@ -346,11 +347,9 @@ export function openWorkerDrawer(workerId) {
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <div class="drawer-section-label">Department membership</div>
+    <div class="drawer-section-label">${t('workers.deptMembership')}</div>
     <div class="drawer-dept-hint">
-      ${deptIds.length === 0
-        ? 'Currently has access to <strong>all departments</strong>. Assign one to restrict.'
-        : 'Toggle departments to add or remove this worker.'}
+      ${deptIds.length === 0 ? t('workers.accessAll') : t('workers.toggleHint')}
     </div>
     <div class="drawer-dept-list" id="drawer-dept-list">
       ${drawerDeptListHtml(deptIds)}
@@ -363,7 +362,7 @@ export function openWorkerDrawer(workerId) {
 
 function drawerDeptListHtml(deptIds) {
   if (!_allDepts.length) {
-    return '<div class="dept-empty" style="padding:12px 0">No departments created yet.</div>'
+    return `<div class="dept-empty" style="padding:12px 0">${t('workers.noDeptsCreated')}</div>`
   }
   return _allDepts.map(d => {
     const color   = deptColor(d.id)
@@ -407,7 +406,7 @@ export async function toggleDeptMembership(deptId) {
 
   if (!res?.ok) {
     if (toggleEl) { toggleEl.style.opacity = ''; toggleEl.style.pointerEvents = '' }
-    alert('Failed to update department — try again')
+    alert(t('workers.deptUpdateFailed'))
     return
   }
 
@@ -423,9 +422,7 @@ export async function toggleDeptMembership(deptId) {
   if (deptListEl) deptListEl.innerHTML = drawerDeptListHtml(newDeptIds)
 
   const hintEl = document.querySelector('.drawer-dept-hint')
-  if (hintEl) hintEl.innerHTML = newDeptIds.length === 0
-    ? 'Currently has access to <strong>all departments</strong>. Assign one to restrict.'
-    : 'Toggle departments to add or remove this worker.'
+  if (hintEl) hintEl.innerHTML = newDeptIds.length === 0 ? t('workers.accessAll') : t('workers.toggleHint')
 
   document.getElementById('dept-list').innerHTML = deptListHtml()
   renderWorkersGrid()
@@ -475,7 +472,7 @@ export function filterWorkers(query) {
   const grid   = document.getElementById('workers-grid')
   if (!grid) return
   if (!filtered.length) {
-    grid.innerHTML = '<p class="workers-empty-filter">No workers match your search</p>'
+    grid.innerHTML = `<p class="workers-empty-filter">${t('workers.noWorkersMatch')}</p>`
     return
   }
   grid.innerHTML = filtered.map(w => workerCard(w, counts.get(w.id) || 0)).join('')
@@ -506,10 +503,10 @@ export async function submitInvite() {
   const btn     = document.getElementById('invite-submit-btn')
   const email   = emailEl.value.trim()
 
-  if (!email) { errEl.textContent = 'Enter an email address'; return }
+  if (!email) { errEl.textContent = t('workers.inviteNeedEmail'); return }
   errEl.textContent = ''
   btn.disabled = true
-  btn.textContent = 'Sending…'
+  btn.textContent = t('common.sending')
 
   try {
     const res = await apiFetch('/organization/invitations', {
@@ -519,7 +516,7 @@ export async function submitInvite() {
     })
     if (!res?.ok) {
       const d = await res?.json().catch(() => ({}))
-      errEl.textContent = d?.error || 'Failed to send invite'
+      errEl.textContent = d?.error || t('workers.inviteFailed')
       return
     }
     const inv = await res.json()
@@ -528,7 +525,7 @@ export async function submitInvite() {
     document.getElementById('invitations-section').innerHTML = invitationsHtml(_allInvitations)
   } finally {
     btn.disabled = false
-    btn.textContent = 'Send invite'
+    btn.textContent = t('workers.sendInvite')
   }
 }
 
@@ -537,16 +534,16 @@ export async function submitInvite() {
 export async function resendInvite(id) {
   const row = document.getElementById(`inv-${id}`)
   const btn = row?.querySelector('.btn-ghost')
-  if (btn) { btn.disabled = true; btn.textContent = 'Sending…' }
+  if (btn) { btn.disabled = true; btn.textContent = t('common.sending') }
   const res = await apiFetch(`/organization/invitations/${id}/resend`, { method: 'POST', body: '{}' })
   if (!res?.ok) {
-    if (btn) { btn.disabled = false; btn.textContent = 'Resend' }
-    alert('Failed to resend — try again')
+    if (btn) { btn.disabled = false; btn.textContent = t('requests.resend') }
+    alert(t('workers.inviteResendFailed'))
     return
   }
-  if (btn) { btn.disabled = false; btn.textContent = 'Resend' }
+  if (btn) { btn.disabled = false; btn.textContent = t('requests.resend') }
   const meta = row?.querySelector('.pending-invite-meta')
-  if (meta) meta.textContent = 'Sent just now · expires in 7 days'
+  if (meta) meta.textContent = t('workers.inviteSentJustNow')
 }
 
 export async function cancelInvite(id) {
@@ -556,7 +553,7 @@ export async function cancelInvite(id) {
   const res = await apiFetch(`/organization/invitations/${id}`, { method: 'DELETE' })
   if (!res?.ok) {
     if (btn) btn.disabled = false
-    alert('Failed to cancel — try again')
+    alert(t('workers.inviteCancelFailed'))
     return
   }
   _allInvitations = _allInvitations.filter(i => i.id !== id)
@@ -568,18 +565,18 @@ export async function cancelInvite(id) {
 function invitationsHtml(invitations) {
   if (!invitations.length) return ''
   return `
-    <div class="workers-section-divider"><span>Pending invitations</span></div>
+    <div class="workers-section-divider"><span>${t('workers.pendingInvitations')}</span></div>
     <div class="pending-invites">
       ${invitations.map(inv => `
         <div class="pending-invite-row" id="inv-${esc(inv.id)}">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           <div class="pending-invite-info">
-            <span class="pending-invite-email">${esc(inv.email || inv.phone || '—')}</span>
-            <span class="pending-invite-meta">Sent ${daysAgo(inv.createdAt)} &middot; ${daysUntil(inv.expiresAt)}</span>
+            <span class="pending-invite-email">${esc(inv.email || inv.phone || t('common.dash'))}</span>
+            <span class="pending-invite-meta">${t('workers.sent', { ago: daysAgo(inv.createdAt) })} &middot; ${daysUntil(inv.expiresAt)}</span>
           </div>
           <div class="pending-invite-actions">
-            <button class="btn btn-ghost btn-sm" onclick="resendInvite('${esc(inv.id)}')">Resend</button>
-            <button class="btn btn-danger btn-sm" onclick="cancelInvite('${esc(inv.id)}')">Cancel</button>
+            <button class="btn btn-ghost btn-sm" onclick="resendInvite('${esc(inv.id)}')">${t('requests.resend')}</button>
+            <button class="btn btn-danger btn-sm" onclick="cancelInvite('${esc(inv.id)}')">${t('common.cancel')}</button>
           </div>
         </div>`).join('')}
     </div>`
@@ -587,12 +584,12 @@ function invitationsHtml(invitations) {
 
 function daysAgo(iso) {
   const d = Math.round((Date.now() - new Date(iso).getTime()) / 86400000)
-  return d === 0 ? 'today' : d === 1 ? 'yesterday' : `${d} days ago`
+  return d === 0 ? t('workers.today') : d === 1 ? t('workers.yesterday') : t('workers.daysAgo', { n: d })
 }
 
 function daysUntil(iso) {
   const d = Math.ceil((new Date(iso).getTime() - Date.now()) / 86400000)
-  return d <= 0 ? 'expired' : d === 1 ? 'expires tomorrow' : `expires in ${d} days`
+  return d <= 0 ? t('workers.expired') : d === 1 ? t('workers.expiresTomorrow') : t('workers.expiresIn', { n: d })
 }
 
 // ── Window exports ────────────────────────────────────────────────────────────

@@ -6,10 +6,11 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://shift-right-production.up.railway.app https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'none'">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <title>ShiftRight — Set up your organization</title>
+  <title data-i18n="onboarding.docTitle">ShiftRight — Set up your organization</title>
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/auth.css">
   <link rel="stylesheet" href="css/onboarding.css">
+  <link rel="stylesheet" href="css/i18n.css">
 </head>
 <body class="auth-page">
 
@@ -19,6 +20,7 @@
 <nav class="auth-nav">
   <a href="/" class="logo">Shift<span>Right</span></a>
   <div class="nav-org" id="nav-org"></div>
+  <div id="auth-lang-switcher"></div>
 </nav>
 
 <div class="auth-card wide">
@@ -34,64 +36,62 @@
 
   <!-- STEP 1: Work Week -->
   <div class="step visible" id="step-week">
-    <h1>Set up your work week</h1>
-    <p class="subtitle">Tell us which days your team works. You can change this anytime in Settings.</p>
+    <h1 data-i18n="onboarding.step1Title">Set up your work week</h1>
+    <p class="subtitle" data-i18n="onboarding.step1Subtitle">Tell us which days your team works. You can change this anytime in Settings.</p>
 
-    <div class="section-label">Work-week preset</div>
+    <div class="section-label" data-i18n="onboarding.workWeekPreset">Work-week preset</div>
     <div class="chip-row" id="preset-row">
-      <div class="chip" data-preset="0">Mon–Fri</div>
-      <div class="chip" data-preset="1">Sun–Thu</div>
-      <div class="chip" data-preset="2">All days</div>
-      <div class="chip" data-preset="3">Custom</div>
+      <div class="chip" data-preset="0" data-i18n="onboarding.presetMonFri">Mon–Fri</div>
+      <div class="chip" data-preset="1" data-i18n="onboarding.presetSunThu">Sun–Thu</div>
+      <div class="chip" data-preset="2" data-i18n="onboarding.presetAllDays">All days</div>
+      <div class="chip" data-preset="3" data-i18n="onboarding.presetCustom">Custom</div>
     </div>
 
-    <div class="section-label">Active days</div>
+    <div class="section-label" data-i18n="onboarding.activeDays">Active days</div>
     <div class="day-row" id="day-row"></div>
 
-    <div class="section-label">Week starts on</div>
+    <div class="section-label" data-i18n="onboarding.weekStartsOn">Week starts on</div>
     <div class="two-col">
-      <div class="opt" data-week="MONDAY">Monday</div>
-      <div class="opt" data-week="SUNDAY">Sunday</div>
+      <div class="opt" data-week="MONDAY" data-i18n="onboarding.monday">Monday</div>
+      <div class="opt" data-week="SUNDAY" data-i18n="onboarding.sunday">Sunday</div>
     </div>
 
     <div class="actions">
       <button class="btn-primary" id="btn-next-1">
-        <span>Continue</span>
+        <span data-i18n="onboarding.continue">Continue</span>
       </button>
     </div>
   </div>
 
   <!-- STEP 2: Departments + Templates -->
   <div class="step" id="step-departments">
-    <h1>Departments and shifts</h1>
-    <p class="subtitle">Add the departments your team works in, then define your common shift types.</p>
+    <h1 data-i18n="onboarding.step2Title">Departments and shifts</h1>
+    <p class="subtitle" data-i18n="onboarding.step2Subtitle">Add the departments your team works in, then define your common shift types.</p>
 
     <div class="alert" id="alert-2" style="display:none"></div>
 
-    <div class="section-label">Departments</div>
+    <div class="section-label" data-i18n="onboarding.departments">Departments</div>
     <div class="dept-chips" id="dept-chips"></div>
     <div class="input-row">
-      <input type="text" id="dept-input" placeholder="e.g. Kitchen, Front Desk, Warehouse" autocomplete="off">
+      <input type="text" id="dept-input" data-i18n-placeholder="onboarding.deptPlaceholder" placeholder="e.g. Kitchen, Front Desk, Warehouse" autocomplete="off">
       <button class="icon-btn" id="add-dept-btn" type="button">+</button>
     </div>
 
     <div id="templates-section" style="display:none">
       <div style="height:1px; background:var(--border); margin: 8px 0 20px;"></div>
-      <div class="section-label">Shift types</div>
+      <div class="section-label" data-i18n="onboarding.shiftTypes">Shift types</div>
       <div id="templates-list"></div>
-      <button class="add-tmpl-btn" id="add-tmpl-btn" type="button">
-        <span style="font-size:1.05rem">+</span> Add shift type
-      </button>
+      <button class="add-tmpl-btn" id="add-tmpl-btn" type="button" data-i18n="onboarding.addShiftType">+ Add shift type</button>
     </div>
 
     <div class="skip-row">
-      <a id="skip-link">Skip — I'll set this up later</a>
+      <a id="skip-link" data-i18n="onboarding.skipLater">Skip — I'll set this up later</a>
     </div>
 
     <div class="actions">
-      <button class="btn-back" id="btn-back-2">Back</button>
+      <button class="btn-back" id="btn-back-2" data-i18n="onboarding.back">Back</button>
       <button class="btn-primary" id="btn-finish">
-        <span>Finish setup</span>
+        <span data-i18n="onboarding.finishSetup">Finish setup</span>
       </button>
     </div>
   </div>
@@ -100,22 +100,22 @@
   <div class="step" id="step-success">
     <div class="success">
       <div class="check-ring">✓</div>
-      <h1>You're all set!</h1>
-      <p class="subtitle">Your organization is ready. Share the invite code below with your team so they can join.</p>
+      <h1 data-i18n="onboarding.step3AllSet">You're all set!</h1>
+      <p class="subtitle" data-i18n="onboarding.step3Subtitle">Your organization is ready. Share the invite code below with your team so they can join.</p>
 
       <div class="invite-box">
-        <div class="invite-label">Invite code</div>
+        <div class="invite-label" data-i18n="onboarding.inviteCode">Invite code</div>
         <div class="invite-code" id="invite-code">——</div>
-        <p class="invite-hint">Your workers enter this code in the ShiftRight mobile app to join.</p>
+        <p class="invite-hint" data-i18n="onboarding.inviteHint">Your workers enter this code in the ShiftRight mobile app to join.</p>
         <button class="copy-btn" id="copy-btn" type="button">
-          <span id="copy-label">Copy invite code</span>
+          <span id="copy-label" data-i18n="onboarding.copyInviteCode">Copy invite code</span>
         </button>
       </div>
 
       <!-- TODO: replace href="#" with real App Store + Play Store URLs once live -->
       <div class="next-card">
-        <div class="next-card-title"><span class="icon">📱</span> Get the mobile app</div>
-        <div class="next-card-body">
+        <div class="next-card-title"><span class="icon">📱</span> <span data-i18n="onboarding.getMobileApp">Get the mobile app</span></div>
+        <div class="next-card-body" data-i18n="onboarding.getMobileBody">
           Workers join your organization through the mobile app. Grab it for your team — and for yourself, to manage on the go.
         </div>
         <div class="store-row">
@@ -124,8 +124,8 @@
               <path d="M17.05 12.04c-.03-2.84 2.32-4.2 2.42-4.26-1.32-1.93-3.38-2.2-4.11-2.23-1.74-.18-3.4 1.03-4.29 1.03-.9 0-2.26-1.01-3.72-.98-1.91.03-3.68 1.11-4.66 2.82-1.99 3.44-.5 8.53 1.42 11.32.94 1.37 2.05 2.9 3.5 2.84 1.41-.06 1.94-.91 3.65-.91 1.7 0 2.18.91 3.66.88 1.51-.03 2.47-1.39 3.39-2.77 1.07-1.58 1.51-3.12 1.53-3.2-.04-.01-2.93-1.12-2.96-4.45zM14.27 3.62c.77-.94 1.29-2.24 1.15-3.54-1.11.05-2.46.75-3.26 1.68-.71.83-1.34 2.17-1.18 3.44 1.24.1 2.51-.63 3.29-1.58z"/>
             </svg>
             <div class="store-text">
-              <span class="store-sub">Download on the</span>
-              <span class="store-name">App Store</span>
+              <span class="store-sub" data-i18n="onboarding.downloadOnThe">Download on the</span>
+              <span class="store-name" data-i18n="onboarding.appStore">App Store</span>
             </div>
           </a>
           <a class="store-btn" href="#" id="android-store" target="_blank" rel="noopener">
@@ -139,21 +139,21 @@
               <path d="M3.2 1.9C2.8 2.3 2.5 2.9 2.5 3.7v16.6c0 .8.3 1.4.7 1.8l9.4-9.6L3.2 1.9zm10.9 9.5L4.5 1.8 16.7 8.6l-2.6 2.8zm6.4-2.2L17.3 7.2 14.4 10l2.9 2.8 3.2-1.8c1-.6 1-2 0-2.6zM4.5 22.2L14.1 13l2.6 2.8L4.5 22.2z" fill="url(#play-grad)"/>
             </svg>
             <div class="store-text">
-              <span class="store-sub">GET IT ON</span>
-              <span class="store-name">Google Play</span>
+              <span class="store-sub" data-i18n="onboarding.getItOn">GET IT ON</span>
+              <span class="store-name" data-i18n="onboarding.googlePlay">Google Play</span>
             </div>
           </a>
         </div>
       </div>
 
       <div class="next-card">
-        <div class="next-card-title"><span class="icon">🔄</span> Manage from anywhere</div>
-        <div class="next-card-body">
+        <div class="next-card-title"><span class="icon">🔄</span> <span data-i18n="onboarding.manageAnywhere">Manage from anywhere</span></div>
+        <div class="next-card-body" data-i18n="onboarding.manageAnywhereBody">
           Sign in with the same email on any device. Web, iOS, and Android stay in sync — edit your departments, shift types, and work week whenever it's convenient.
         </div>
       </div>
 
-      <button class="go-dashboard" id="go-dashboard" type="button">
+      <button class="go-dashboard" id="go-dashboard" type="button" data-i18n="onboarding.goDashboard">
         Go to dashboard →
       </button>
     </div>

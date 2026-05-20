@@ -1,0 +1,78 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   i18n.css — Language switcher UI + RTL overrides.
+
+   The web app's existing CSS uses physical properties (left/right/border-left,
+   margin-left, etc.). Rather than refactor everything to logical properties,
+   this file adds targeted [dir="rtl"] overrides for the spots where RTL would
+   otherwise look wrong (sidebar border, active-nav marker, action bar, modal
+   close button position, auth nav alignment).
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* ── Language switcher (shared) ───────────────────────────────────────────── */
+
+.lang-switcher {
+  display: flex;
+  gap: 4px;
+}
+.lang-switcher .lang-btn {
+  flex: 1;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.55);
+  transition: background 0.15s, color 0.15s;
+}
+.lang-switcher .lang-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.85);
+}
+.lang-switcher .lang-btn.active {
+  background: rgba(191, 31, 58, 0.25);
+  color: #f87171;
+}
+
+/* Sidebar variant: tucked above the sign-out button. */
+.lang-switcher-sidebar {
+  margin-bottom: 10px;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 10px;
+}
+
+/* Auth-nav variant: small pill at top-right of unauth pages. */
+.lang-switcher-auth .lang-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 5px 10px;
+  font-size: 0.74rem;
+}
+.lang-switcher-auth .lang-btn.active {
+  background: white;
+  color: var(--navy-deep);
+}
+
+/* ── RTL overrides ────────────────────────────────────────────────────────── */
+
+/* Sidebar border flips to the left edge in RTL. */
+[dir="rtl"] aside {
+  border-right: none;
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.18);
+}
+
+/* Active-nav red marker: pinned to the right edge in RTL with mirrored radius. */
+[dir="rtl"] .nav-item.active::before {
+  left: auto;
+  right: 0;
+  border-radius: 3px 0 0 3px;
+}
+
+/* Auth-nav: when RTL we want the "back" arrow to face right and the lang
+   switcher to sit visually mirrored. Flex already mirrors via dir, but the
+   back-arrow glyph (←) is baked into the text — the translations themselves
+   use the appropriate arrow (→), so we don't need to flip the glyph here. */

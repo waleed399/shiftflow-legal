@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="css/sidebar.css">
   <link rel="stylesheet" href="css/views.css">
   <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/i18n.css">
 </head>
 <body>
 
@@ -18,7 +19,7 @@
 <div id="loading">
   <div class="loading-inner">
     <div class="logo">Shift<span>Right</span></div>
-    <p class="loading-msg">Loading your workspace…</p>
+    <p class="loading-msg" data-i18n="common.loading">Loading your workspace…</p>
     <div class="spinner"></div>
   </div>
 </div>
@@ -44,31 +45,32 @@
     <nav>
       <div class="nav-item active" id="nav-shifts" onclick="showView('shifts')">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        Shifts
+        <span data-i18n="nav.shifts">Shifts</span>
       </div>
       <div class="nav-item" id="nav-requests" onclick="showView('requests')">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-        Requests
+        <span data-i18n="nav.requests">Requests</span>
         <span class="nav-badge" id="req-badge"></span>
       </div>
       <div class="nav-item" id="nav-workers" onclick="showView('workers')">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Workers
+        <span data-i18n="nav.workers">Workers</span>
       </div>
       <div class="nav-item" id="nav-availability" onclick="showView('availability')">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8.01" y2="14"/><line x1="12" y1="14" x2="12.01" y2="14"/><line x1="16" y1="14" x2="16.01" y2="14"/></svg>
-        Availability
+        <span data-i18n="nav.availability">Availability</span>
       </div>
       <div class="nav-item" id="nav-profile" onclick="showView('profile')">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        Profile
+        <span data-i18n="nav.profile">Profile</span>
       </div>
     </nav>
 
     <div class="sidebar-footer">
+      <div id="sb-lang-switcher"></div>
       <button class="sign-out-btn" onclick="signOut()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Sign out
+        <span data-i18n="nav.signOut">Sign out</span>
       </button>
     </div>
   </aside>
@@ -79,15 +81,15 @@
     <!-- Shifts view -->
     <div id="view-shifts">
       <div class="topbar">
-        <span class="topbar-title">Shifts</span>
+        <span class="topbar-title" data-i18n="shifts.title">Shifts</span>
         <div class="view-toggle">
-          <button class="view-toggle-btn active" id="view-list-btn" onclick="setShiftsView('list')" title="List view">
+          <button class="view-toggle-btn active" id="view-list-btn" onclick="setShiftsView('list')" data-i18n-title="shifts.listView" title="List view">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
           </button>
-          <button class="view-toggle-btn" id="view-table-btn" onclick="setShiftsView('table')" title="Day roster">
+          <button class="view-toggle-btn" id="view-table-btn" onclick="setShiftsView('table')" data-i18n-title="shifts.dayRoster" title="Day roster">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg>
           </button>
-          <button class="view-toggle-btn" id="view-week-btn" onclick="setShiftsView('week')" title="Week roster">
+          <button class="view-toggle-btn" id="view-week-btn" onclick="setShiftsView('week')" data-i18n-title="shifts.weekRoster" title="Week roster">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><rect x="7" y="13" width="2" height="2" rx="0.5"/><rect x="11" y="13" width="2" height="2" rx="0.5"/><rect x="15" y="13" width="2" height="2" rx="0.5"/><rect x="7" y="17" width="2" height="2" rx="0.5"/><rect x="11" y="17" width="2" height="2" rx="0.5"/><rect x="15" y="17" width="2" height="2" rx="0.5"/></svg>
           </button>
         </div>
@@ -105,24 +107,24 @@
       <div class="day-tabs" id="day-tabs"></div>
 
       <div class="action-bar" id="action-bar" style="display:none">
-        <span class="action-bar-label" id="action-label-day">Day:</span>
+        <span class="action-bar-label" id="action-label-day" data-i18n="shifts.dayLabel">Day:</span>
         <button class="action-btn btn-publish-day" id="btn-publish-day" onclick="publishDay()">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          Publish day
+          <span data-i18n="shifts.publishDay">Publish day</span>
         </button>
         <button class="action-btn btn-unpublish-day" id="btn-unpublish-day" onclick="unpublishDay()">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          Unpublish day
+          <span data-i18n="shifts.unpublishDay">Unpublish day</span>
         </button>
         <span class="action-bar-sep" id="action-bar-sep"></span>
-        <span class="action-bar-label">Week:</span>
+        <span class="action-bar-label" data-i18n="shifts.weekLabel">Week:</span>
         <button class="action-btn btn-publish-week" id="btn-publish-week" onclick="publishWeek()">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="9 16 11 18 15 14"/></svg>
-          <span id="publish-week-label">Publish week</span>
+          <span id="publish-week-label" data-i18n="shifts.publishWeek">Publish week</span>
         </button>
         <button class="action-btn btn-unpublish-week" id="btn-unpublish-week" onclick="unpublishWeek()">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="10" y1="14" x2="14" y2="18"/><line x1="14" y1="14" x2="10" y2="18"/></svg>
-          Unpublish week
+          <span data-i18n="shifts.unpublishWeek">Unpublish week</span>
         </button>
       </div>
 
@@ -132,7 +134,7 @@
         </div>
       </div>
 
-      <button class="fab" id="fab-new-shift" onclick="openCreateShiftModal()" title="Create a new shift" aria-label="Create a new shift">
+      <button class="fab" id="fab-new-shift" onclick="openCreateShiftModal()" data-i18n-title="shifts.newShiftTooltip" data-i18n-aria="shifts.newShiftTooltip" title="Create a new shift" aria-label="Create a new shift">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </button>
     </div>
@@ -140,7 +142,7 @@
     <!-- Availability view -->
     <div id="view-availability" style="display:none">
       <div class="topbar">
-        <span class="topbar-title">Availability</span>
+        <span class="topbar-title" data-i18n="availability.title">Availability</span>
         <div class="week-nav">
           <button class="week-btn" onclick="changeAvailWeek(-1)">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -159,7 +161,7 @@
     <!-- Workers view -->
     <div id="view-workers" style="display:none">
       <div class="topbar">
-        <span class="topbar-title">Workers</span>
+        <span class="topbar-title" data-i18n="workers.title">Workers</span>
       </div>
       <div class="content-area">
         <div id="workers-content"></div>
@@ -169,7 +171,7 @@
     <!-- Profile view -->
     <div id="view-profile" style="display:none">
       <div class="topbar">
-        <span class="topbar-title">Profile</span>
+        <span class="topbar-title" data-i18n="profile.title">Profile</span>
       </div>
       <div class="content-area">
         <div id="profile-content"></div>
@@ -179,15 +181,15 @@
     <!-- Requests view -->
     <div id="view-requests" style="display:none">
       <div class="topbar">
-        <span class="topbar-title">Requests</span>
+        <span class="topbar-title" data-i18n="requests.title">Requests</span>
       </div>
       <div class="req-tabs">
         <button class="req-tab active" id="req-tab-timeoff" onclick="setReqTab('timeoff')">
-          Time-off
+          <span data-i18n="requests.timeOff">Time-off</span>
           <span class="req-tab-badge" id="req-tab-count-timeoff"></span>
         </button>
         <button class="req-tab" id="req-tab-swaps" onclick="setReqTab('swaps')">
-          Swaps
+          <span data-i18n="requests.swaps">Swaps</span>
           <span class="req-tab-badge" id="req-tab-count-swaps"></span>
         </button>
       </div>
@@ -214,11 +216,11 @@
     </div>
     <div class="modal-body" id="shift-modal-body">
       <div>
-        <div class="modal-section-label">Workers</div>
+        <div class="modal-section-label" data-i18n="modals.workersLabel">Workers</div>
         <div id="modal-workers-list"></div>
         <button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="openAssignPicker()">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Assign worker
+          <span data-i18n="modals.assignWorker">Assign worker</span>
         </button>
       </div>
     </div>
@@ -231,15 +233,15 @@
   <div class="modal" style="max-width:400px">
     <div class="modal-header">
       <div class="modal-header-left">
-        <div class="modal-title">Assign worker</div>
-        <div class="modal-subtitle">Select a worker to add to this shift</div>
+        <div class="modal-title" data-i18n="modals.assignWorker">Assign worker</div>
+        <div class="modal-subtitle" data-i18n="modals.assignWorkerSubtitle">Select a worker to add to this shift</div>
       </div>
       <button class="modal-close" onclick="closeAssignModal()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <div class="modal-body">
-      <input class="picker-search" id="picker-search" placeholder="Search workers…" oninput="filterPicker(this.value)">
+      <input class="picker-search" id="picker-search" data-i18n-placeholder="modals.searchWorkersPlaceholder" placeholder="Search workers…" oninput="filterPicker(this.value)">
       <div class="picker-list" id="picker-list"></div>
     </div>
   </div>
@@ -250,7 +252,7 @@
   <div class="modal" style="max-width:460px">
     <div class="modal-header">
       <div class="modal-header-left">
-        <div class="modal-title">Create shift</div>
+        <div class="modal-title" data-i18n="modals.createShift">Create shift</div>
         <div class="modal-subtitle" id="cs-subtitle"></div>
       </div>
       <button class="modal-close" onclick="closeCreateShiftModal()">
@@ -260,33 +262,33 @@
     <div class="modal-body">
       <form id="create-shift-form" onsubmit="submitCreateShift(event)" autocomplete="off">
         <div class="form-row">
-          <label class="form-label" for="cs-department">Department</label>
+          <label class="form-label" for="cs-department" data-i18n="modals.department">Department</label>
           <select class="form-input" id="cs-department" required></select>
         </div>
         <div class="form-grid-2">
           <div class="form-row">
-            <label class="form-label" for="cs-start">Start time</label>
+            <label class="form-label" for="cs-start" data-i18n="modals.startTime">Start time</label>
             <input class="form-input" type="time" id="cs-start" required>
           </div>
           <div class="form-row">
-            <label class="form-label" for="cs-end">End time</label>
+            <label class="form-label" for="cs-end" data-i18n="modals.endTime">End time</label>
             <input class="form-input" type="time" id="cs-end" required>
           </div>
         </div>
         <div class="form-row">
-          <label class="form-label" for="cs-required">Required workers</label>
+          <label class="form-label" for="cs-required" data-i18n="modals.requiredWorkers">Required workers</label>
           <input class="form-input" type="number" id="cs-required" min="1" max="99" value="1" required>
         </div>
         <div class="form-row">
-          <label class="form-label" for="cs-notes">Notes <span class="form-optional">(optional)</span></label>
-          <textarea class="form-input" id="cs-notes" rows="2" maxlength="500" placeholder="Anything the team should know"></textarea>
+          <label class="form-label" for="cs-notes"><span data-i18n="modals.notes">Notes</span> <span class="form-optional" data-i18n="common.optional">(optional)</span></label>
+          <textarea class="form-input" id="cs-notes" rows="2" maxlength="500" data-i18n-placeholder="modals.notesPlaceholder" placeholder="Anything the team should know"></textarea>
         </div>
         <div id="cs-error" class="form-error"></div>
       </form>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeCreateShiftModal()">Cancel</button>
-      <button class="btn btn-success" id="cs-submit" onclick="submitCreateShift()">Create shift</button>
+      <button class="btn btn-ghost" onclick="closeCreateShiftModal()" data-i18n="common.cancel">Cancel</button>
+      <button class="btn btn-success" id="cs-submit" onclick="submitCreateShift()" data-i18n="modals.createShift">Create shift</button>
     </div>
   </div>
 </div>
@@ -304,8 +306,8 @@
     <div class="confirm-dialog-title" id="confirm-title"></div>
     <div class="confirm-dialog-body" id="confirm-body"></div>
     <div class="confirm-dialog-actions">
-      <button class="btn btn-ghost" onclick="closeConfirmDialog()">Cancel</button>
-      <button class="btn btn-danger" onclick="confirmDialogOk()">Delete</button>
+      <button class="btn btn-ghost" onclick="closeConfirmDialog()" data-i18n="common.cancel">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDialogOk()" data-i18n="common.delete">Delete</button>
     </div>
   </div>
 </div>

@@ -2,6 +2,7 @@ import { state } from './state.js'
 import { apiFetch } from './api.js'
 import { toYMD, fmtDate, esc } from './utils.js'
 import { loadShifts } from './shifts.js'
+import { t } from './i18n.js'
 
 export async function openCreateShiftModal(prefillDeptId) {
   document.getElementById('cs-subtitle').textContent = fmtDate(state.selectedDay)
@@ -12,14 +13,14 @@ export async function openCreateShiftModal(prefillDeptId) {
   document.getElementById('cs-error').textContent = ''
 
   const dept = document.getElementById('cs-department')
-  dept.innerHTML = '<option value="">Loading…</option>'
+  dept.innerHTML = `<option value="">${t('modals.noDepartmentsLoading')}</option>`
   dept.disabled = true
   document.getElementById('create-shift-modal').classList.remove('hidden')
 
   await ensureDepartments()
   const depts = state.departments || []
   if (depts.length === 0) {
-    dept.innerHTML = '<option value="">No departments yet — create one in the Workers tab</option>'
+    dept.innerHTML = `<option value="">${t('modals.noDepartmentsYet')}</option>`
     dept.disabled = true
     return
   }
@@ -53,15 +54,15 @@ export async function submitCreateShift(e) {
   const requiredWorkers = parseInt(document.getElementById('cs-required').value, 10) || 1
   const notes = document.getElementById('cs-notes').value.trim()
 
-  if (!departmentId) { showError('Pick a department'); return }
-  if (!startTime || !endTime) { showError('Pick a start and end time'); return }
-  if (startTime === endTime) { showError("Start and end time can’t match"); return }
-  if (requiredWorkers < 1) { showError('Required workers must be at least 1'); return }
+  if (!departmentId) { showError(t('modals.pickDepartment')); return }
+  if (!startTime || !endTime) { showError(t('modals.pickStartEnd')); return }
+  if (startTime === endTime) { showError(t('modals.startEndMatch')); return }
+  if (requiredWorkers < 1) { showError(t('modals.requiredAtLeast')); return }
 
   const submitBtn = document.getElementById('cs-submit')
   const originalText = submitBtn.textContent
   submitBtn.disabled = true
-  submitBtn.textContent = 'Creating…'
+  submitBtn.textContent = t('common.creating')
 
   try {
     const body = {
@@ -79,14 +80,14 @@ export async function submitCreateShift(e) {
     })
     if (!res?.ok) {
       const data = await res?.json().catch(() => ({}))
-      showError(data?.error || 'Failed to create shift')
+      showError(data?.error || t('modals.failedCreate'))
       return
     }
     delete state.shiftsCache[toYMD(state.currentWeek)]
     closeCreateShiftModal()
     await loadShifts()
   } catch {
-    showError('Network error — try again')
+    showError(t('common.networkError'))
   } finally {
     submitBtn.disabled = false
     submitBtn.textContent = originalText

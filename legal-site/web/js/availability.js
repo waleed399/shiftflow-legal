@@ -1,17 +1,21 @@
 import { state } from './state.js'
 import { apiFetch } from './api.js'
 import { esc, getInitials, applyAvatars, toYMD, addDays, getWeekStartOf, MONTHS, DAY_FULL, AVAIL_ICONS } from './utils.js'
+import { t } from './i18n.js'
 
 // ── Preference config (colours match mobile exactly) ──────────────────────────
 
-const PREF = {
-  morning:   { label: 'Morning',   color: '#f59e0b', bg: '#fffbeb' },
-  afternoon: { label: 'Afternoon', color: '#f97316', bg: '#fff7ed' },
-  night:     { label: 'Night',     color: '#60a5fa', bg: '#eff6ff' },
-  any:       { label: 'Any time',  color: '#22c55e', bg: '#f0fdf4' },
-  custom:    { label: 'Custom',    color: '#3b82f6', bg: '#eff6ff' },
-  off:       { label: 'Day off',   color: '#94a3b8', bg: '#f8fafc' },
+const PREF_STYLE = {
+  morning:   { color: '#f59e0b', bg: '#fffbeb' },
+  afternoon: { color: '#f97316', bg: '#fff7ed' },
+  night:     { color: '#60a5fa', bg: '#eff6ff' },
+  any:       { color: '#22c55e', bg: '#f0fdf4' },
+  custom:    { color: '#3b82f6', bg: '#eff6ff' },
+  off:       { color: '#94a3b8', bg: '#f8fafc' },
 }
+const PREF = new Proxy({}, { get: (_, key) => {
+  const s = PREF_STYLE[key]; return s ? { ...s, label: t(`availability.pref.${key}`) } : undefined
+} })
 
 
 const ICON_BELL     = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`
@@ -19,15 +23,14 @@ const ICON_BELL_RING = `<svg width="14" height="14" viewBox="0 0 24 24" fill="no
 
 // ── Day helpers ───────────────────────────────────────────────────────────────
 
-const DAY_META = {
-  MON: { full: 'MONDAY',    label: 'Mon' },
-  TUE: { full: 'TUESDAY',   label: 'Tue' },
-  WED: { full: 'WEDNESDAY', label: 'Wed' },
-  THU: { full: 'THURSDAY',  label: 'Thu' },
-  FRI: { full: 'FRIDAY',    label: 'Fri' },
-  SAT: { full: 'SATURDAY',  label: 'Sat' },
-  SUN: { full: 'SUNDAY',    label: 'Sun' },
+const DAY_META_FULL = {
+  MON: 'MONDAY', TUE: 'TUESDAY', WED: 'WEDNESDAY', THU: 'THURSDAY',
+  FRI: 'FRIDAY', SAT: 'SATURDAY', SUN: 'SUNDAY',
 }
+const DAY_META = new Proxy({}, { get: (_, code) => {
+  const full = DAY_META_FULL[code]
+  return full ? { full, label: t(`days.short.${code}`) } : undefined
+} })
 
 const ALL_DAYS_ORDERED = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
 
@@ -59,7 +62,7 @@ export async function renderAvailability() {
 
   const res = await apiFetch(`/availability/week-roster/${toYMD(state.currentWeek)}`)
   if (!res?.ok) {
-    el.innerHTML = '<div class="empty-state"><p>Failed to load availability.</p></div>'
+    el.innerHTML = `<div class="empty-state"><p>${t('availability.failedLoad')}</p></div>`
     return
   }
   _roster    = await res.json()
@@ -91,7 +94,7 @@ function renderRoster() {
     el.innerHTML = `
       <div class="empty-state">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <p>No workers in your organisation yet.</p>
+        <p>${t('availability.noWorkers')}</p>
       </div>`
     return
   }
@@ -99,8 +102,8 @@ function renderRoster() {
   const pct           = Math.round(submitted.length / total * 100)
   const progressColor = submitted.length === total ? '#10b981' : '#1a2d4f'
   const progressLabel = submitted.length === total
-    ? 'All workers submitted ✓'
-    : `${submitted.length} of ${total} submitted`
+    ? t('availability.submittedAll')
+    : t('availability.submittedOf', { submitted: submitted.length, total })
 
   const cols = `grid-template-columns: repeat(${workDays.length}, 1fr)`
 
@@ -127,7 +130,7 @@ function renderRoster() {
       ${submitted.length ? `
         <div class="avail-section-label">
           <span class="avail-section-dot" style="background:#10b981"></span>
-          SUBMITTED (${submitted.length})
+          ${t('availability.submittedLabel', { n: submitted.length })}
         </div>
         ${submitted.map(r => submittedRow(r, workDays, cols)).join('')}
       ` : ''}
@@ -135,7 +138,7 @@ function renderRoster() {
       ${pending.length ? `
         <div class="avail-section-label" style="${submitted.length ? 'margin-top:20px' : ''}">
           <span class="avail-section-dot" style="background:#f59e0b"></span>
-          WAITING (${pending.length})
+          ${t('availability.waitingLabel', { n: pending.length })}
         </div>
         ${pending.map(r => pendingRow(r, workDays, cols)).join('')}
       ` : ''}
@@ -156,7 +159,7 @@ function submittedRow(r, workDays, cols) {
   })
 
   const timeOffBadge = timeOff
-    ? `<span class="avail-timeoff-badge">🏖 On leave · ${timeOff.startDate.slice(0, 10)} – ${timeOff.endDate.slice(0, 10)}</span>`
+    ? `<span class="avail-timeoff-badge">${t('availability.onLeave', { start: timeOff.startDate.slice(0, 10), end: timeOff.endDate.slice(0, 10) })}</span>`
     : ''
   const notes = availability?.notes
     ? `<div class="avail-notes">&ldquo;${esc(availability.notes)}&rdquo;</div>`
@@ -172,7 +175,7 @@ function submittedRow(r, workDays, cols) {
           <div class="avail-worker-name">${esc(worker.name)}</div>
           ${timeOffBadge}
           ${notes}
-          <div class="avail-days-count">${activeDays.length}/${workDays.length} days available</div>
+          <div class="avail-days-count">${t('availability.daysAvailable', { active: activeDays.length, total: workDays.length })}</div>
         </div>
       </div>
       <div class="avail-days-strip" style="${cols}">${cells}</div>
@@ -187,8 +190,8 @@ function pendingRow(r, workDays, cols) {
   const emptyCells = workDays.map(() => `<div class="avail-cell avail-cell-empty"><span class="avail-dash">—</span></div>`).join('')
 
   const sub = timeOff
-    ? `<span class="avail-timeoff-badge">🏖 On leave · ${timeOff.startDate.slice(0, 10)} – ${timeOff.endDate.slice(0, 10)}</span>`
-    : `<span class="avail-waiting">Waiting for availability…</span>`
+    ? `<span class="avail-timeoff-badge">${t('availability.onLeave', { start: timeOff.startDate.slice(0, 10), end: timeOff.endDate.slice(0, 10) })}</span>`
+    : `<span class="avail-waiting">${t('availability.waitingForAvailability')}</span>`
 
   return `
     <div class="avail-row avail-row-pending">
@@ -205,7 +208,7 @@ function pendingRow(r, workDays, cols) {
                 id="nudge-${esc(worker.id)}"
                 onclick="nudgeWorker('${esc(worker.id)}')"
                 ${isNudged ? 'disabled' : ''}
-                title="${isNudged ? 'Reminder sent' : 'Send availability reminder'}">
+                title="${isNudged ? t('availability.nudgeSentTooltip') : t('availability.nudgeTooltip')}">
           ${isNudged ? ICON_BELL_RING : ICON_BELL}
         </button>
       </div>
