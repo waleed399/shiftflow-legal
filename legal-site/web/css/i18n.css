@@ -76,3 +76,10 @@
    switcher to sit visually mirrored. Flex already mirrors via dir, but the
    back-arrow glyph (←) is baked into the text — the translations themselves
    use the appropriate arrow (→), so we don't need to flip the glyph here. */
+
+/* Week-nav chevrons: flex auto-swaps button positions in RTL, but the
+   chevron SVGs still point the original direction. Mirror them so "previous"
+   points right and "next" points left, matching RTL reading flow. */
+[dir="rtl"] .week-nav .week-btn svg {
+  transform: scaleX(-1);
+}

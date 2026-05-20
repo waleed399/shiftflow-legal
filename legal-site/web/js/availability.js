@@ -218,10 +218,16 @@ function pendingRow(r, workDays, cols) {
 function dayCell(slot) {
   if (!slot) return `<div class="avail-cell avail-cell-empty"><span class="avail-dash">—</span></div>`
 
-  const p = PREF[slot.preference]
+  // Slots come back two shapes: preference-tagged (morning/night/any/off) or
+  // raw time-range (startTime/endTime with no preference). For the raw shape,
+  // fall through to a custom-style cell that shows the hours.
+  const pref = slot.preference || (slot.startTime && slot.endTime ? 'custom' : null)
+  if (!pref) return `<div class="avail-cell avail-cell-empty"><span class="avail-dash">—</span></div>`
+
+  const p = PREF[pref]
   if (!p) return `<div class="avail-cell avail-cell-empty"><span class="avail-dash">—</span></div>`
 
-  if (slot.preference === 'custom') {
+  if (pref === 'custom') {
     return `
       <div class="avail-cell" style="background:${p.bg};color:${p.color}">
         ${AVAIL_ICONS.custom}
@@ -231,13 +237,13 @@ function dayCell(slot) {
       </div>`
   }
 
-  const sub = slot.preference === 'morning' && slot.until
+  const sub = pref === 'morning' && slot.until
     ? `<span class="avail-cell-sub">~ ${esc(slot.until)}</span>`
     : ''
 
   return `
     <div class="avail-cell" style="background:${p.bg};color:${p.color}">
-      ${AVAIL_ICONS[slot.preference]}
+      ${AVAIL_ICONS[pref]}
       <span class="avail-cell-label">${p.label}</span>
       ${sub}
     </div>`

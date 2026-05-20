@@ -340,11 +340,13 @@ export async function renderTableView() {
   const workerCols = workers.map(w => {
     const initials = esc(getInitials(w.name))
     const pref     = workerDayPrefs.get(w.id)
-    const cfg      = pref?.preference ? availPref(pref.preference) : null
-    const isOff    = pref?.preference === 'off'
-    const badge    = cfg ? `<span class="dt-avail-badge" style="background:${cfg.color}22;border-color:${cfg.color};color:${cfg.color}">${AVAIL_ICONS[pref.preference]}</span>` : ''
+    // Slots may have an explicit preference, or just startTime/endTime (treat as custom).
+    const prefKey  = pref?.preference || (pref?.startTime && pref?.endTime ? 'custom' : null)
+    const cfg      = prefKey ? availPref(prefKey) : null
+    const isOff    = prefKey === 'off'
+    const badge    = cfg ? `<span class="dt-avail-badge" style="background:${cfg.color}22;border-color:${cfg.color};color:${cfg.color}">${AVAIL_ICONS[prefKey]}</span>` : ''
     const label    = cfg
-      ? `<div class="dt-avail-label" style="color:${cfg.color}">${esc(pref.preference === 'custom' && pref.startTime ? `${pref.startTime}–${pref.endTime}` : cfg.label)}</div>`
+      ? `<div class="dt-avail-label" style="color:${cfg.color}">${esc(prefKey === 'custom' && pref.startTime ? `${pref.startTime}–${pref.endTime}` : cfg.label)}</div>`
       : ''
     return `
       <th class="dt-worker-th">
