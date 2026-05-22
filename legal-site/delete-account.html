@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Account Deletion – Shift-Right</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      line-height: 1.7;
+    }
+    header {
+      background: linear-gradient(135deg, #1a2d4f 0%, #243560 100%);
+      border-bottom: 3px solid #bf1f3a;
+      padding: 28px 24px;
+      text-align: center;
+    }
+    header h1 { color: #fff; font-size: 1.6rem; font-weight: 800; letter-spacing: -0.3px; }
+    header p  { color: rgba(255,255,255,0.65); font-size: 0.85rem; margin-top: 6px; }
+    .container { max-width: 760px; margin: 40px auto; padding: 0 24px 80px; }
+    h2 {
+      font-size: 1.05rem; font-weight: 700; color: #1a2d4f;
+      margin: 36px 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    p  { margin: 10px 0; font-size: 0.95rem; color: #334155; }
+    ul { margin: 10px 0 10px 20px; }
+    li { margin: 6px 0; font-size: 0.95rem; color: #334155; }
+    a  { color: #1a2d4f; text-decoration: underline; }
+    .last-updated {
+      display: inline-block;
+      background: #e0e7ff;
+      color: #3730a3;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 99px;
+      margin-bottom: 28px;
+    }
+    .step-box {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid #1a2d4f;
+      border-radius: 8px;
+      padding: 18px 22px;
+      margin: 16px 0;
+    }
+    .step-box strong { color: #1a2d4f; font-size: 1rem; }
+    .step-box ol { margin: 10px 0 0 20px; }
+    .step-box li { margin: 4px 0; }
+    .email-link {
+      display: inline-block;
+      background: #1a2d4f;
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin: 8px 0;
+    }
+    .email-link:hover { background: #243560; }
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      border-top: 1px solid #e2e8f0;
+      margin-top: 60px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Shift-Right</h1>
+  <p>Account &amp; Data Deletion</p>
+</header>
+
+<div class="container">
+  <span class="last-updated">Last updated: May 22, 2026</span>
+
+  <p>This page explains how you can request the deletion of your Shift-Right account and the personal data associated with it. We provide two ways to request deletion: directly inside the app, or by email.</p>
+
+  <h2>1. Delete Your Account In-App</h2>
+  <div class="step-box">
+    <strong>Steps:</strong>
+    <ol>
+      <li>Open the Shift-Right app on your device.</li>
+      <li>Sign in to your account.</li>
+      <li>Tap the <strong>Profile</strong> tab in the bottom navigation.</li>
+      <li>Scroll down and tap <strong>Delete Account</strong>.</li>
+      <li>Confirm the deletion when prompted.</li>
+    </ol>
+  </div>
+  <p>Your account and personal data will be removed within 30 days of the request.</p>
+
+  <h2>2. Request Deletion by Email</h2>
+  <p>If you can no longer access the app, you can request deletion by sending an email from the address associated with your Shift-Right account:</p>
+  <a href="mailto:support@shiftright.app?subject=Account%20Deletion%20Request" class="email-link">support@shiftright.app</a>
+  <p>Please use the subject line <em>"Account Deletion Request"</em>. We will verify your identity, process the deletion within 30 days, and confirm by email once it is complete.</p>
+
+  <h2>3. What Data Is Deleted</h2>
+  <p>When your account is deleted, we permanently remove the following:</p>
+  <ul>
+    <li>Account profile (name, email, phone number, profile photo)</li>
+    <li>Authentication data (password hash, refresh tokens, device tokens)</li>
+    <li>Your shift assignments, availability, and time-off requests</li>
+    <li>Swap requests you have created</li>
+    <li>Push notification tokens registered to your account</li>
+    <li>In-app notifications addressed to you</li>
+  </ul>
+
+  <h2>4. What Data May Be Retained</h2>
+  <p>For legal, accounting, and security reasons, we may retain a limited subset of data after account deletion:</p>
+  <ul>
+    <li>Anonymized usage and crash logs (no personal identifiers) — retained per Sentry retention policy</li>
+    <li>Billing and payment records held by our payment processor (Lemon Squeezy) — retained up to 7 years to meet tax and accounting obligations</li>
+    <li>Webhook and audit logs that do not directly identify you — retained up to 90 days for security</li>
+  </ul>
+
+  <h2>5. Organization Data (For Managers)</h2>
+  <p>If you are the manager of an organization, deleting your personal account does <strong>not</strong> automatically delete the organization, its workers, or its shift history. To delete an entire organization and all of its data, please email <a href="mailto:support@shiftright.app">support@shiftright.app</a> and identify yourself as the organization owner.</p>
+
+  <h2>6. Reversibility</h2>
+  <p>Account deletion is <strong>permanent</strong>. Once your data has been removed it cannot be restored. If you are unsure, consider signing out instead — you can sign back in at any time.</p>
+
+  <h2>7. Contact</h2>
+  <p>If you have questions about this process or need help with a deletion request, contact us at <a href="mailto:support@shiftright.app">support@shiftright.app</a>.</p>
+</div>
+
+<footer>
+  &copy; 2026 Shift-Right · <a href="/privacy.html">Privacy Policy</a> · <a href="/terms.html">Terms of Service</a>
+</footer>
+
+</body>
+</html>
