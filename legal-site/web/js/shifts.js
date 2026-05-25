@@ -619,9 +619,13 @@ export async function renderWeekView() {
 
   const workerAvail = new Map(
     (_availRosterCache[key] || []).map(r => {
-      const m = new Map()
-      if (r.availability) (r.availability.slots || []).forEach(s => m.set(s.day, s.preference))
-      return [r.worker.id, m]
+      const slots = new Map()
+      ;(r.availability?.slots || []).forEach(s => slots.set(s.day, {
+        preference: s.preference,
+        startTime: s.startTime,
+        endTime: s.endTime,
+      }))
+      return [r.worker.id, { hasAvail: !!r.availability, slots }]
     })
   )
 
@@ -665,10 +669,22 @@ export async function renderWeekView() {
       const dayShifts = (shiftsByDay.get(ymd) || [])
         .filter(s => deptId === null || s.department?.id === deptId)
         .sort((a, b) => a.startTime.localeCompare(b.startTime))
-      const isOff = workerAvail.get(w.id)?.get(DAY_FULL[date.getDay()]) === 'off'
+
+      const dayFull = DAY_FULL[date.getDay()]
+      const avail   = workerAvail.get(w.id)
+      const slot    = avail?.hasAvail ? (avail.slots.get(dayFull) || { preference: 'off' }) : null
+      const prefKey = slot?.preference || (slot?.startTime && slot?.endTime ? 'custom' : null)
+      const cfg     = prefKey ? availPref(prefKey) : null
+      const isOff   = prefKey === 'off'
+      const availChip = cfg
+        ? `<div class="wv-avail-chip" style="background:${cfg.color}1A;border-color:${cfg.color}66;color:${cfg.color}">
+            <span class="wv-avail-icon">${AVAIL_ICONS[prefKey]}</span>
+            <span class="wv-avail-label">${esc(prefKey === 'custom' && slot.startTime ? `${slot.startTime.substring(0,5)}–${slot.endTime.substring(0,5)}` : cfg.label)}</span>
+          </div>`
+        : ''
 
       if (dayShifts.length === 0) {
-        return `<td class="wv-cell${isOff ? ' wv-cell-off' : ''}"><span class="wv-empty">—</span></td>`
+        return `<td class="wv-cell${isOff ? ' wv-cell-off' : ''}">${availChip}${availChip ? '' : '<span class="wv-empty">—</span>'}</td>`
       }
 
       const assignedIds = new Set(
@@ -714,7 +730,7 @@ export async function renderWeekView() {
         </div>`
       }).filter(Boolean).join('')
 
-      return `<td class="wv-cell${isOff ? ' wv-cell-off' : ''}">${pills || '<span class="wv-empty">—</span>'}</td>`
+      return `<td class="wv-cell${isOff ? ' wv-cell-off' : ''}">${availChip}${pills || (availChip ? '' : '<span class="wv-empty">—</span>')}</td>`
     }).join('')
 
     return `<tr>
