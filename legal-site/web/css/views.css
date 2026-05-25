@@ -188,7 +188,8 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .dt-plus-mini   { width: 16px; height: 16px; border-radius: 50%; border: 1.5px dashed #94a3b8; color: #94a3b8; font-size: 0.8rem; display: inline-flex; align-items: center; justify-content: center; }
 
 /* ── Week roster view ── */
-.content-area:has(.wv-outer) { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+#view-shifts:has(.wv-outer) { display: flex; }
+.content-area:has(.wv-outer) { padding: 0; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
 .content-area:has(.wv-outer) #shifts-content { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .wv-outer { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .wv-scroll { overflow: auto; flex: 1; min-height: 0; overscroll-behavior: contain; }
