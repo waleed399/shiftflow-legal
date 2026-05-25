@@ -672,8 +672,9 @@ export async function renderWeekView() {
 
   const colSpan = weekDays.length + 1
 
-  function workerRow(w, deptId = null) {
+  function workerRow(w, deptId = null, rowIdx = 0) {
     const initials = esc(getInitials(w.name))
+    const altCls   = rowIdx % 2 === 1 ? ' wv-row-alt' : ''
     const cells = weekDays.map(({ date, ymd }) => {
       const dayShifts = (shiftsByDay.get(ymd) || [])
         .filter(s => deptId === null || s.department?.id === deptId)
@@ -750,7 +751,7 @@ export async function renderWeekView() {
       ? (weekMins % 60 === 0 ? `${weekMins / 60}h` : `${Math.floor(weekMins / 60)}h ${weekMins % 60}m`)
       : ''
 
-    return `<tr>
+    return `<tr class="wv-worker-row${altCls}">
       <td class="wv-worker-cell">
         <div class="wv-worker-avatar" data-avatar="${esc(w.avatarUrl || '')}">${initials}</div>
         <div class="wv-worker-info">
@@ -776,7 +777,7 @@ export async function renderWeekView() {
     const emptyRow = grp.length === 0
       ? `<tr><td colspan="${colSpan}" class="wv-dept-empty">${t('shifts.deptNoWorkers')}</td></tr>`
       : ''
-    return band + emptyRow + grp.map(w => workerRow(w, dept?.id ?? null)).join('')
+    return band + emptyRow + grp.map((w, i) => workerRow(w, dept?.id ?? null, i)).join('')
   }).join('')
 
   el.innerHTML = `
