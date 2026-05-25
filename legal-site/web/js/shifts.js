@@ -611,10 +611,19 @@ export async function renderWeekView() {
   const today    = new Date()
 
   const shiftsByDay = new Map()
+  const workerWeekMins = new Map()
   allShifts.filter(s => s.status !== 'CANCELLED').forEach(s => {
     const ymd = s.date.substring(0, 10)
     if (!shiftsByDay.has(ymd)) shiftsByDay.set(ymd, [])
     shiftsByDay.get(ymd).push(s)
+    const sStart = toMins(s.startTime)
+    const sEnd   = normEnd(sStart, toMins(s.endTime))
+    ;(s.assignments || []).forEach(a => {
+      const wid    = a.worker?.id || a.id
+      const aStart = a.blockStart ? toMins(a.blockStart) : sStart
+      const aEnd   = a.blockEnd   ? normEnd(aStart, toMins(a.blockEnd)) : sEnd
+      workerWeekMins.set(wid, (workerWeekMins.get(wid) || 0) + (aEnd - aStart))
+    })
   })
 
   const workerAvail = new Map(
@@ -674,17 +683,20 @@ export async function renderWeekView() {
       const avail   = workerAvail.get(w.id)
       const slot    = avail?.hasAvail ? (avail.slots.get(dayFull) || { preference: 'off' }) : null
       const prefKey = slot?.preference || (slot?.startTime && slot?.endTime ? 'custom' : null)
-      const cfg     = prefKey ? availPref(prefKey) : null
+      const showChip = prefKey && prefKey !== 'any'
+      const cfg     = showChip ? availPref(prefKey) : null
       const isOff   = prefKey === 'off'
+      const isToday = isSameDay(date, today)
       const availChip = cfg
         ? `<div class="wv-avail-chip" style="background:${cfg.color}1A;border-color:${cfg.color}66;color:${cfg.color}">
             <span class="wv-avail-icon">${AVAIL_ICONS[prefKey]}</span>
             <span class="wv-avail-label">${esc(prefKey === 'custom' && slot.startTime ? `${slot.startTime.substring(0,5)}–${slot.endTime.substring(0,5)}` : cfg.label)}</span>
           </div>`
         : ''
+      const cellCls = `wv-cell${isOff ? ' wv-cell-off' : ''}${isToday ? ' wv-cell-today' : ''}`
 
       if (dayShifts.length === 0) {
-        return `<td class="wv-cell${isOff ? ' wv-cell-off' : ''}">${availChip}${availChip ? '' : '<span class="wv-empty">—</span>'}</td>`
+        return `<td class="${cellCls}">${availChip}${availChip ? '' : '<span class="wv-empty">—</span>'}</td>`
       }
 
       const assignedIds = new Set(
@@ -730,13 +742,21 @@ export async function renderWeekView() {
         </div>`
       }).filter(Boolean).join('')
 
-      return `<td class="wv-cell${isOff ? ' wv-cell-off' : ''}">${availChip}${pills || (availChip ? '' : '<span class="wv-empty">—</span>')}</td>`
+      return `<td class="${cellCls}">${availChip}${pills || (availChip ? '' : '<span class="wv-empty">—</span>')}</td>`
     }).join('')
+
+    const weekMins = workerWeekMins.get(w.id) || 0
+    const hoursLabel = weekMins
+      ? (weekMins % 60 === 0 ? `${weekMins / 60}h` : `${Math.floor(weekMins / 60)}h ${weekMins % 60}m`)
+      : ''
 
     return `<tr>
       <td class="wv-worker-cell">
         <div class="wv-worker-avatar" data-avatar="${esc(w.avatarUrl || '')}">${initials}</div>
-        <div class="wv-worker-name">${esc(w.name.split(' ')[0])}</div>
+        <div class="wv-worker-info">
+          <div class="wv-worker-name">${esc(w.name.split(' ')[0])}</div>
+          ${hoursLabel ? `<div class="wv-worker-mins">${hoursLabel}</div>` : ''}
+        </div>
       </td>
       ${cells}
     </tr>`

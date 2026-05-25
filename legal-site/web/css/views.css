@@ -188,21 +188,30 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .dt-plus-mini   { width: 16px; height: 16px; border-radius: 50%; border: 1.5px dashed #94a3b8; color: #94a3b8; font-size: 0.8rem; display: inline-flex; align-items: center; justify-content: center; }
 
 /* ── Week roster view ── */
-.wv-outer { display: flex; flex-direction: column; height: 100%; }
-.wv-scroll { overflow: auto; flex: 1; }
-.wv-table { border-collapse: collapse; min-width: 100%; }
-.wv-corner { position: sticky; top: 0; left: 0; z-index: 4; background: var(--white); min-width: 130px; width: 130px; padding: 10px 14px; font-size: 0.7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid var(--border); border-right: 1px solid var(--border); }
-.wv-day-th { position: sticky; top: 0; z-index: 2; background: var(--white); min-width: 135px; padding: 8px 10px; text-align: center; border-bottom: 2px solid var(--border); border-right: 1px solid #f1f5f9; }
-.wv-day-th.wv-today { background: #f8faff; }
+.content-area:has(.wv-outer) { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+.content-area:has(.wv-outer) #shifts-content { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.wv-outer { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.wv-scroll { overflow: auto; flex: 1; min-height: 0; overscroll-behavior: contain; }
+.wv-table { border-collapse: separate; border-spacing: 0; min-width: 100%; }
+.wv-corner { position: sticky; top: 0; left: 0; z-index: 4; background: var(--white); min-width: 150px; width: 150px; padding: 10px 14px; font-size: 0.7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid var(--border); border-right: 1px solid var(--border); box-shadow: 4px 0 6px -4px rgba(15,23,42,0.06); }
+.wv-day-th { position: sticky; top: 0; z-index: 2; background: var(--white); min-width: 135px; padding: 8px 10px; text-align: center; border-bottom: 2px solid var(--border); border-right: 1px solid #f1f5f9; box-shadow: 0 4px 6px -4px rgba(15,23,42,0.05); }
+.wv-day-th.wv-today { background: #eef4ff; }
 .wv-day-name { font-size: 0.68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
 .wv-day-num { font-size: 1.05rem; font-weight: 700; color: var(--primary); margin-top: 3px; }
+.wv-today .wv-day-name { color: var(--primary); }
 .wv-today .wv-day-num { background: #1a2d4f; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 3px auto 0; font-size: 0.88rem; }
-.wv-worker-cell { position: sticky; left: 0; z-index: 1; background: var(--white); min-width: 130px; width: 130px; padding: 10px 12px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
-.wv-worker-avatar { width: 28px; height: 28px; min-width: 28px; border-radius: 50%; background: var(--primary); color: white; font-size: 0.62rem; font-weight: 700; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+.wv-worker-cell { position: sticky; left: 0; z-index: 1; background: var(--white); min-width: 150px; width: 150px; padding: 10px 12px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; box-shadow: 4px 0 6px -4px rgba(15,23,42,0.06); }
+.wv-worker-avatar { width: 32px; height: 32px; min-width: 32px; border-radius: 50%; background: var(--primary); color: white; font-size: 0.65rem; font-weight: 700; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
 .wv-worker-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.wv-worker-name { font-size: 0.82rem; font-weight: 600; color: var(--primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.wv-cell { padding: 6px 8px; border-bottom: 1px solid var(--border); border-right: 1px solid #f1f5f9; vertical-align: top; min-width: 135px; }
+.wv-worker-info { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1; }
+.wv-worker-name { font-size: 0.82rem; font-weight: 600; color: var(--primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
+.wv-worker-mins { font-size: 0.65rem; font-weight: 700; color: var(--muted); letter-spacing: 0.02em; }
+.wv-cell { padding: 6px 8px; border-bottom: 1px solid var(--border); border-right: 1px solid #f1f5f9; vertical-align: top; min-width: 135px; transition: background 0.12s; }
 .wv-cell-off { background: #fafafa; }
+.wv-cell-today { background: #f5f9ff; }
+.wv-cell-today.wv-cell-off { background: #f1f4fa; }
+.wv-table tbody tr:hover .wv-cell:not(.wv-cell-off):not(.wv-cell-today) { background: #fafbfd; }
+.wv-table tbody tr:hover .wv-worker-cell { background: #fafbfd; }
 .wv-empty { color: #cbd5e1; font-size: 0.8rem; display: block; text-align: center; padding: 4px 0; }
 .wv-avail-chip { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; padding: 2px 6px; margin-bottom: 4px; border-radius: 4px; border: 1px solid; font-size: 0.62rem; font-weight: 700; line-height: 1.2; white-space: nowrap; overflow: hidden; }
 .wv-avail-icon { display: inline-flex; align-items: center; flex-shrink: 0; }
