@@ -2,7 +2,7 @@ import { state } from './state.js'
 import { getToken, getRefreshToken, clearSession, apiFetch } from './api.js'
 import { getWeekStartOf, getInitials, showToast } from './utils.js'
 import { renderWeekLabel, renderDayTabs, loadShifts } from './shifts.js'
-import { renderProfile, getEffectivePlan } from './profile.js'
+import { renderProfile, getEffectivePlan, canManageWeb } from './profile.js'
 import './modals.js' // registers window.openShiftModal and other modal handlers
 import './createShift.js' // registers window.openCreateShiftModal and submit handlers
 import { renderRequests, loadPendingCount } from './requests.js'
@@ -112,7 +112,16 @@ function renderSidebar() {
   planEl.textContent = plan
   planEl.className = `plan-badge plan-${plan}`
 
+  applyWebLockState()
+
   mountLanguageSwitcher(document.getElementById('sb-lang-switcher'), { variant: 'sidebar' })
+}
+
+export function applyWebLockState() {
+  const locked = !canManageWeb(state.currentOrg)
+  document.body.classList.toggle('web-locked', locked)
+  const banner = document.getElementById('lock-banner')
+  if (banner) banner.style.display = locked ? 'flex' : 'none'
 }
 
 const ON_ENTER = { profile: renderProfile, requests: renderRequests, workers: renderWorkers, availability: renderAvailability }

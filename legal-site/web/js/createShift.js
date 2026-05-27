@@ -3,8 +3,10 @@ import { apiFetch } from './api.js'
 import { toYMD, fmtDate, esc } from './utils.js'
 import { loadShifts } from './shifts.js'
 import { t } from './i18n.js'
+import { requireWebManage } from './profile.js'
 
 export async function openCreateShiftModal(prefillDeptId) {
+  if (!requireWebManage()) return
   document.getElementById('cs-subtitle').textContent = fmtDate(state.selectedDay)
   document.getElementById('cs-start').value = '09:00'
   document.getElementById('cs-end').value = '17:00'

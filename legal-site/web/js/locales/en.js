@@ -234,6 +234,12 @@ export default {
     featuresBusiness: ['Everything in Pro', 'Unlimited workers', 'Priority support'],
   },
 
+  lock: {
+    banner: 'Your Pro trial has ended — upgrade to manage shifts from the web.',
+    bannerCta: 'Upgrade →',
+    actionBlocked: 'Upgrade to Pro to make changes from the web.',
+  },
+
   upgrade: {
     noToken: 'No login token found. Please open the ShiftRight app and tap "Open Pricing Page" again.',
     linkExpired: 'This link has expired. Please open the ShiftRight app and try again.',

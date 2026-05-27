@@ -2,6 +2,7 @@ import { state, ensureOrgWorkers } from './state.js'
 import { apiFetch } from './api.js'
 import { esc, getInitials, applyAvatars, toYMD } from './utils.js'
 import { t } from './i18n.js'
+import { requireWebManage } from './profile.js'
 
 // ── Module state ──────────────────────────────────────────────────────────────
 
@@ -207,6 +208,7 @@ function workerCard(w, shiftCount) {
 // ── Dept CRUD ─────────────────────────────────────────────────────────────────
 
 export function openCreateDept() {
+  if (!requireWebManage()) return
   document.getElementById('dept-add-form').classList.add('active')
   document.getElementById('dept-add-input').focus()
 }
@@ -223,6 +225,7 @@ export function onDeptAddKey(e) {
 }
 
 export async function submitCreateDept() {
+  if (!requireWebManage()) return
   const input = document.getElementById('dept-add-input')
   const errEl = document.getElementById('dept-add-error')
   const btn   = document.getElementById('dept-add-btn')
@@ -254,6 +257,7 @@ export async function submitCreateDept() {
 }
 
 export function renameDept(id) {
+  if (!requireWebManage()) return
   const nameEl = document.getElementById(`dept-name-${id}`)
   if (!nameEl || nameEl.querySelector('input')) return
 
@@ -268,6 +272,7 @@ export function renameDept(id) {
 }
 
 export async function submitRenameDept(id) {
+  if (!requireWebManage()) return
   const input = document.getElementById(`dept-rename-${id}`)
   if (!input) return
   const newName = input.value.trim()
@@ -306,6 +311,7 @@ export function onDeptRenameKey(e, id) {
 }
 
 export function deleteDept(id, name) {
+  if (!requireWebManage()) return
   showConfirmDialog(
     t('workers.confirmDeleteTitle', { name }),
     t('workers.confirmDeleteBody', { name: esc(name) }),
@@ -386,6 +392,7 @@ export function closeWorkerDrawer() {
 }
 
 export async function toggleDeptMembership(deptId) {
+  if (!requireWebManage()) return
   if (!_drawerWorkerId) return
   const worker  = _allWorkers.find(w => w.id === _drawerWorkerId)
   if (!worker) return
@@ -482,6 +489,7 @@ export function filterWorkers(query) {
 // ── Invite form ───────────────────────────────────────────────────────────────
 
 export function openInviteForm() {
+  if (!requireWebManage()) return
   document.getElementById('invite-form').classList.remove('hidden')
   document.getElementById('invite-email').focus()
 }
@@ -498,6 +506,7 @@ export function onInviteKey(e) {
 }
 
 export async function submitInvite() {
+  if (!requireWebManage()) return
   const emailEl = document.getElementById('invite-email')
   const errEl   = document.getElementById('invite-error')
   const btn     = document.getElementById('invite-submit-btn')
@@ -532,6 +541,7 @@ export async function submitInvite() {
 // ── Invitation actions ────────────────────────────────────────────────────────
 
 export async function resendInvite(id) {
+  if (!requireWebManage()) return
   const row = document.getElementById(`inv-${id}`)
   const btn = row?.querySelector('.btn-ghost')
   if (btn) { btn.disabled = true; btn.textContent = t('common.sending') }
@@ -547,6 +557,7 @@ export async function resendInvite(id) {
 }
 
 export async function cancelInvite(id) {
+  if (!requireWebManage()) return
   const row = document.getElementById(`inv-${id}`)
   const btn = row?.querySelector('.btn-danger')
   if (btn) btn.disabled = true

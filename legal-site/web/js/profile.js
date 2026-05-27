@@ -1,6 +1,6 @@
 import { state } from './state.js'
 import { apiFetch } from './api.js'
-import { esc, getInitials } from './utils.js'
+import { esc, getInitials, showToast } from './utils.js'
 import { t } from './i18n.js'
 
 let billingPeriod = 'monthly'
@@ -9,6 +9,17 @@ function getEffectivePlan(org) {
   if (!org) return 'FREE'
   if (org.trialEndsAt && new Date(org.trialEndsAt) > new Date()) return 'PRO'
   return org.plan || 'FREE'
+}
+
+function canManageWeb(org) {
+  const plan = getEffectivePlan(org)
+  return plan === 'PRO' || plan === 'BUSINESS'
+}
+
+function requireWebManage() {
+  if (canManageWeb(state.currentOrg)) return true
+  showToast(t('lock.actionBlocked'))
+  return false
 }
 
 function getPlanLabel(org) {
@@ -24,7 +35,7 @@ function getPlanLabel(org) {
   return t('profile.planFree')
 }
 
-export { getEffectivePlan }
+export { getEffectivePlan, canManageWeb, requireWebManage }
 
 export function setBillingPeriod(period) {
   billingPeriod = period

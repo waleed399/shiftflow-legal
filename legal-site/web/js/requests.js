@@ -2,6 +2,7 @@ import { state } from './state.js'
 import { apiFetch } from './api.js'
 import { esc, MONTHS } from './utils.js'
 import { t } from './i18n.js'
+import { requireWebManage } from './profile.js'
 
 let activeTab = 'timeoff'
 
@@ -278,6 +279,7 @@ function patchCachedTimeOff(id, status) {
 }
 
 async function approveSwap(id) {
+  if (!requireWebManage()) return
   disableSwapBtns(id)
   if (await doAction(() => apiFetch(`/swaps/${id}/approve`, { method: 'PATCH', body: '{}' }))) {
     patchCachedSwap(id, 'APPROVED')
@@ -288,6 +290,7 @@ async function approveSwap(id) {
 }
 
 async function approveSwapOpen(id) {
+  if (!requireWebManage()) return
   const vol = document.getElementById(`vol-${id}`)?.value
   if (!vol) { alert(t('requests.pickVolunteerFirst')); return }
   disableSwapBtns(id)
@@ -300,6 +303,7 @@ async function approveSwapOpen(id) {
 }
 
 async function denySwap(id) {
+  if (!requireWebManage()) return
   disableSwapBtns(id)
   if (await doAction(() => apiFetch(`/swaps/${id}/deny`, { method: 'PATCH', body: '{}' }))) {
     patchCachedSwap(id, 'DENIED')
@@ -310,6 +314,7 @@ async function denySwap(id) {
 }
 
 async function approveTimeOff(id) {
+  if (!requireWebManage()) return
   disableTimeOffBtns(id)
   if (await doAction(() => apiFetch(`/time-off/${id}/approve`, { method: 'PATCH', body: '{}' }))) {
     patchCachedTimeOff(id, 'APPROVED')
@@ -320,6 +325,7 @@ async function approveTimeOff(id) {
 }
 
 async function denyTimeOff(id) {
+  if (!requireWebManage()) return
   disableTimeOffBtns(id)
   if (await doAction(() => apiFetch(`/time-off/${id}/deny`, { method: 'PATCH', body: '{}' }))) {
     patchCachedTimeOff(id, 'DENIED')

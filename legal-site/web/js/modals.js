@@ -3,6 +3,7 @@ import { apiFetch } from './api.js'
 import { toYMD, esc, getInitials, applyAvatars, showToast } from './utils.js'
 import { loadShifts, updateActionBar } from './shifts.js'
 import { t } from './i18n.js'
+import { requireWebManage } from './profile.js'
 
 // ── Shift detail modal ────────────────────────────────────────────────────────
 
@@ -121,6 +122,7 @@ function renderModalFooter(shift) {
 }
 
 export async function publishShift(shiftId, unpublish = false) {
+  if (!requireWebManage()) return
   const btn = document.querySelector(`#modal-footer ${unpublish ? '.btn-warning' : '.btn-success'}`)
   if (btn) btn.disabled = true
   const key = toYMD(state.currentWeek)
@@ -143,6 +145,7 @@ export async function publishShift(shiftId, unpublish = false) {
 }
 
 export async function removeWorker(shiftId, workerId, btn) {
+  if (!requireWebManage()) return
   if (btn) btn.disabled = true
   const res = await apiFetch(`/shifts/${shiftId}/assign/${workerId}`, { method: 'DELETE' })
   if (!res?.ok) {
@@ -158,6 +161,7 @@ export async function removeWorker(shiftId, workerId, btn) {
 }
 
 export async function markAttendance(shiftId, workerId, status) {
+  if (!requireWebManage()) return
   const res = await apiFetch(`/shifts/${shiftId}/attendance`, {
     method: 'PATCH',
     body: JSON.stringify({ workerId, attendance: status }),
@@ -175,6 +179,7 @@ export async function markAttendance(shiftId, workerId, status) {
 // ── Assign worker picker ──────────────────────────────────────────────────────
 
 export async function openAssignPicker() {
+  if (!requireWebManage()) return
   document.getElementById('assign-modal').classList.remove('hidden')
   document.getElementById('picker-search').value = ''
   document.getElementById('picker-list').innerHTML = `<div style="padding:12px;color:var(--muted);font-size:0.85rem">${t('modals.pickerLoading')}</div>`
@@ -221,6 +226,7 @@ function renderPickerList(workers, query) {
 }
 
 export async function assignWorker(workerId) {
+  if (!requireWebManage()) return
   closeAssignModal()
   const res = await apiFetch(`/shifts/${state.activeShiftId}/assign`, {
     method: 'POST',
@@ -241,6 +247,7 @@ export async function assignWorker(workerId) {
 // ── Edit shift ────────────────────────────────────────────────────────────────
 
 export function openEditMode() {
+  if (!requireWebManage()) return
   const shift = state.activeShiftData
   if (!shift) return
   _editing = true
@@ -281,6 +288,7 @@ export function closeEditMode() {
 }
 
 export async function saveEditShift() {
+  if (!requireWebManage()) return
   const startTime      = document.getElementById('es-start')?.value
   const endTime        = document.getElementById('es-end')?.value
   const requiredWorkers = parseInt(document.getElementById('es-required')?.value, 10)
@@ -333,6 +341,7 @@ export async function saveEditShift() {
 // ── Cancel (delete) shift ─────────────────────────────────────────────────────
 
 export function confirmCancelShift(shiftId) {
+  if (!requireWebManage()) return
   document.getElementById('modal-footer').innerHTML = `
     <span style="font-size:0.82rem;color:var(--muted);align-self:center;flex:1">${t('modals.confirmCancel')}</span>
     <button class="btn btn-danger" id="confirm-cancel-btn" onclick="doDeleteShift('${shiftId}')">${t('modals.yesCancel')}</button>
@@ -344,6 +353,7 @@ export function renderModalFooterFromState() {
 }
 
 export async function doDeleteShift(shiftId) {
+  if (!requireWebManage()) return
   const btn = document.getElementById('confirm-cancel-btn')
   if (btn) { btn.disabled = true; btn.textContent = t('common.cancelling') }
   try {

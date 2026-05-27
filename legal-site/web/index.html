@@ -78,6 +78,13 @@
   <!-- Main content -->
   <main>
 
+    <!-- Read-only lock banner (visible when trial ended without upgrade) -->
+    <div id="lock-banner" class="lock-banner" style="display:none" onclick="showView('profile')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <span class="lock-banner-text" data-i18n="lock.banner">Your Pro trial has ended — upgrade to manage shifts from the web.</span>
+      <span class="lock-banner-cta" data-i18n="lock.bannerCta">Upgrade →</span>
+    </div>
+
     <!-- Shifts view -->
     <div id="view-shifts">
       <div class="topbar">

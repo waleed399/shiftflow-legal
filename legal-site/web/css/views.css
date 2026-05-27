@@ -3,6 +3,37 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 #view-shifts, #view-profile, #view-requests, #view-workers, #view-availability { flex: 1; flex-direction: column; min-height: 0; }
 #view-shifts { position: relative; }
 
+/* ── Read-only lock banner ── */
+.lock-banner {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 24px;
+  background: linear-gradient(90deg, #fff7ed 0%, #ffedd5 100%);
+  border-bottom: 1px solid #fed7aa;
+  color: #9a3412;
+  font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; flex-shrink: 0;
+  transition: background 0.15s;
+}
+.lock-banner:hover { background: linear-gradient(90deg, #ffedd5 0%, #fed7aa 100%); }
+.lock-banner svg { flex-shrink: 0; color: #c2410c; }
+.lock-banner-text { flex: 1; }
+.lock-banner-cta { font-weight: 700; color: #c2410c; white-space: nowrap; }
+
+/* Hide write controls when org lacks web management permissions */
+body.web-locked .fab { display: none !important; }
+body.web-locked #action-bar { display: none !important; }
+body.web-locked .wv-pill-open { display: none; }
+body.web-locked .wv-pill-assigned { cursor: default; }
+body.web-locked .wv-pill-assigned:hover { opacity: 1; }
+body.web-locked .dt-cell-plus { display: none; }
+body.web-locked #modal-footer .btn-success,
+body.web-locked #modal-footer .btn-warning,
+body.web-locked #modal-footer .btn-danger,
+body.web-locked #modal-footer .btn-sm { display: none; }
+body.web-locked .attendance-btns,
+body.web-locked .remove-btn { display: none; }
+body.web-locked #shift-modal-body .btn-sm { display: none; }
+
 /* ── Topbar ── */
 .topbar {
   background: var(--white); border-bottom: 1px solid var(--border);

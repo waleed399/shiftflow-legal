@@ -2,6 +2,7 @@ import { state } from './state.js'
 import { apiFetch } from './api.js'
 import { esc, getInitials, applyAvatars, toYMD, addDays, getWeekStartOf, MONTHS, DAY_FULL, AVAIL_ICONS } from './utils.js'
 import { t } from './i18n.js'
+import { requireWebManage } from './profile.js'
 
 // ── Preference config (colours match mobile exactly) ──────────────────────────
 
@@ -252,6 +253,7 @@ function dayCell(slot) {
 // ── Nudge ─────────────────────────────────────────────────────────────────────
 
 export async function nudgeWorker(workerId) {
+  if (!requireWebManage()) return
   const btn = document.getElementById(`nudge-${workerId}`)
   if (!btn || btn.disabled) return
   btn.disabled = true

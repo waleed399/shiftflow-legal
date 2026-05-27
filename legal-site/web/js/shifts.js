@@ -2,6 +2,7 @@ import { state, ensureOrgWorkers } from './state.js'
 import { apiFetch } from './api.js'
 import { DAYS, MONTHS, DEPT_COLORS, DAY_FULL, AVAIL_ICONS, addDays, isSameDay, toYMD, fmtDate, getWeekStartOf, esc, getInitials, applyAvatars, showToast } from './utils.js'
 import { t } from './i18n.js'
+import { requireWebManage } from './profile.js'
 
 let shiftsView = 'list'
 
@@ -473,6 +474,7 @@ export async function renderTableView() {
 }
 
 export async function assignInTable(shiftId, workerId) {
+  if (!requireWebManage()) return
   const cellKey = `${shiftId}::${workerId}`
   const cell = document.querySelector(`[data-cell="${cellKey}"]`)
   if (!cell || cell.dataset.assigning) return
@@ -533,6 +535,7 @@ export function updateActionBar() {
 }
 
 export async function publishDay() {
+  if (!requireWebManage()) return
   document.getElementById('btn-publish-day').disabled = true
   try {
     const res = await apiFetch('/shifts/publish-day', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ date: toYMD(state.selectedDay) }) })
@@ -541,6 +544,7 @@ export async function publishDay() {
 }
 
 export async function unpublishDay() {
+  if (!requireWebManage()) return
   document.getElementById('btn-unpublish-day').disabled = true
   try {
     const res = await apiFetch('/shifts/unpublish-day', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ date: toYMD(state.selectedDay) }) })
@@ -549,6 +553,7 @@ export async function unpublishDay() {
 }
 
 export async function publishWeek() {
+  if (!requireWebManage()) return
   const key = toYMD(state.currentWeek)
   const draftCount = (state.shiftsCache[key] || []).filter(s => s.status === 'DRAFT').length
   const msg = draftCount === 1
@@ -572,6 +577,7 @@ export async function publishWeek() {
 }
 
 export async function unpublishWeek() {
+  if (!requireWebManage()) return
   if (!confirm(t('shifts.confirmUnpublishWeek'))) return
 
   const key = toYMD(state.currentWeek)
@@ -796,6 +802,7 @@ export async function renderWeekView() {
 }
 
 export async function assignInWeekView(shiftId, workerId) {
+  if (!requireWebManage()) return
   const pill = document.querySelector(`.wv-pill-open[data-assign="${shiftId}::${workerId}"]`)
   if (!pill || pill.dataset.assigning) return
   pill.dataset.assigning = '1'
