@@ -1,6 +1,6 @@
 /* ── Main ── */
 main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-#view-shifts, #view-profile, #view-requests, #view-workers, #view-availability { flex: 1; flex-direction: column; min-height: 0; }
+#view-shifts, #view-profile, #view-requests, #view-workers, #view-availability { flex: 1; display: flex; flex-direction: column; min-height: 0; }
 #view-shifts { position: relative; }
 
 /* ── Read-only lock banner ── */
