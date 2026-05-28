@@ -286,27 +286,11 @@
 [data-theme="dark"] .dash-req-deny:hover:not(:disabled) { background: rgba(191,31,58,0.28); }
 
 /* ═══════════════════════════════════════════════════
-   Theme toggle button (sidebar footer)
+   Theme toggle button (header, icon-only)
    ═══════════════════════════════════════════════════ */
 
-.theme-toggle-btn {
-  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
-  border-radius: 10px; cursor: pointer; color: rgba(255,255,255,0.32);
-  font-size: 0.8rem; font-weight: 500; transition: all 0.15s;
-  width: 100%; background: none; border: none; font-family: inherit;
-  margin-bottom: 4px;
-}
-.theme-toggle-btn:hover { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.07); }
-.theme-toggle-btn svg { flex-shrink: 0; opacity: 0.7; transition: opacity 0.15s; }
-.theme-toggle-btn:hover svg { opacity: 1; }
-
-/* Swap icon and label based on current theme */
+/* Swap moon/sun icon based on current theme */
 .theme-icon-sun  { display: none; }
 .theme-icon-moon { display: block; }
 [data-theme="dark"] .theme-icon-sun  { display: block; }
 [data-theme="dark"] .theme-icon-moon { display: none; }
-
-.theme-label-dark  { display: inline; }
-.theme-label-light { display: none; }
-[data-theme="dark"] .theme-label-dark  { display: none; }
-[data-theme="dark"] .theme-label-light { display: inline; }

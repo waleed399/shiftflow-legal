@@ -11,8 +11,17 @@ aside {
   box-shadow: 4px 0 24px rgba(0,0,0,0.18);
 }
 .sidebar-header { padding: 20px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.sidebar-logo-group { display: flex; align-items: center; gap: 10px; }
 .logo { font-size: 1.25rem; font-weight: 800; color: white; letter-spacing: -0.5px; }
 .logo span { color: var(--red); }
+
+.header-theme-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 7px; flex-shrink: 0;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.55); cursor: pointer; transition: all 0.15s;
+}
+.header-theme-btn:hover { background: rgba(255,255,255,0.14); color: white; border-color: rgba(255,255,255,0.22); }
 
 .user-card { padding: 18px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.07); }
 .avatar {
