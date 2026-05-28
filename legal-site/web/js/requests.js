@@ -220,6 +220,13 @@ function timeOffHistoryCard(req) {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
+function refreshBadges() {
+  const ps = (_cachedSwaps   || []).filter(s => s.status === 'PENDING').length
+  const pt = (_cachedTimeoff || []).filter(t => t.status === 'PENDING').length
+  updateBadge(ps + pt)
+  updateTabCounts(ps, pt)
+}
+
 function updateBadge(n) {
   state.pendingRequestCount = n
   const el = document.getElementById('req-badge')
@@ -283,6 +290,7 @@ async function approveSwap(id) {
   disableSwapBtns(id)
   if (await doAction(() => apiFetch(`/swaps/${id}/approve`, { method: 'PATCH', body: '{}' }))) {
     patchCachedSwap(id, 'APPROVED')
+    refreshBadges()
     window.dismissNotification?.(id)
     renderTab(_cachedSwaps, _cachedTimeoff)
   } else {
@@ -297,6 +305,7 @@ async function approveSwapOpen(id) {
   disableSwapBtns(id)
   if (await doAction(() => apiFetch(`/swaps/${id}/approve`, { method: 'PATCH', body: JSON.stringify({ replacementWorkerId: vol }) }))) {
     patchCachedSwap(id, 'APPROVED')
+    refreshBadges()
     window.dismissNotification?.(id)
     renderTab(_cachedSwaps, _cachedTimeoff)
   } else {
@@ -309,6 +318,7 @@ async function denySwap(id) {
   disableSwapBtns(id)
   if (await doAction(() => apiFetch(`/swaps/${id}/deny`, { method: 'PATCH', body: '{}' }))) {
     patchCachedSwap(id, 'DENIED')
+    refreshBadges()
     window.dismissNotification?.(id)
     renderTab(_cachedSwaps, _cachedTimeoff)
   } else {
@@ -321,6 +331,7 @@ async function approveTimeOff(id) {
   disableTimeOffBtns(id)
   if (await doAction(() => apiFetch(`/time-off/${id}/approve`, { method: 'PATCH', body: '{}' }))) {
     patchCachedTimeOff(id, 'APPROVED')
+    refreshBadges()
     window.dismissNotification?.(id)
     renderTab(_cachedSwaps, _cachedTimeoff)
   } else {
@@ -333,6 +344,7 @@ async function denyTimeOff(id) {
   disableTimeOffBtns(id)
   if (await doAction(() => apiFetch(`/time-off/${id}/deny`, { method: 'PATCH', body: '{}' }))) {
     patchCachedTimeOff(id, 'DENIED')
+    refreshBadges()
     window.dismissNotification?.(id)
     renderTab(_cachedSwaps, _cachedTimeoff)
   } else {
