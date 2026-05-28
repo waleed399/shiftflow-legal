@@ -110,6 +110,10 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
           </div>
+          <button class="btn-create-shifts" id="btn-create-shifts" onclick="openCreateShiftsModal()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
+            <span data-i18n="shifts.createShiftsTitle">Create shifts</span>
+          </button>
           <button class="btn-generate-sched" id="btn-generate" onclick="openGenerateModal()">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
             <span data-i18n="shifts.generateSchedule">Generate</span>
@@ -321,6 +325,28 @@
     <div class="confirm-dialog-actions">
       <button class="btn btn-ghost" onclick="closeConfirmDialog()" data-i18n="common.cancel">Cancel</button>
       <button class="btn btn-danger" onclick="confirmDialogOk()" data-i18n="common.delete">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Create shifts from templates modal -->
+<div class="modal-overlay hidden" id="create-shifts-modal" onclick="onCreateShiftsOverlayClick(event)">
+  <div class="modal" style="max-width:660px">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <div class="modal-title" data-i18n="shifts.createShiftsTitle">Create shifts</div>
+        <div class="modal-subtitle" data-i18n="shifts.createShiftsSubtitle">Generate draft shifts for multiple weeks from your shift types</div>
+      </div>
+      <button class="modal-close" onclick="closeCreateShiftsModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="cs-modal-body">
+      <div class="loader-inline"><div class="spinner"></div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeCreateShiftsModal()" data-i18n="common.cancel">Cancel</button>
+      <button class="btn btn-success" id="cs-submit-btn" onclick="submitCreateShifts()" disabled data-i18n="shifts.csCreate">Create shifts</button>
     </div>
   </div>
 </div>

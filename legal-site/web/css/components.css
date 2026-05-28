@@ -90,6 +90,45 @@ textarea.form-input { resize: vertical; min-height: 44px; }
 .nav-badge { display: none; margin-left: auto; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--red); color: white; font-size: 0.65rem; font-weight: 700; align-items: center; justify-content: center; }
 .nav-badge.visible { display: inline-flex; animation: badgePop 0.25s ease; }
 
+/* ── Create Shifts from Templates ── */
+.btn-create-shifts {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 8px;
+  border: 1.5px solid #1a2d4f; background: white; color: #1a2d4f;
+  font-size: 0.82rem; font-weight: 600; cursor: pointer;
+  font-family: inherit; transition: all 0.15s; white-space: nowrap;
+}
+.btn-create-shifts:hover { background: #1a2d4f; color: white; }
+.cs-section-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 8px; }
+.cs-week-nav { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.cs-week-label { flex: 1; text-align: center; font-size: 0.875rem; font-weight: 600; color: var(--text); }
+.cs-week-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.cs-week-pill { padding: 5px 14px; border-radius: 8px; border: 1.5px solid var(--border); background: white; font-size: 0.8rem; font-weight: 600; color: var(--muted); cursor: pointer; font-family: inherit; transition: all 0.15s; }
+.cs-week-pill:hover { border-color: #1a2d4f; color: #1a2d4f; }
+.cs-week-pill-on { border-color: #1a2d4f; background: #eff6ff; color: #1a2d4f; }
+.cs-grid-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; }
+.cs-grid { width: 100%; border-collapse: collapse; }
+.cs-grid thead th { background: #f8fafc; padding: 8px 10px; font-size: 0.72rem; font-weight: 700; color: var(--muted); border-bottom: 1px solid var(--border); }
+.cs-tmpl-th { text-align: left; min-width: 160px; }
+.cs-day-th { text-align: center; width: 44px; cursor: pointer; user-select: none; transition: color 0.12s; }
+.cs-day-th:hover { color: #1a2d4f; }
+.cs-day-all { color: #1a2d4f; }
+.cs-dept-band td { background: #1a2d4f; color: white; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 5px 12px; }
+.cs-tmpl-row { border-bottom: 1px solid #f1f5f9; }
+.cs-tmpl-row:last-child { border-bottom: none; }
+.cs-tmpl-cell { padding: 10px 12px; cursor: pointer; }
+.cs-tmpl-cell:hover { background: #f8fafc; }
+.cs-tmpl-inner { display: flex; align-items: center; gap: 8px; }
+.cs-tmpl-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.cs-tmpl-name { font-size: 0.82rem; font-weight: 600; color: var(--navy); display: block; }
+.cs-tmpl-time { font-size: 0.72rem; color: var(--muted); display: block; }
+.cs-cell { text-align: center; padding: 6px 4px; cursor: pointer; }
+.cs-cell:hover .cs-dot { border-color: #1a2d4f; }
+.cs-dot { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #e2e8f0; background: #f8fafc; margin: 0 auto; display: flex; align-items: center; justify-content: center; transition: all 0.12s; }
+.cs-dot-on { border-color: transparent; }
+.cs-dot-on::after { content: '✓'; font-size: 11px; font-weight: 700; color: white; }
+.cs-hint { font-size: 0.72rem; color: var(--muted); line-height: 1.5; margin-bottom: 16px; }
+
 /* ── Generate Schedule Modal ── */
 .btn-generate-sched {
   display: inline-flex; align-items: center; gap: 6px;

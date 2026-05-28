@@ -34,6 +34,7 @@ body.web-locked .attendance-btns,
 body.web-locked .remove-btn { display: none; }
 body.web-locked #shift-modal-body .btn-sm { display: none; }
 body.web-locked #btn-generate { display: none !important; }
+body.web-locked #btn-create-shifts { display: none !important; }
 
 /* ── Topbar ── */
 .topbar {
