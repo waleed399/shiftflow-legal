@@ -107,6 +107,36 @@ body.web-locked #btn-create-shifts { display: none !important; }
 .loader-inline { display: flex; align-items: center; justify-content: center; padding: 72px; }
 .loader-inline .spinner { border-color: rgba(0,0,0,0.08); border-top-color: var(--navy); }
 
+/* ── Shift filter bar ── */
+#shift-filter-bar {
+  border-bottom: 1px solid var(--border);
+  background: var(--white);
+}
+.filter-bar-scroll {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 20px; overflow-x: auto;
+  scrollbar-width: none;
+}
+.filter-bar-scroll::-webkit-scrollbar { display: none; }
+.filter-chip {
+  display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+  padding: 5px 11px; border-radius: 20px; border: 1.5px solid var(--border);
+  background: transparent; color: var(--muted); font-size: 0.75rem; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: all 0.15s; flex-shrink: 0;
+}
+.filter-chip:hover { border-color: var(--chip-color, var(--navy)); color: var(--chip-color, var(--navy)); }
+.filter-chip.active {
+  background: var(--chip-color, var(--navy)); border-color: var(--chip-color, var(--navy));
+  color: white;
+}
+.filter-chip-clear {
+  background: var(--red); border-color: var(--red); color: white;
+}
+.filter-chip-clear:hover { opacity: 0.85; }
+.filter-divider { width: 1px; height: 18px; background: var(--border); flex-shrink: 0; }
+.btn-link { background: none; border: none; color: var(--navy); font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: inherit; text-decoration: underline; }
+.btn-link:hover { opacity: 0.75; }
+
 /* ── Day stats strip ── */
 .day-stats { display: flex; gap: 10px; margin-bottom: 18px; max-width: 800px; animation: slideUp 0.28s ease both; }
 .stat-chip {

@@ -156,6 +156,14 @@ export default {
     generateInvalidAvail: 'יש נתוני זמינות לא תקינים — בקש מהם לשלוח מחדש.',
     generateFailed: 'יצירה נכשלה — נסה שוב',
     generateApplyFailed: 'החלת לוח הזמנים נכשלה — נסה שוב',
+    filterUnderstaffed: 'חסר כוח אדם',
+    filterNeedsWorkers: 'דרושים עובדים',
+    filterMorning: 'בוקר',
+    filterAfternoon: 'צהריים',
+    filterEvening: 'ערב',
+    filterClear: 'נקה ({{count}})',
+    filterNoMatch: 'אין משמרות התואמות את הסינון.',
+    filterClearLink: 'נקה סינון',
   },
 
   requests: {

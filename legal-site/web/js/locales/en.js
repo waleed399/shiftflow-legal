@@ -156,6 +156,14 @@ export default {
     generateInvalidAvail: 'have outdated availability data — ask them to re-submit.',
     generateFailed: 'Failed to generate — try again',
     generateApplyFailed: 'Failed to apply schedule — try again',
+    filterUnderstaffed: 'Understaffed',
+    filterNeedsWorkers: 'Needs workers',
+    filterMorning: 'Morning',
+    filterAfternoon: 'Afternoon',
+    filterEvening: 'Evening',
+    filterClear: 'Clear ({{count}})',
+    filterNoMatch: 'No shifts match the active filters.',
+    filterClearLink: 'Clear filters',
   },
 
   requests: {

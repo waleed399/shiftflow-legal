@@ -300,3 +300,8 @@
 .theme-icon-moon { display: block; }
 [data-theme="dark"] .theme-icon-sun  { display: block; }
 [data-theme="dark"] .theme-icon-moon { display: none; }
+
+/* Filter bar */
+[data-theme="dark"] #shift-filter-bar { background: var(--white); border-color: var(--border); }
+[data-theme="dark"] .filter-chip { border-color: #334155; color: #94a3b8; }
+[data-theme="dark"] .filter-chip.active { color: white; }
