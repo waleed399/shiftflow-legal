@@ -12,9 +12,8 @@ let _selectedDay    = null  // day selected in the strip
 // ── Entry point ───────────────────────────────────────────────────────────────
 
 export async function renderDashboard() {
-  const today  = new Date()
   _dashWeek    = state.currentWeek   // always reset to current week on nav
-  _selectedDay = today
+  _selectedDay = new Date()          // always default to actual today
 
   const el = document.getElementById('dashboard-content')
   if (!el) return
@@ -382,10 +381,10 @@ window._dashSelectDay = (ymd) => {
 window._dashChangeWeek = async (dir) => {
   _dashWeek = addDays(_dashWeek, dir * 7)
 
-  // Select the first day of the new week; snap back to today if it falls in this week
-  const today   = new Date()
-  const weekEnd = addDays(_dashWeek, 6)
-  _selectedDay  = (today >= _dashWeek && today <= weekEnd) ? today : new Date(_dashWeek)
+  // Snap back to today if today falls in the newly selected week, otherwise first day
+  const today = new Date()
+  const todayInWeek = Array.from({ length: 7 }, (_, i) => addDays(_dashWeek, i)).some(d => isSameDay(d, today))
+  _selectedDay = todayInWeek ? today : new Date(_dashWeek)
 
   // Fetch week data if not cached
   const key = toYMD(_dashWeek)
