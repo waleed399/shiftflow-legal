@@ -69,7 +69,6 @@ function updateBell() {
   const pending = _items.filter(n => n.type.endsWith('_pending')).length
   const badge = document.getElementById('notif-bell-badge')
   if (!badge) return
-  badge.textContent = pending > 9 ? '9+' : pending > 0 ? String(pending) : ''
   badge.classList.toggle('visible', pending > 0)
 }
 
