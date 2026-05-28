@@ -8,6 +8,7 @@
   --text: #0f172a;
   --muted: #64748b;
   --border: #e2e8f0;
+  --primary: var(--navy);
   --sidebar: 272px;
   --radius-card: 14px;
   --radius-btn: 10px;

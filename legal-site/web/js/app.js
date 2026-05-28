@@ -179,8 +179,15 @@ function signOut() {
   window.location.href = '/app/'
 }
 
-window.showView  = showView
-window.signOut   = signOut
-window.showToast = showToast
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark')
+  localStorage.setItem('shiftflow_theme', isDark ? 'light' : 'dark')
+}
+
+window.showView    = showView
+window.signOut     = signOut
+window.showToast   = showToast
+window.toggleTheme = toggleTheme
 
 init()
