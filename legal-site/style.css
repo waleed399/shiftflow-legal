@@ -5,6 +5,9 @@
   --navy-mid: #223660;
   --red: #bf1f3a;
   --red-light: #e8253f;
+  --gold: #d97706;
+  --gold-light: #f59e0b;
+  --gold-pale: rgba(245,158,11,0.15);
   --bg: #f0f4f8;
   --white: #ffffff;
   --text: #0f172a;
@@ -44,6 +47,24 @@ nav.scrolled .nav-app-btn:hover { color: var(--navy); border-color: var(--navy);
   text-decoration: none; transition: background 0.15s, transform 0.1s;
 }
 .nav-cta:hover { background: var(--red-light); transform: translateY(-1px); }
+
+/* ── Language toggle ── */
+.lang-toggle {
+  display: flex; align-items: center;
+  background: rgba(255,255,255,0.1); border-radius: 20px; padding: 3px; gap: 2px;
+  margin-left: 4px;
+}
+nav.scrolled .lang-toggle { background: var(--bg); }
+.lang-btn {
+  padding: 5px 13px; border-radius: 16px; border: none;
+  background: transparent; color: rgba(255,255,255,0.45);
+  font-size: 0.72rem; font-weight: 700; cursor: pointer;
+  font-family: inherit; transition: all 0.18s; line-height: 1;
+  letter-spacing: 0.03em; white-space: nowrap;
+}
+.lang-btn.active { background: rgba(255,255,255,0.18); color: #fff; }
+nav.scrolled .lang-btn { color: var(--muted); }
+nav.scrolled .lang-btn.active { background: var(--navy); color: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
 
 /* ── HERO ── */
 .hero {
@@ -269,6 +290,34 @@ nav.scrolled .nav-app-btn:hover { color: var(--navy); border-color: var(--navy);
 .pricing-cta-ghost:hover { background: rgba(255,255,255,0.1); color: white; border-color: rgba(255,255,255,0.5); }
 .pricing-cta-solid { background: var(--red); color: white; box-shadow: 0 4px 16px rgba(191,31,58,0.4); }
 .pricing-cta-solid:hover { background: var(--red-light); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(191,31,58,0.5); }
+.pricing-cta-gold {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+  color: #fff; box-shadow: 0 4px 16px rgba(217,119,6,0.42);
+}
+.pricing-cta-gold:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 6px 22px rgba(217,119,6,0.55); }
+
+/* ── Pricing tier header (icon + label row) ── */
+.pricing-tier-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.tier-icon-wrap {
+  width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.tier-icon-pro  { background: rgba(191,31,58,0.18);   color: var(--red); }
+.tier-icon-biz  { background: rgba(217,119,6,0.2);    color: var(--gold-light); }
+.pricing-card.popular .tier-icon-pro { background: rgba(191,31,58,0.1); color: var(--red); }
+.pricing-tier-header .pricing-tier { margin-bottom: 0; }
+
+/* Business gold price */
+.pricing-card.business .pricing-price { color: var(--gold-light) !important; }
+.pricing-card.business .pricing-price sup { color: var(--gold-light) !important; }
+.pricing-card.business .pricing-tier { color: rgba(245,158,11,0.65) !important; }
+
+/* Save badge pulse */
+@keyframes badgePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(5,150,105,0.4); }
+  50%       { box-shadow: 0 0 0 5px rgba(5,150,105,0); }
+}
+.pricing-save-badge { animation: badgePulse 2.4s ease infinite; }
 
 /* ── CTA STRIP ── */
 .cta-strip {

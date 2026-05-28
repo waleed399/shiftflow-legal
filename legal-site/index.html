@@ -16,6 +16,10 @@
     <a class="nav-link" href="#pricing">Pricing</a>
   </div>
   <div class="nav-actions">
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="lang-en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" id="lang-he" onclick="setLang('he')">עברית</button>
+    </div>
     <a href="/web/login.html" class="nav-app-btn">Sign in</a>
     <a href="/web/signup.html" class="nav-cta">Get started free</a>
   </div>
@@ -229,7 +233,12 @@
 
       <div class="pricing-card popular">
         <div class="popular-badge">Most Popular</div>
-        <p class="pricing-tier">Pro</p>
+        <div class="pricing-tier-header">
+          <div class="tier-icon-wrap tier-icon-pro">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </div>
+          <p class="pricing-tier">Pro</p>
+        </div>
         <p class="pricing-price" id="pro-price"><sup>$</sup>49.99 <span>/ mo</span></p>
         <p class="pricing-note" id="pro-note">&nbsp;</p>
         <ul class="pricing-features">
@@ -243,8 +252,13 @@
         <a class="pricing-cta pricing-cta-solid" href="/web/signup.html">Get Pro</a>
       </div>
 
-      <div class="pricing-card">
-        <p class="pricing-tier">Business</p>
+      <div class="pricing-card business">
+        <div class="pricing-tier-header">
+          <div class="tier-icon-wrap tier-icon-biz">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 19l2.5-8 4.5 4L12 5l3 10 4.5-4L22 19H2z"/><line x1="2" y1="22" x2="22" y2="22"/></svg>
+          </div>
+          <p class="pricing-tier">Business</p>
+        </div>
         <p class="pricing-price" id="biz-price"><sup>$</sup>99.99 <span>/ mo</span></p>
         <p class="pricing-note" id="biz-note">&nbsp;</p>
         <ul class="pricing-features">
@@ -252,7 +266,7 @@
           <li>Unlimited workers</li>
           <li>Priority support</li>
         </ul>
-        <a class="pricing-cta pricing-cta-ghost" href="/web/signup.html">Get Business</a>
+        <a class="pricing-cta pricing-cta-gold" href="/web/signup.html">Get Business</a>
       </div>
 
     </div>

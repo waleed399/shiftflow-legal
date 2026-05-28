@@ -8,6 +8,13 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.12 })
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el))
 
+function setLang(lang) {
+  document.getElementById('lang-en').classList.toggle('active', lang === 'en')
+  document.getElementById('lang-he').classList.toggle('active', lang === 'he')
+  document.documentElement.lang = lang
+  document.documentElement.dir  = lang === 'he' ? 'rtl' : 'ltr'
+}
+
 function setPricing(period) {
   const isAnnual = period === 'annual'
   document.getElementById('btn-monthly').classList.toggle('active', !isAnnual)
