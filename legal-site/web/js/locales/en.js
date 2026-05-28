@@ -481,4 +481,20 @@ export default {
     idle: 'Resend code',
     countdown: 'Resend code in {{s}}s',
   },
+
+  notifications: {
+    title: 'Activity',
+    pending: 'Pending',
+    recent: 'Recent',
+    empty: 'No activity yet',
+    swapPending: '{{name}} requested a swap',
+    timeoffPending: '{{name}} requested time off',
+    approved: '{{name}}\'s request was approved',
+    denied: '{{name}}\'s request was denied',
+    cancelled: '{{name}}\'s request was cancelled',
+    justNow: 'Just now',
+    minsAgo: '{{n}}m ago',
+    hoursAgo: '{{n}}h ago',
+    daysAgo: '{{n}}d ago',
+  },
 }

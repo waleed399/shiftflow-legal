@@ -481,4 +481,20 @@ export default {
     idle: 'שלח קוד שוב',
     countdown: 'שלח שוב בעוד {{s}} שניות',
   },
+
+  notifications: {
+    title: 'פעילות',
+    pending: 'ממתין לאישור',
+    recent: 'אחרונים',
+    empty: 'אין פעילות עדיין',
+    swapPending: '{{name}} ביקש החלפת משמרת',
+    timeoffPending: '{{name}} ביקש חופשה',
+    approved: 'הבקשה של {{name}} אושרה',
+    denied: 'הבקשה של {{name}} נדחתה',
+    cancelled: 'הבקשה של {{name}} בוטלה',
+    justNow: 'עכשיו',
+    minsAgo: 'לפני {{n}} דק׳',
+    hoursAgo: 'לפני {{n}} שע׳',
+    daysAgo: 'לפני {{n}} ימים',
+  },
 }

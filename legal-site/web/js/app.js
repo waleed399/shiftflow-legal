@@ -9,6 +9,7 @@ import { renderRequests, loadPendingCount } from './requests.js'
 import { renderWorkers } from './workers.js'
 import { renderAvailability } from './availability.js'
 import { initI18n, mountLanguageSwitcher } from './i18n.js'
+import { initNotifications } from './notifications.js'
 
 async function init() {
   initI18n()
@@ -58,7 +59,8 @@ async function init() {
     loadingEl.classList.add('loading-exit')
     setTimeout(() => { loadingEl.style.display = 'none' }, 400)
 
-    loadPendingCount() // non-blocking badge update
+    loadPendingCount()    // non-blocking badge update
+    initNotifications()  // non-blocking: fetch + render notification bell
 
     if (returningFromPayment) {
       showView('profile')
