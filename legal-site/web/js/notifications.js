@@ -31,19 +31,19 @@ function buildItems(swaps, timeoff) {
 
   for (const s of swaps) {
     if (s.status === 'PENDING') {
-      items.push({ type: 'swap_pending', workerName: s.requester?.name, ts: s.createdAt })
+      items.push({ id: s.id, type: 'swap_pending', workerName: s.requester?.name, ts: s.createdAt })
     }
   }
   for (const r of timeoff) {
     if (r.status === 'PENDING') {
-      items.push({ type: 'timeoff_pending', workerName: r.worker?.name, ts: r.createdAt })
+      items.push({ id: r.id, type: 'timeoff_pending', workerName: r.worker?.name, ts: r.createdAt })
     }
   }
   for (const s of swaps) {
     if (s.status !== 'PENDING') {
       const ts = s.updatedAt || s.createdAt
       if (ts && new Date(ts).getTime() > sevenDaysAgo) {
-        items.push({ type: `swap_${s.status.toLowerCase()}`, workerName: s.requester?.name, ts })
+        items.push({ id: s.id, type: `swap_${s.status.toLowerCase()}`, workerName: s.requester?.name, ts })
       }
     }
   }
@@ -51,7 +51,7 @@ function buildItems(swaps, timeoff) {
     if (r.status !== 'PENDING') {
       const ts = r.updatedAt || r.createdAt
       if (ts && new Date(ts).getTime() > sevenDaysAgo) {
-        items.push({ type: `timeoff_${r.status.toLowerCase()}`, workerName: r.worker?.name, ts })
+        items.push({ id: r.id, type: `timeoff_${r.status.toLowerCase()}`, workerName: r.worker?.name, ts })
       }
     }
   }
@@ -71,6 +71,12 @@ function updateBell() {
   if (!badge) return
   badge.textContent = pending > 9 ? '9+' : pending > 0 ? String(pending) : ''
   badge.classList.toggle('visible', pending > 0)
+}
+
+export function dismissNotification(id) {
+  _items = _items.filter(n => n.id !== id)
+  updateBell()
+  if (_open) renderPanelContent()
 }
 
 export function toggleNotifPanel() {
@@ -150,16 +156,16 @@ function renderItem(n) {
   }
 
   const clickAttr = isPending
-    ? `onclick="window.showView('requests'); window.closeNotifPanel()" role="button" tabindex="0"`
-    : ''
+    ? `onclick="window.showView('requests'); window.closeNotifPanel()"`
+    : `onclick="window.dismissNotification('${esc(n.id)}')"`
 
-  return `<div class="notif-item${isPending ? ' notif-item-action' : ''}" ${clickAttr}>
+  return `<div class="notif-item notif-item-action" ${clickAttr} role="button" tabindex="0">
     <div class="notif-icon-wrap ${colorCls}">${iconHtml}</div>
     <div class="notif-body">
       <div class="notif-text">${label}</div>
       ${timeStr ? `<div class="notif-time">${esc(timeStr)}</div>` : ''}
     </div>
-    ${isPending ? `<svg class="notif-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>` : ''}
+    ${isPending ? `<svg class="notif-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>` : `<svg class="notif-dismiss-x" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`}
   </div>`
 }
 
@@ -186,5 +192,6 @@ function iconX() {
   return `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`
 }
 
-window.toggleNotifPanel = toggleNotifPanel
-window.closeNotifPanel  = closeNotifPanel
+window.toggleNotifPanel   = toggleNotifPanel
+window.closeNotifPanel    = closeNotifPanel
+window.dismissNotification = dismissNotification

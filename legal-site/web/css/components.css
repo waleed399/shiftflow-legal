@@ -225,3 +225,5 @@ textarea.form-input { resize: vertical; min-height: 44px; }
 .notif-text { font-size: 0.82rem; font-weight: 500; color: var(--text); line-height: 1.4; }
 .notif-time { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
 .notif-chevron { flex-shrink: 0; color: var(--muted); margin-top: 4px; }
+.notif-dismiss-x { flex-shrink: 0; color: #cbd5e1; margin-top: 4px; opacity: 0; transition: opacity 0.15s; }
+.notif-item:hover .notif-dismiss-x { opacity: 1; }

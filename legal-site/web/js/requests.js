@@ -283,6 +283,7 @@ async function approveSwap(id) {
   disableSwapBtns(id)
   if (await doAction(() => apiFetch(`/swaps/${id}/approve`, { method: 'PATCH', body: '{}' }))) {
     patchCachedSwap(id, 'APPROVED')
+    window.dismissNotification?.(id)
     renderTab(_cachedSwaps, _cachedTimeoff)
   } else {
     enableSwapBtns(id)
@@ -296,6 +297,7 @@ async function approveSwapOpen(id) {
   disableSwapBtns(id)
   if (await doAction(() => apiFetch(`/swaps/${id}/approve`, { method: 'PATCH', body: JSON.stringify({ replacementWorkerId: vol }) }))) {
     patchCachedSwap(id, 'APPROVED')
+    window.dismissNotification?.(id)
     renderTab(_cachedSwaps, _cachedTimeoff)
   } else {
     enableSwapBtns(id)
@@ -307,6 +309,7 @@ async function denySwap(id) {
   disableSwapBtns(id)
   if (await doAction(() => apiFetch(`/swaps/${id}/deny`, { method: 'PATCH', body: '{}' }))) {
     patchCachedSwap(id, 'DENIED')
+    window.dismissNotification?.(id)
     renderTab(_cachedSwaps, _cachedTimeoff)
   } else {
     enableSwapBtns(id)
@@ -318,6 +321,7 @@ async function approveTimeOff(id) {
   disableTimeOffBtns(id)
   if (await doAction(() => apiFetch(`/time-off/${id}/approve`, { method: 'PATCH', body: '{}' }))) {
     patchCachedTimeOff(id, 'APPROVED')
+    window.dismissNotification?.(id)
     renderTab(_cachedSwaps, _cachedTimeoff)
   } else {
     enableTimeOffBtns(id)
@@ -329,6 +333,7 @@ async function denyTimeOff(id) {
   disableTimeOffBtns(id)
   if (await doAction(() => apiFetch(`/time-off/${id}/deny`, { method: 'PATCH', body: '{}' }))) {
     patchCachedTimeOff(id, 'DENIED')
+    window.dismissNotification?.(id)
     renderTab(_cachedSwaps, _cachedTimeoff)
   } else {
     enableTimeOffBtns(id)
