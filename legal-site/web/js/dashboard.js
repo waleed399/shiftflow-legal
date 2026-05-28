@@ -1,6 +1,6 @@
 import { state } from './state.js'
 import { apiFetch } from './api.js'
-import { esc, addDays, toYMD, isSameDay } from './utils.js'
+import { esc, addDays, toYMD, isSameDay, DEPT_COLORS } from './utils.js'
 import { t } from './i18n.js'
 import { requireWebManage } from './profile.js'
 
@@ -94,7 +94,7 @@ function _buildHTML() {
         </div>
         <div class="dash-shifts-list">
           ${selShifts.length
-            ? selShifts.map(_shiftRow).join('')
+            ? _buildDeptSections(selShifts)
             : `<div class="dash-empty-msg">${t('dashboard.noShiftsForDay')}</div>`}
         </div>
       </div>
@@ -261,26 +261,73 @@ function _buildWeekStrip(allShifts) {
     </div>`
 }
 
-// ── Shift row ─────────────────────────────────────────────────────────────────
+// ── Department-grouped shift sections ────────────────────────────────────────
 
-function _shiftRow(shift) {
-  const isActive = shift.status === 'ACTIVE'
-  const dept     = shift.department?.name || '—'
-  const assigned = shift.assignments?.length || 0
-  const required = shift.requiredWorkers || 0
-  const full     = assigned >= required
-  const color    = full ? '#059669' : assigned > 0 ? '#d97706' : '#dc2626'
-  const dur      = _duration(shift.startTime, shift.endTime)
+const _STATUS_COLORS = {
+  DRAFT: '#94a3b8', PUBLISHED: '#1a2d4f', ACTIVE: '#f59e0b',
+  COMPLETED: '#22c55e', CANCELLED: '#ef4444',
+}
 
+function _getDeptColor(deptId) {
+  if (!deptId) return DEPT_COLORS[0]
+  let hash = 0
+  for (let i = 0; i < deptId.length; i++) hash = (hash * 31 + deptId.charCodeAt(i)) | 0
+  return DEPT_COLORS[Math.abs(hash) % DEPT_COLORS.length]
+}
+
+function _buildDeptSections(shifts) {
+  const groupMap = new Map()
+  shifts.forEach(s => {
+    const deptId = s.department?.id || 'unknown'
+    if (!groupMap.has(deptId)) groupMap.set(deptId, { dept: s.department, shifts: [] })
+    groupMap.get(deptId).shifts.push(s)
+  })
+  return [...groupMap.entries()].map(([deptId, g]) => _deptSection(g, _getDeptColor(deptId))).join('')
+}
+
+function _deptSection(group, color) {
+  const totalAssigned = group.shifts.reduce((sum, s) => sum + (s.assignments?.length || 0), 0)
+  const totalRequired = group.shifts.reduce((sum, s) => sum + (s.requiredWorkers || 0), 0)
+  const badgeColor = totalAssigned === 0 ? '#dc2626' : totalAssigned < totalRequired ? '#d97706' : color
   return `
-    <div class="dash-shift-row">
-      ${isActive ? '<span class="dash-live-dot"></span>' : '<span class="dash-live-dot-spacer"></span>'}
-      <div class="dash-shift-time">${shift.startTime?.substring(0, 5) || '—'}</div>
-      <div class="dash-shift-info">
-        <div class="dash-shift-dept">${esc(dept)}</div>
-        ${dur ? `<div class="dash-shift-dur">${dur}</div>` : ''}
+    <div>
+      <div class="dept-header" style="background:${color}10">
+        <div class="dept-stripe" style="background:${color}"></div>
+        <span class="dept-name" style="color:${color}">${esc(group.dept?.name || t('common.unknown'))}</span>
+        <span class="dept-worker-badge" style="background:${badgeColor}22;color:${badgeColor}">${totalAssigned}/${totalRequired}</span>
       </div>
-      <div class="dash-shift-coverage" style="color:${color}">${assigned}/${required}</div>
+      ${group.shifts.map(s => _dashShiftRow(s)).join('')}
+    </div>`
+}
+
+function _dashShiftRow(shift) {
+  const assigned    = shift.assignments?.length || 0
+  const required    = shift.requiredWorkers || 0
+  const pct         = Math.min(100, required > 0 ? Math.round(assigned / required * 100) : 100)
+  const workerColor = assigned === 0 ? '#dc2626' : assigned < required ? '#d97706' : '#059669'
+  const borderColor = _STATUS_COLORS[shift.status] || '#94a3b8'
+  const start       = shift.startTime?.substring(0, 5) || '—'
+  const end         = shift.endTime?.substring(0, 5) || '—'
+  const dur         = _duration(shift.startTime, shift.endTime)
+  return `
+    <div class="dept-shift-row" style="border-left:3px solid ${borderColor}" onclick="window.showView('shifts')">
+      <div class="shift-time-col">
+        <span class="shift-time">${start}</span>
+        <div class="shift-time-sep"></div>
+        <span class="shift-time">${end}</span>
+      </div>
+      <div class="shift-row-body">
+        <div class="shift-row-top">
+          <span class="status-pill status-${shift.status}">${t(`shifts.status.${shift.status}`)}</span>
+          ${dur ? `<span style="font-size:0.65rem;color:var(--muted)">${dur}</span>` : ''}
+        </div>
+        <div class="shift-coverage">
+          <div class="coverage-bar">
+            <div class="coverage-fill" style="width:${pct}%;background:${workerColor}"></div>
+          </div>
+          <span class="coverage-text" style="color:${workerColor}">${assigned}/${required}</span>
+        </div>
+      </div>
     </div>`
 }
 
