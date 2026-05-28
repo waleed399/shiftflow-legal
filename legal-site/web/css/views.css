@@ -247,6 +247,10 @@ body.web-locked #btn-create-shifts { display: none !important; }
 .dt-cell-blocked { display: flex; flex-direction: column; align-items: center; gap: 1px; opacity: 0.8; }
 .dt-blocked-icon  { font-size: 0.75rem; }
 .dt-blocked-label { font-size: 0.6rem; font-weight: 700; }
+.dt-blocked-warn  { color: #d97706; }
+.dt-blocked-muted { color: #94a3b8; }
+.dt-cell-limit      { background: #fff7ed; }
+.dt-cell-wrong-dept { background: #f8fafc; }
 .dt-cell-loading { display: flex; align-items: center; justify-content: center; height: 100%; }
 .dt-legend { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 8px 16px; border-top: 1px solid var(--border); background: #f8fafc; flex-shrink: 0; }
 .dt-legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.72rem; color: var(--muted); }

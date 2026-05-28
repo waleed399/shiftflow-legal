@@ -163,6 +163,10 @@
 [data-theme="dark"] .dt-legend       { background: #162032; border-color: var(--border); }
 [data-theme="dark"] .dt-legend-sep   { color: var(--border); }
 [data-theme="dark"] .dt-plus-mini    { border-color: #475569; color: #475569; }
+[data-theme="dark"] .dt-cell-limit      { background: #2c1808; }
+[data-theme="dark"] .dt-cell-wrong-dept { background: #1a2535; }
+[data-theme="dark"] .dt-blocked-warn    { color: #fb923c; }
+[data-theme="dark"] .dt-blocked-muted   { color: #64748b; }
 
 /* Week-roster view */
 [data-theme="dark"] .wv-corner       { background: var(--white); border-color: var(--border); }

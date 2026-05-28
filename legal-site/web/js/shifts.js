@@ -521,35 +521,33 @@ export async function renderTableView() {
         const canAssign    = !isAssigned && !isFull && !isBlocked
         const cellKey      = `${s.id}::${w.id}`
 
-        let bg, clickAttr, content
+        let bgCls = '', bgStyle = '', clickAttr, content
 
         if (isAssigned) {
-          bg = sColor + '18'
+          bgStyle = `background:${sColor}18`
           clickAttr = `onclick="openShiftModal('${s.id}')"`
           content = `<div class="dt-cell-check" style="background:${sColor}">✓</div>`
         } else if (isWrongDept) {
-          bg = '#f8fafc'
+          bgCls = ' dt-cell-wrong-dept'
           clickAttr = ''
-          content = `<div class="dt-cell-blocked"><span class="dt-blocked-icon">🔒</span><span class="dt-blocked-label" style="color:#94a3b8">${t('shifts.cell.dept')}</span></div>`
+          content = `<div class="dt-cell-blocked"><span class="dt-blocked-icon">🔒</span><span class="dt-blocked-label dt-blocked-muted">${t('shifts.cell.dept')}</span></div>`
         } else if (isAtLimit) {
-          bg = '#fff7ed'
+          bgCls = ' dt-cell-limit'
           clickAttr = ''
-          content = `<div class="dt-cell-blocked"><span class="dt-blocked-icon">🕐</span><span class="dt-blocked-label" style="color:#d97706">${t('shifts.cell.twelveH')}</span></div>`
+          content = `<div class="dt-cell-blocked"><span class="dt-blocked-icon">🕐</span><span class="dt-blocked-label dt-blocked-warn">${t('shifts.cell.twelveH')}</span></div>`
         } else if (hasConflict) {
-          bg = '#fff7ed'
+          bgCls = ' dt-cell-limit'
           clickAttr = ''
-          content = `<div class="dt-cell-blocked"><span class="dt-blocked-icon">🕐</span><span class="dt-blocked-label" style="color:#d97706">${t('shifts.cell.busy')}</span></div>`
+          content = `<div class="dt-cell-blocked"><span class="dt-blocked-icon">🕐</span><span class="dt-blocked-label dt-blocked-warn">${t('shifts.cell.busy')}</span></div>`
         } else if (canAssign) {
-          bg = 'transparent'
           clickAttr = `onclick="assignInTable('${s.id}','${w.id}')"`
           content = `<div class="dt-cell-plus">+</div>`
         } else {
-          bg = 'transparent'
           clickAttr = ''
           content = `<div class="dt-cell-dash">—</div>`
         }
 
-        return `<td class="dt-worker-cell${idx > 0 ? ' dt-row-border' : ''}" data-cell="${cellKey}" style="background:${bg};cursor:${isAssigned || canAssign ? 'pointer' : 'default'}" ${clickAttr}>${content}</td>`
+        return `<td class="dt-worker-cell${idx > 0 ? ' dt-row-border' : ''}${bgCls}" data-cell="${cellKey}" style="${bgStyle};cursor:${isAssigned || canAssign ? 'pointer' : 'default'}" ${clickAttr}>${content}</td>`
       }).join('')
 
       return `<tr>${infoCell}${workerCells}</tr>`
