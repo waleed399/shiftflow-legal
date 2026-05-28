@@ -50,11 +50,15 @@ export default {
     pendingApprovals: 'ממתין לאישור',
     viewAll: 'הצג הכל',
     noShiftsToday: 'אין משמרות מתוכננות להיום',
+    noShiftsForDay: 'אין משמרות מתוכננות ליום זה',
     allClear: 'הכל תקין — אין בקשות ממתינות',
     timeOff: 'חופשה',
     swap: 'החלפה',
     openSwap: 'החלפה פתוחה — מתנדבים מוזמנים',
     shifts: 'משמרות',
+    shiftsDay: 'משמרות ביום זה',
+    prevWeek: 'שבוע קודם',
+    nextWeek: 'שבוע הבא',
   },
 
   days: {

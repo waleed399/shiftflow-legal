@@ -50,11 +50,15 @@ export default {
     pendingApprovals: 'PENDING APPROVALS',
     viewAll: 'View all',
     noShiftsToday: 'No shifts scheduled for today',
+    noShiftsForDay: 'No shifts scheduled for this day',
     allClear: 'All clear — no pending requests',
     timeOff: 'Time off',
     swap: 'Swap',
     openSwap: 'Open swap — volunteers welcome',
     shifts: 'shifts',
+    shiftsDay: 'Shifts this day',
+    prevWeek: 'Previous week',
+    nextWeek: 'Next week',
   },
 
   days: {
