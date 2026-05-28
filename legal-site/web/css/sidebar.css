@@ -10,7 +10,7 @@ aside {
   border-right: 1px solid rgba(255,255,255,0.05);
   box-shadow: 4px 0 24px rgba(0,0,0,0.18);
 }
-.sidebar-header { padding: 24px 20px 18px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+.sidebar-header { padding: 20px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .logo { font-size: 1.25rem; font-weight: 800; color: white; letter-spacing: -0.5px; }
 .logo span { color: var(--red); }
 

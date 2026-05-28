@@ -75,6 +75,12 @@ export function mountLanguageSwitcher(containerEl, { variant = 'sidebar' } = {})
   if (!containerEl) return
   containerEl.innerHTML = ''
   containerEl.classList.add('lang-switcher', `lang-switcher-${variant}`)
+
+  if (variant === 'header') {
+    _mountGlobeSwitcher(containerEl)
+    return
+  }
+
   for (const { code, label } of LANGUAGES) {
     const btn = document.createElement('button')
     btn.type = 'button'
@@ -93,4 +99,82 @@ export function mountLanguageSwitcher(containerEl, { variant = 'sidebar' } = {})
     })
     containerEl.appendChild(btn)
   }
+}
+
+function _mountGlobeSwitcher(containerEl) {
+  // Globe trigger button
+  const triggerBtn = document.createElement('button')
+  triggerBtn.type = 'button'
+  triggerBtn.className = 'lang-globe-btn'
+  triggerBtn.setAttribute('aria-haspopup', 'listbox')
+  triggerBtn.setAttribute('aria-expanded', 'false')
+  triggerBtn.innerHTML = `
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="2" y1="12" x2="22" y2="12"/>
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </svg>
+    <span class="lang-globe-code">${currentLang.toUpperCase()}</span>
+  `
+
+  // Dropdown
+  const dropdown = document.createElement('div')
+  dropdown.className = 'lang-globe-dropdown'
+  dropdown.setAttribute('role', 'listbox')
+
+  function renderOptions() {
+    dropdown.innerHTML = ''
+    for (const { code, label } of LANGUAGES) {
+      const opt = document.createElement('button')
+      opt.type = 'button'
+      opt.className = 'lang-globe-option' + (code === currentLang ? ' active' : '')
+      opt.setAttribute('role', 'option')
+      opt.setAttribute('aria-selected', code === currentLang ? 'true' : 'false')
+      opt.innerHTML = `
+        <span>${label}</span>
+        ${code === currentLang ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
+      `
+      opt.addEventListener('click', () => {
+        setLanguage(code)
+        close()
+      })
+      dropdown.appendChild(opt)
+    }
+  }
+
+  let isOpen = false
+
+  function open() {
+    isOpen = true
+    renderOptions()
+    dropdown.classList.add('open')
+    triggerBtn.classList.add('open')
+    triggerBtn.setAttribute('aria-expanded', 'true')
+  }
+
+  function close() {
+    isOpen = false
+    dropdown.classList.remove('open')
+    triggerBtn.classList.remove('open')
+    triggerBtn.setAttribute('aria-expanded', 'false')
+  }
+
+  triggerBtn.addEventListener('click', e => {
+    e.stopPropagation()
+    isOpen ? close() : open()
+  })
+
+  document.addEventListener('click', e => {
+    if (isOpen && !containerEl.contains(e.target)) close()
+  })
+
+  // Keep the code label in sync when language changes
+  document.addEventListener('languagechange', () => {
+    const codeEl = triggerBtn.querySelector('.lang-globe-code')
+    if (codeEl) codeEl.textContent = currentLang.toUpperCase()
+    if (isOpen) renderOptions()
+  })
+
+  containerEl.appendChild(triggerBtn)
+  containerEl.appendChild(dropdown)
 }

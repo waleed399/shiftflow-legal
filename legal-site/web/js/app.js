@@ -116,7 +116,7 @@ function renderSidebar() {
 
   applyWebLockState()
 
-  mountLanguageSwitcher(document.getElementById('sb-lang-switcher'), { variant: 'sidebar' })
+  mountLanguageSwitcher(document.getElementById('sb-lang-switcher'), { variant: 'header' })
 }
 
 export function applyWebLockState() {
