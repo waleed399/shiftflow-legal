@@ -43,6 +43,7 @@ body.web-locked #btn-generate { display: none !important; }
   box-shadow: 0 1px 4px rgba(0,0,0,0.04); position: relative; z-index: 2;
 }
 .topbar-title { font-size: 1rem; font-weight: 700; color: var(--navy); letter-spacing: -0.2px; }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
 .week-nav { display: flex; align-items: center; gap: 8px; }
 .week-label { font-size: 0.875rem; font-weight: 600; color: var(--text); min-width: 186px; text-align: center; }
 .week-btn {

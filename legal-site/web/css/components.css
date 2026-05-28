@@ -91,8 +91,15 @@ textarea.form-input { resize: vertical; min-height: 44px; }
 .nav-badge.visible { display: inline-flex; animation: badgePop 0.25s ease; }
 
 /* ── Generate Schedule Modal ── */
-.btn-generate-sched { background: #1a2d4f; color: white; }
-.btn-generate-sched:hover { background: #0f1e38; color: white; }
+.btn-generate-sched {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 16px; border-radius: 8px; border: none;
+  background: #1a2d4f; color: white;
+  font-size: 0.82rem; font-weight: 600; cursor: pointer;
+  font-family: inherit; transition: background 0.15s;
+  white-space: nowrap;
+}
+.btn-generate-sched:hover { background: #0f1e38; }
 .gen-options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 @media (max-width: 520px) { .gen-options-grid { grid-template-columns: 1fr; } }
 .gen-option-card { border: 2px solid var(--border); border-radius: 12px; padding: 16px; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
