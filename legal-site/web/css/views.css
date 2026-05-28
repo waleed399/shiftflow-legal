@@ -33,6 +33,7 @@ body.web-locked #modal-footer .btn-sm { display: none; }
 body.web-locked .attendance-btns,
 body.web-locked .remove-btn { display: none; }
 body.web-locked #shift-modal-body .btn-sm { display: none; }
+body.web-locked #btn-generate { display: none !important; }
 
 /* ── Topbar ── */
 .topbar {

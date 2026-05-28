@@ -89,3 +89,26 @@ textarea.form-input { resize: vertical; min-height: 44px; }
 /* ── Nav badge ── */
 .nav-badge { display: none; margin-left: auto; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--red); color: white; font-size: 0.65rem; font-weight: 700; align-items: center; justify-content: center; }
 .nav-badge.visible { display: inline-flex; animation: badgePop 0.25s ease; }
+
+/* ── Generate Schedule Modal ── */
+.btn-generate-sched { background: #1a2d4f; color: white; }
+.btn-generate-sched:hover { background: #0f1e38; color: white; }
+.gen-options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 520px) { .gen-options-grid { grid-template-columns: 1fr; } }
+.gen-option-card { border: 2px solid var(--border); border-radius: 12px; padding: 16px; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+.gen-option-card:hover { border-color: #94a3b8; background: #f8fafc; }
+.gen-option-selected { border-color: #1a2d4f !important; background: #f0f7ff !important; }
+.gen-option-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.gen-option-label { font-size: 0.875rem; font-weight: 700; color: var(--navy); }
+.gen-option-radio { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #cbd5e1; flex-shrink: 0; background: white; transition: all 0.15s; }
+.gen-radio-on { border-color: #1a2d4f; background: #1a2d4f; box-shadow: inset 0 0 0 3px white; }
+.gen-option-desc { font-size: 0.76rem; color: var(--muted); line-height: 1.5; margin-bottom: 10px; }
+.gen-option-stats { display: flex; gap: 6px; flex-wrap: wrap; }
+.gen-stat-chip { font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+.gen-stat-ok { background: #f0fdf4; color: #15803d; }
+.gen-stat-warn { background: #fef9c3; color: #b45309; }
+.gen-warnings-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 12px 14px; }
+.gen-warnings-box p { font-size: 0.78rem; font-weight: 700; color: #b45309; margin: 0 0 6px; }
+.gen-warnings-box ul { margin: 0; padding-left: 16px; }
+.gen-warnings-box li { font-size: 0.74rem; color: #78350f; line-height: 1.6; }
+.gen-invalid-box { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 10px; padding: 10px 14px; font-size: 0.76rem; color: #9a3412; line-height: 1.5; }
