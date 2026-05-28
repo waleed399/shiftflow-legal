@@ -592,6 +592,13 @@ body.web-locked #btn-create-shifts { display: none !important; }
 .avail-cell-time { font-size: 0.6rem; font-weight: 700; line-height: 1; }
 .avail-cell-time-sep { font-size: 0.55rem; opacity: 0.6; line-height: 1; }
 
+.avail-pref-morning   { background: #fffbeb; color: #f59e0b; }
+.avail-pref-afternoon { background: #fff7ed; color: #f97316; }
+.avail-pref-night     { background: #eff6ff; color: #60a5fa; }
+.avail-pref-any       { background: #f0fdf4; color: #22c55e; }
+.avail-pref-custom    { background: #eff6ff; color: #3b82f6; }
+.avail-pref-off       { background: #f8fafc; color: #94a3b8; }
+
 .avail-nudge-btn {
   width: 32px; height: 32px; border-radius: 8px;
   border: 1px solid var(--border); background: var(--white);

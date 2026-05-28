@@ -230,7 +230,7 @@ function dayCell(slot) {
 
   if (pref === 'custom') {
     return `
-      <div class="avail-cell" style="background:${p.bg};color:${p.color}">
+      <div class="avail-cell avail-pref-custom">
         ${AVAIL_ICONS.custom}
         <span class="avail-cell-time">${esc(slot.startTime)}</span>
         <span class="avail-cell-time-sep">–</span>
@@ -243,7 +243,7 @@ function dayCell(slot) {
     : ''
 
   return `
-    <div class="avail-cell" style="background:${p.bg};color:${p.color}">
+    <div class="avail-cell avail-pref-${pref}">
       ${AVAIL_ICONS[pref]}
       <span class="avail-cell-label">${p.label}</span>
       ${sub}
