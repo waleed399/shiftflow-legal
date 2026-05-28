@@ -168,6 +168,11 @@ export default {
     exportDay: 'Export day',
     exportWeek: 'Export week',
     exportNoShifts: 'No shifts to export.',
+    exportSectionDay: 'Day',
+    exportSectionWeek: 'Week',
+    printAction: 'Print',
+    downloadCsv: 'Download CSV',
+    downloadPdf: 'Download PDF',
   },
 
   requests: {

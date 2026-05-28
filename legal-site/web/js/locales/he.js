@@ -168,6 +168,11 @@ export default {
     exportDay: 'ייצוא יום',
     exportWeek: 'ייצוא שבוע',
     exportNoShifts: 'אין משמרות לייצוא.',
+    exportSectionDay: 'יום',
+    exportSectionWeek: 'שבוע',
+    printAction: 'הדפסה',
+    downloadCsv: 'הורד CSV',
+    downloadPdf: 'הורד PDF',
   },
 
   requests: {

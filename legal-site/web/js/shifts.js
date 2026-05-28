@@ -1311,6 +1311,10 @@ window.clearShiftFilters  = clearShiftFilters
 window.exportDay          = exportDay
 window.exportWeek         = exportWeek
 window.toggleExportMenu   = toggleExportMenu
+window.downloadDayCSV     = downloadDayCSV
+window.downloadWeekCSV    = downloadWeekCSV
+window.downloadDayPDF     = downloadDayPDF
+window.downloadWeekPDF    = downloadWeekPDF
 
 // ── Export ────────────────────────────────────────────────────────────────────
 
@@ -1468,4 +1472,126 @@ function _buildPrintHTML(days) {
     <span>${new Date().toLocaleDateString()}</span>
   </div>
 </body></html>`
+}
+
+function _getDayExportData() {
+  const key = toYMD(state.currentWeek)
+  const all = state.shiftsCache[key] || []
+  const selectedYMD = toYMD(state.selectedDay)
+  const shifts = all
+    .filter(s => s.date.substring(0, 10) === selectedYMD && s.status !== 'CANCELLED')
+    .sort((a, b) => a.startTime.localeCompare(b.startTime))
+  return shifts.length ? [{ date: state.selectedDay, shifts }] : []
+}
+
+function _getWeekExportData() {
+  const key = toYMD(state.currentWeek)
+  const all = state.shiftsCache[key] || []
+  return getWeekViewDays()
+    .map(({ date, ymd }) => ({
+      date,
+      shifts: all.filter(s => s.date.substring(0, 10) === ymd && s.status !== 'CANCELLED')
+               .sort((a, b) => a.startTime.localeCompare(b.startTime)),
+    }))
+    .filter(d => d.shifts.length > 0)
+}
+
+function _csvCell(v) {
+  const s = (v ?? '').toString()
+  return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
+}
+
+function _buildCSV(days) {
+  const header = ['Date', 'Department', 'Start', 'End', 'Assigned workers', 'Coverage', 'Required', 'Status']
+  const rows = [header.map(_csvCell).join(',')]
+  days.forEach(({ date, shifts }) => {
+    const dateStr = toYMD(date)
+    shifts.forEach(s => {
+      const dept = s.department?.name || ''
+      const start = s.startTime?.substring(0, 5) || ''
+      const end = s.endTime?.substring(0, 5) || ''
+      const workers = (s.assignments || []).map(a => a.worker?.name || '').filter(Boolean).join('; ')
+      const assigned = s.assignments?.length || 0
+      const required = s.requiredWorkers || 0
+      const status = s.status || ''
+      rows.push([dateStr, dept, start, end, workers, assigned, required, status].map(_csvCell).join(','))
+    })
+  })
+  return '﻿' + rows.join('\r\n')
+}
+
+function _downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+
+function _exportFilename(days, ext) {
+  const orgSlug = (state.currentOrg?.name || 'ShiftRight').replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'ShiftRight'
+  if (days.length > 1) return `${orgSlug}_week-${toYMD(days[0].date)}.${ext}`
+  return `${orgSlug}_${toYMD(days[0].date)}.${ext}`
+}
+
+function _downloadCSV(days) {
+  const csv = _buildCSV(days)
+  _downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), _exportFilename(days, 'csv'))
+}
+
+function _downloadPDF(days) {
+  if (typeof html2pdf === 'undefined') {
+    showToast('PDF library not loaded', 'error')
+    return
+  }
+  const doc = new DOMParser().parseFromString(_buildPrintHTML(days), 'text/html')
+  const node = document.createElement('div')
+  node.style.position = 'fixed'
+  node.style.left = '-10000px'
+  node.style.top = '0'
+  node.style.width = days.length > 1 ? '1100px' : '794px'
+  node.style.background = 'white'
+  const styleTag = doc.querySelector('style')
+  if (styleTag) node.appendChild(styleTag.cloneNode(true))
+  const bodyClone = doc.body
+  while (bodyClone.firstChild) node.appendChild(bodyClone.firstChild)
+  document.body.appendChild(node)
+  html2pdf().set({
+    margin: 10,
+    filename: _exportFilename(days, 'pdf'),
+    image: { type: 'jpeg', quality: 0.95 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: days.length > 1 ? 'landscape' : 'portrait' },
+  }).from(node).save().finally(() => document.body.removeChild(node))
+}
+
+export function downloadDayCSV() {
+  _closeExportMenu()
+  const days = _getDayExportData()
+  if (!days.length) { showToast(t('shifts.exportNoShifts'), 'info'); return }
+  _downloadCSV(days)
+}
+
+export function downloadWeekCSV() {
+  _closeExportMenu()
+  const days = _getWeekExportData()
+  if (!days.length) { showToast(t('shifts.exportNoShifts'), 'info'); return }
+  _downloadCSV(days)
+}
+
+export function downloadDayPDF() {
+  _closeExportMenu()
+  const days = _getDayExportData()
+  if (!days.length) { showToast(t('shifts.exportNoShifts'), 'info'); return }
+  _downloadPDF(days)
+}
+
+export function downloadWeekPDF() {
+  _closeExportMenu()
+  const days = _getWeekExportData()
+  if (!days.length) { showToast(t('shifts.exportNoShifts'), 'info'); return }
+  _downloadPDF(days)
 }
