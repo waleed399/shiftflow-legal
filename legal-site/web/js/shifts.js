@@ -1308,3 +1308,164 @@ window.selectGenOption      = (id) => { _genSelected = id; renderGenOptions() }
 window.onGenerateOverlayClick = (e) => { if (e.target.id === 'generate-modal') closeGenerateModal() }
 window.toggleShiftFilter  = toggleShiftFilter
 window.clearShiftFilters  = clearShiftFilters
+window.exportDay          = exportDay
+window.exportWeek         = exportWeek
+window.toggleExportMenu   = toggleExportMenu
+
+// ── Export ────────────────────────────────────────────────────────────────────
+
+function toggleExportMenu() {
+  const dd = document.getElementById('export-dropdown')
+  const btn = document.getElementById('btn-export')
+  const isOpen = dd.classList.contains('open')
+  dd.classList.toggle('open', !isOpen)
+  btn.classList.toggle('active', !isOpen)
+  if (!isOpen) {
+    const close = (e) => {
+      if (!document.getElementById('export-wrap')?.contains(e.target)) {
+        dd.classList.remove('open')
+        btn.classList.remove('active')
+        document.removeEventListener('click', close)
+      }
+    }
+    setTimeout(() => document.addEventListener('click', close), 0)
+  }
+}
+
+function _closeExportMenu() {
+  document.getElementById('export-dropdown')?.classList.remove('open')
+  document.getElementById('btn-export')?.classList.remove('active')
+}
+
+export function exportDay() {
+  _closeExportMenu()
+  const key = toYMD(state.currentWeek)
+  const all = state.shiftsCache[key] || []
+  const selectedYMD = toYMD(state.selectedDay)
+  const dayShifts = all
+    .filter(s => s.date.substring(0, 10) === selectedYMD && s.status !== 'CANCELLED')
+    .sort((a, b) => a.startTime.localeCompare(b.startTime))
+  if (!dayShifts.length) { showToast(t('shifts.exportNoShifts'), 'info'); return }
+  _openPrintWindow([{ date: state.selectedDay, shifts: dayShifts }])
+}
+
+export function exportWeek() {
+  _closeExportMenu()
+  const key = toYMD(state.currentWeek)
+  const all = state.shiftsCache[key] || []
+  const days = getWeekViewDays()
+    .map(({ date, ymd }) => ({
+      date,
+      shifts: all.filter(s => s.date.substring(0, 10) === ymd && s.status !== 'CANCELLED')
+               .sort((a, b) => a.startTime.localeCompare(b.startTime)),
+    }))
+    .filter(d => d.shifts.length > 0)
+  if (!days.length) { showToast(t('shifts.exportNoShifts'), 'info'); return }
+  _openPrintWindow(days)
+}
+
+function _openPrintWindow(days) {
+  const win = window.open('', '_blank')
+  if (!win) return
+  win.document.write(_buildPrintHTML(days))
+  win.document.close()
+  win.focus()
+  setTimeout(() => win.print(), 350)
+}
+
+function _buildPrintHTML(days) {
+  const orgName  = esc(state.currentOrg?.name || 'ShiftRight')
+  const isMulti  = days.length > 1
+  const MONTHS_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December']
+  const DAY_NAMES   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
+
+  function fmtPrintDate(d) {
+    return `${DAY_NAMES[d.getDay()]}, ${d.getDate()} ${MONTHS_FULL[d.getMonth()]} ${d.getFullYear()}`
+  }
+
+  const daysHtml = days.map(({ date, shifts }) => {
+    const deptMap = new Map()
+    shifts.forEach(s => {
+      const id = s.department?.id || '_'
+      if (!deptMap.has(id)) deptMap.set(id, { name: s.department?.name || '—', color: getDeptColor(id), shifts: [] })
+      deptMap.get(id).shifts.push(s)
+    })
+
+    const deptsHtml = [...deptMap.values()].map(dept => {
+      const rows = dept.shifts.map(s => {
+        const time    = `${s.startTime?.substring(0,5) || '—'} – ${s.endTime?.substring(0,5) || '—'}`
+        const workers = (s.assignments || []).map(a => a.worker?.name || '').filter(Boolean)
+        const status  = s.status
+        const assigned = s.assignments?.length || 0
+        const required = s.requiredWorkers || 0
+        const coverageColor = assigned === 0 ? '#dc2626' : assigned < required ? '#d97706' : '#059669'
+        return `<tr>
+          <td class="col-time">${time}</td>
+          <td class="col-workers">${workers.length ? workers.join(', ') : '<span class="no-workers">No workers assigned</span>'}</td>
+          <td class="col-coverage" style="color:${coverageColor}">${assigned}/${required}</td>
+          <td class="col-status status-${status.toLowerCase()}">${status.charAt(0) + status.slice(1).toLowerCase()}</td>
+        </tr>`
+      }).join('')
+      return `<div class="dept-block">
+        <div class="dept-label" style="border-left:4px solid ${dept.color};color:${dept.color}">${dept.name}</div>
+        <table><thead><tr>
+          <th>Time</th><th>Assigned workers</th><th>Coverage</th><th>Status</th>
+        </tr></thead><tbody>${rows}</tbody></table>
+      </div>`
+    }).join('')
+
+    return `<div class="day-section${isMulti ? ' day-section-multi' : ''}">
+      <div class="day-heading">${fmtPrintDate(date)}</div>
+      ${deptsHtml}
+    </div>`
+  }).join('')
+
+  const rangeLabel = isMulti
+    ? `Week of ${fmtPrintDate(days[0].date)}`
+    : fmtPrintDate(days[0].date)
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>Schedule — ${orgName}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, Helvetica, sans-serif; color: #1a2d4f; background: white; padding: 28px 32px; font-size: 13px; }
+  .print-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #1a2d4f; padding-bottom: 10px; margin-bottom: 20px; }
+  .org-name { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+  .org-name span { color: #bf1f3a; }
+  .range-label { font-size: 12px; color: #64748b; }
+  .day-section { margin-bottom: 28px; }
+  .day-section-multi { page-break-inside: avoid; }
+  .day-heading { font-size: 15px; font-weight: 700; color: #1a2d4f; margin-bottom: 12px; padding: 6px 10px; background: #f1f5f9; border-radius: 6px; }
+  .dept-block { margin-bottom: 14px; }
+  .dept-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 10px; margin-bottom: 6px; }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: #1a2d4f; color: white; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 6px 10px; text-align: left; }
+  td { padding: 7px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: #f8fafc; }
+  .col-time { white-space: nowrap; font-weight: 600; width: 110px; }
+  .col-coverage { width: 70px; font-weight: 700; text-align: center; }
+  .col-status { width: 90px; font-size: 11px; font-weight: 600; text-transform: capitalize; }
+  .status-draft { color: #94a3b8; }
+  .status-published { color: #1a2d4f; }
+  .status-active { color: #d97706; }
+  .status-completed { color: #059669; }
+  .no-workers { color: #94a3b8; font-style: italic; }
+  .print-footer { margin-top: 28px; border-top: 1px solid #e2e8f0; padding-top: 8px; font-size: 10px; color: #94a3b8; display: flex; justify-content: space-between; }
+  @media print {
+    body { padding: 0; }
+    .day-section-multi { page-break-after: auto; }
+  }
+</style>
+</head><body>
+  <div class="print-header">
+    <div class="org-name">Shift<span>Right</span> &nbsp;·&nbsp; ${orgName}</div>
+    <div class="range-label">${rangeLabel}</div>
+  </div>
+  ${daysHtml}
+  <div class="print-footer">
+    <span>Generated by ShiftRight</span>
+    <span>${new Date().toLocaleDateString()}</span>
+  </div>
+</body></html>`
+}

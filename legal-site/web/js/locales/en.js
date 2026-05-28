@@ -164,6 +164,10 @@ export default {
     filterClear: 'Clear ({{count}})',
     filterNoMatch: 'No shifts match the active filters.',
     filterClearLink: 'Clear filters',
+    exportLabel: 'Export',
+    exportDay: 'Export day',
+    exportWeek: 'Export week',
+    exportNoShifts: 'No shifts to export.',
   },
 
   requests: {

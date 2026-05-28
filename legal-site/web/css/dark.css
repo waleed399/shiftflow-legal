@@ -73,6 +73,7 @@
 /* Generate Schedule */
 [data-theme="dark"] .btn-generate-sched { background: var(--navy); }
 [data-theme="dark"] .btn-generate-sched:hover { background: var(--navy-mid); }
+[data-theme="dark"] .export-dropdown { box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
 [data-theme="dark"] .gen-option-card { border-color: var(--border); }
 [data-theme="dark"] .gen-option-card:hover { background: #263447; border-color: #475569; }
 [data-theme="dark"] .gen-option-selected { background: #1e3a5f !important; border-color: var(--navy) !important; }

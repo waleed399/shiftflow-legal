@@ -164,6 +164,10 @@ export default {
     filterClear: 'נקה ({{count}})',
     filterNoMatch: 'אין משמרות התואמות את הסינון.',
     filterClearLink: 'נקה סינון',
+    exportLabel: 'ייצוא',
+    exportDay: 'ייצוא יום',
+    exportWeek: 'ייצוא שבוע',
+    exportNoShifts: 'אין משמרות לייצוא.',
   },
 
   requests: {

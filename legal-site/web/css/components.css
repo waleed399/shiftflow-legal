@@ -139,6 +139,32 @@ textarea.form-input { resize: vertical; min-height: 44px; }
   white-space: nowrap;
 }
 .btn-generate-sched:hover { background: #0f1e38; }
+
+/* ── Export button + dropdown ── */
+.export-wrap { position: relative; }
+.btn-export {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 8px; cursor: pointer; font-family: inherit;
+  font-size: 0.82rem; font-weight: 600; white-space: nowrap; transition: all 0.15s;
+  background: var(--white); color: var(--text); border: 1.5px solid var(--border);
+}
+.btn-export:hover, .btn-export.active { background: var(--bg); border-color: #94a3b8; }
+.export-dropdown {
+  display: none; position: absolute; top: calc(100% + 6px); right: 0;
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  min-width: 160px; z-index: 50; overflow: hidden;
+  animation: fadeIn 0.12s ease;
+}
+[dir="rtl"] .export-dropdown { right: auto; left: 0; }
+.export-dropdown.open { display: block; }
+.export-option {
+  display: flex; align-items: center; gap: 9px; width: 100%;
+  padding: 10px 14px; border: none; background: none; cursor: pointer;
+  font-family: inherit; font-size: 0.85rem; font-weight: 500; color: var(--text);
+  transition: background 0.1s; text-align: start;
+}
+.export-option:hover { background: var(--bg); }
 .gen-options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 @media (max-width: 520px) { .gen-options-grid { grid-template-columns: 1fr; } }
 .gen-option-card { border: 2px solid var(--border); border-radius: 12px; padding: 16px; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
