@@ -6,6 +6,7 @@ import { renderProfile, getEffectivePlan, canManageWeb } from './profile.js'
 import './modals.js' // registers window.openShiftModal and other modal handlers
 import './createShift.js' // registers window.openCreateShiftModal and submit handlers
 import { renderRequests, loadPendingCount } from './requests.js'
+import { renderDashboard } from './dashboard.js'
 import { renderWorkers } from './workers.js'
 import { renderAvailability } from './availability.js'
 import { initI18n, mountLanguageSwitcher } from './i18n.js'
@@ -58,6 +59,8 @@ async function init() {
     document.getElementById('app').style.display = 'flex'
     loadingEl.classList.add('loading-exit')
     setTimeout(() => { loadingEl.style.display = 'none' }, 400)
+
+    showView('dashboard')
 
     loadPendingCount()    // non-blocking badge update
     initNotifications()  // non-blocking: fetch + render notification bell
@@ -126,18 +129,18 @@ export function applyWebLockState() {
   if (banner) banner.style.display = locked ? 'flex' : 'none'
 }
 
-const ON_ENTER = { profile: renderProfile, requests: renderRequests, workers: renderWorkers, availability: renderAvailability }
+const ON_ENTER = { dashboard: renderDashboard, profile: renderProfile, requests: renderRequests, workers: renderWorkers, availability: renderAvailability }
 
 function getActiveView() {
-  for (const v of ['shifts', 'profile', 'requests', 'workers', 'availability']) {
+  for (const v of ['dashboard', 'shifts', 'profile', 'requests', 'workers', 'availability']) {
     const el = document.getElementById(`view-${v}`)
     if (el && el.style.display !== 'none') return v
   }
-  return 'shifts'
+  return 'dashboard'
 }
 
 function showView(view) {
-  for (const v of ['shifts', 'profile', 'requests', 'workers', 'availability']) {
+  for (const v of ['dashboard', 'shifts', 'profile', 'requests', 'workers', 'availability']) {
     document.getElementById(`view-${v}`).style.display = v === view ? 'flex' : 'none'
     document.getElementById(`nav-${v}`).classList.toggle('active', v === view)
   }
@@ -156,6 +159,8 @@ document.addEventListener('languagechange', () => {
     renderWeekLabel()
     renderDayTabs()
     loadShifts()
+  } else if (view === 'dashboard') {
+    renderDashboard()
   } else {
     ON_ENTER[view]?.()
   }

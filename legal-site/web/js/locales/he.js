@@ -25,6 +25,7 @@ export default {
   },
 
   nav: {
+    dashboard: 'לוח בקרה',
     shifts: 'משמרות',
     requests: 'בקשות',
     workers: 'עובדים',
@@ -32,6 +33,28 @@ export default {
     profile: 'פרופיל',
     signOut: 'התנתקות',
     language: 'שפה',
+  },
+
+  dashboard: {
+    goodMorning: 'בוקר טוב, {{name}}',
+    goodAfternoon: 'צהריים טובים, {{name}}',
+    goodEvening: 'ערב טוב, {{name}}',
+    refresh: 'רענן',
+    shiftsToday: 'משמרות היום',
+    workersAssigned: 'עובדים משובצים',
+    coverage: 'כיסוי',
+    pendingRequests: 'בקשות ממתינות',
+    thisWeek: 'השבוע',
+    shiftsTotal: '{{n}} משמרות',
+    todaysShifts: 'משמרות היום',
+    pendingApprovals: 'ממתין לאישור',
+    viewAll: 'הצג הכל',
+    noShiftsToday: 'אין משמרות מתוכננות להיום',
+    allClear: 'הכל תקין — אין בקשות ממתינות',
+    timeOff: 'חופשה',
+    swap: 'החלפה',
+    openSwap: 'החלפה פתוחה — מתנדבים מוזמנים',
+    shifts: 'משמרות',
   },
 
   days: {

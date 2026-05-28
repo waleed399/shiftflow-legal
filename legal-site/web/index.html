@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="css/views.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/i18n.css">
+  <link rel="stylesheet" href="css/dashboard.css">
 </head>
 <body>
 
@@ -44,7 +45,11 @@
     </div>
 
     <nav>
-      <div class="nav-item active" id="nav-shifts" onclick="showView('shifts')">
+      <div class="nav-item active" id="nav-dashboard" onclick="showView('dashboard')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        <span data-i18n="nav.dashboard">Dashboard</span>
+      </div>
+      <div class="nav-item" id="nav-shifts" onclick="showView('shifts')">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <span data-i18n="nav.shifts">Shifts</span>
       </div>
@@ -90,8 +95,18 @@
       <span class="lock-banner-cta" data-i18n="lock.bannerCta">Upgrade →</span>
     </div>
 
+    <!-- Dashboard view -->
+    <div id="view-dashboard">
+      <div class="topbar">
+        <span class="topbar-title" data-i18n="nav.dashboard">Dashboard</span>
+      </div>
+      <div class="content-area">
+        <div id="dashboard-content"></div>
+      </div>
+    </div>
+
     <!-- Shifts view -->
-    <div id="view-shifts">
+    <div id="view-shifts" style="display:none">
       <div class="topbar">
         <span class="topbar-title" data-i18n="shifts.title">Shifts</span>
         <div class="view-toggle">

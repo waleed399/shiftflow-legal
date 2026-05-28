@@ -25,6 +25,7 @@ export default {
   },
 
   nav: {
+    dashboard: 'Dashboard',
     shifts: 'Shifts',
     requests: 'Requests',
     workers: 'Workers',
@@ -32,6 +33,28 @@ export default {
     profile: 'Profile',
     signOut: 'Sign out',
     language: 'Language',
+  },
+
+  dashboard: {
+    goodMorning: 'Good morning, {{name}}',
+    goodAfternoon: 'Good afternoon, {{name}}',
+    goodEvening: 'Good evening, {{name}}',
+    refresh: 'Refresh',
+    shiftsToday: 'Shifts today',
+    workersAssigned: 'Workers assigned',
+    coverage: 'Coverage',
+    pendingRequests: 'Pending requests',
+    thisWeek: 'THIS WEEK',
+    shiftsTotal: '{{n}} shifts total',
+    todaysShifts: "TODAY'S SHIFTS",
+    pendingApprovals: 'PENDING APPROVALS',
+    viewAll: 'View all',
+    noShiftsToday: 'No shifts scheduled for today',
+    allClear: 'All clear — no pending requests',
+    timeOff: 'Time off',
+    swap: 'Swap',
+    openSwap: 'Open swap — volunteers welcome',
+    shifts: 'shifts',
   },
 
   days: {
