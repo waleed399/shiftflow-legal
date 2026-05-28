@@ -1434,30 +1434,35 @@ function _buildPrintHTML(days) {
 <title>Schedule — ${orgName}</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Arial, Helvetica, sans-serif; color: #1a2d4f; background: white; padding: 28px 32px; font-size: 13px; }
-  .print-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #1a2d4f; padding-bottom: 10px; margin-bottom: 20px; }
-  .org-name { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+  html, body { width: 100%; overflow-x: hidden; }
+  body { font-family: Arial, Helvetica, sans-serif; color: #1a2d4f; background: white; padding: 14px 18px; font-size: 12px; }
+  .print-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #1a2d4f; padding-bottom: 8px; margin-bottom: 14px; }
+  .org-name { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
   .org-name span { color: #bf1f3a; }
-  .range-label { font-size: 12px; color: #64748b; }
-  .day-section { margin-bottom: 28px; }
+  .range-label { font-size: 11px; color: #64748b; }
+  .day-section { margin-bottom: 18px; }
   .day-section-multi { page-break-inside: avoid; }
-  .day-heading { font-size: 15px; font-weight: 700; color: #1a2d4f; margin-bottom: 12px; padding: 6px 10px; background: #f1f5f9; border-radius: 6px; }
-  .dept-block { margin-bottom: 14px; }
-  .dept-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 10px; margin-bottom: 6px; }
-  table { width: 100%; border-collapse: collapse; }
-  th { background: #1a2d4f; color: white; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 6px 10px; text-align: left; }
-  td { padding: 7px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+  .day-heading { font-size: 13px; font-weight: 700; color: #1a2d4f; margin-bottom: 8px; padding: 5px 9px; background: #f1f5f9; border-radius: 4px; }
+  .dept-block { margin-bottom: 10px; }
+  .dept-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 3px 9px; margin-bottom: 4px; }
+  /* table-layout: fixed forces respect of the column widths below — without it,
+     a long worker-names cell expands the table beyond the page, and html2canvas
+     captures only what fits in the iframe (cropping the rightmost columns). */
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  th { background: #1a2d4f; color: white; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 5px 8px; text-align: left; }
+  td { padding: 5px 8px; border-bottom: 1px solid #e2e8f0; vertical-align: top; word-break: break-word; }
   tr:last-child td { border-bottom: none; }
   tr:nth-child(even) td { background: #f8fafc; }
-  .col-time { white-space: nowrap; font-weight: 600; width: 110px; }
-  .col-coverage { width: 70px; font-weight: 700; text-align: center; }
-  .col-status { width: 90px; font-size: 11px; font-weight: 600; text-transform: capitalize; }
+  .col-time { white-space: nowrap; font-weight: 600; width: 90px; }
+  .col-workers { width: auto; } /* the flexible column — soaks up remaining space */
+  .col-coverage { width: 60px; font-weight: 700; text-align: center; }
+  .col-status { width: 80px; font-size: 10px; font-weight: 600; text-transform: capitalize; }
   .status-draft { color: #94a3b8; }
   .status-published { color: #1a2d4f; }
   .status-active { color: #d97706; }
   .status-completed { color: #059669; }
   .no-workers { color: #94a3b8; font-style: italic; }
-  .print-footer { margin-top: 28px; border-top: 1px solid #e2e8f0; padding-top: 8px; font-size: 10px; color: #94a3b8; display: flex; justify-content: space-between; }
+  .print-footer { margin-top: 18px; border-top: 1px solid #e2e8f0; padding-top: 6px; font-size: 9px; color: #94a3b8; display: flex; justify-content: space-between; }
   @media print {
     body { padding: 0; }
     .day-section-multi { page-break-after: auto; }
@@ -1643,14 +1648,29 @@ function _downloadPDF(days) {
   // Allow one paint cycle for fonts / layout before snapshotting.
   setTimeout(() => {
     fitIframeToContent()
+    // Pin html2canvas to the iframe's content width/height so it doesn't crop
+    // to the parent window's viewport or fall back to scrollable-region heuristics.
+    // The `width` + `windowWidth` pair is the reliable combo: width controls the
+    // captured canvas size, windowWidth controls layout calculations.
+    const captureWidth = iDoc.documentElement.scrollWidth || widthPx
+    const captureHeight = iDoc.documentElement.scrollHeight
     html2pdf()
       .set({
-        margin: 10,
+        margin: [8, 8, 8, 8],
         filename: _exportFilename(days, 'pdf'),
         image: { type: 'jpeg', quality: 0.95 },
-        html2canvas: { scale: 2, useCORS: true, windowWidth: widthPx, backgroundColor: '#ffffff' },
-        jsPDF: { unit: 'mm', format: 'a4', orientation },
-        pagebreak: { mode: ['css', 'legacy'] },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#ffffff',
+          width: captureWidth,
+          height: captureHeight,
+          windowWidth: captureWidth,
+          windowHeight: captureHeight,
+          letterRendering: true,
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation, compress: true },
+        pagebreak: { mode: ['css', 'legacy'], avoid: '.day-section-multi' },
       })
       .from(iDoc.body)
       .save()
