@@ -97,6 +97,7 @@ export function renderDayTabs() {
 
 export function setShiftsView(view) {
   shiftsView = view
+  _activeFilters = new Set()
   document.getElementById('view-list-btn')?.classList.toggle('active',  view === 'list')
   document.getElementById('view-table-btn')?.classList.toggle('active', view === 'table')
   document.getElementById('view-week-btn')?.classList.toggle('active',  view === 'week')
@@ -107,8 +108,6 @@ export function setShiftsView(view) {
     contentArea.classList.remove('content-area-flush')
     renderShiftsForDay()
   } else {
-    _activeFilters = new Set()
-    document.getElementById('shift-filter-bar').style.display = 'none'
     contentArea.classList.add('content-area-flush')
     if (view === 'table') renderTableView()
     else renderWeekView()
@@ -279,12 +278,18 @@ function renderFilterBar(dayShifts) {
 
 export function toggleShiftFilter(key) {
   _activeFilters.has(key) ? _activeFilters.delete(key) : _activeFilters.add(key)
-  renderShiftsForDay()
+  _rerenderCurrentView()
 }
 
 export function clearShiftFilters() {
   _activeFilters = new Set()
-  renderShiftsForDay()
+  _rerenderCurrentView()
+}
+
+function _rerenderCurrentView() {
+  if (shiftsView === 'table') renderTableView()
+  else if (shiftsView === 'week') renderWeekView()
+  else renderShiftsForDay()
 }
 
 function renderDayStats(dayShifts) {
@@ -371,6 +376,8 @@ export async function renderTableView() {
 
   const el = document.getElementById('shifts-content')
 
+  renderFilterBar(dayShifts)
+
   if (dayShifts.length === 0) {
     el.innerHTML = `
       <div class="empty-state">
@@ -432,9 +439,18 @@ export async function renderTableView() {
     })
   })
 
-  // Group by department
+  // Group by department (apply active filters)
+  const filteredDayShifts = applyShiftFilters(dayShifts)
+  if (filteredDayShifts.length === 0 && _activeFilters.size > 0) {
+    el.innerHTML = `
+      <div class="empty-state" style="padding-top:40px">
+        <p style="color:var(--muted)">${t('shifts.filterNoMatch')}</p>
+        <button class="btn-link" style="margin-top:8px" onclick="clearShiftFilters()">${t('shifts.filterClearLink')}</button>
+      </div>`
+    return
+  }
   const byDept = new Map()
-  dayShifts.forEach(s => {
+  filteredDayShifts.forEach(s => {
     const deptId = s.department?.id || 'unknown'
     if (!byDept.has(deptId)) byDept.set(deptId, { name: s.department?.name || t('common.unknown'), shifts: [] })
     byDept.get(deptId).shifts.push(s)
@@ -719,9 +735,12 @@ export async function renderWeekView() {
   const weekDays = getWeekViewDays()
   const today    = new Date()
 
+  const allActiveShifts = allShifts.filter(s => s.status !== 'CANCELLED')
+  renderFilterBar(allActiveShifts)
+
   const shiftsByDay = new Map()
   const workerWeekMins = new Map()
-  allShifts.filter(s => s.status !== 'CANCELLED').forEach(s => {
+  allActiveShifts.forEach(s => {
     const ymd = s.date.substring(0, 10)
     if (!shiftsByDay.has(ymd)) shiftsByDay.set(ymd, [])
     shiftsByDay.get(ymd).push(s)
@@ -785,9 +804,11 @@ export async function renderWeekView() {
     const initials = esc(getInitials(w.name))
     const altCls   = rowIdx % 2 === 1 ? ' wv-row-alt' : ''
     const cells = weekDays.map(({ date, ymd }) => {
-      const dayShifts = (shiftsByDay.get(ymd) || [])
-        .filter(s => deptId === null || s.department?.id === deptId)
-        .sort((a, b) => a.startTime.localeCompare(b.startTime))
+      const dayShifts = applyShiftFilters(
+        (shiftsByDay.get(ymd) || [])
+          .filter(s => deptId === null || s.department?.id === deptId)
+          .sort((a, b) => a.startTime.localeCompare(b.startTime))
+      )
 
       const dayFull = DAY_FULL[date.getDay()]
       const avail   = workerAvail.get(w.id)
