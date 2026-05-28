@@ -1397,9 +1397,11 @@ function _buildPrintHTML(days) {
 
     const deptsHtml = [...deptMap.values()].map(dept => {
       const rows = dept.shifts.map(s => {
-        const time    = `${s.startTime?.substring(0,5) || '—'} – ${s.endTime?.substring(0,5) || '—'}`
-        const workers = (s.assignments || []).map(a => a.worker?.name || '').filter(Boolean)
-        const status  = s.status
+        const time    = esc(`${s.startTime?.substring(0,5) || '—'} – ${s.endTime?.substring(0,5) || '—'}`)
+        const workers = (s.assignments || []).map(a => esc(a.worker?.name || '')).filter(Boolean)
+        const rawStatus = typeof s.status === 'string' ? s.status : ''
+        const statusClass = esc(rawStatus.toLowerCase())
+        const statusLabel = esc(rawStatus ? rawStatus.charAt(0) + rawStatus.slice(1).toLowerCase() : '')
         const assigned = s.assignments?.length || 0
         const required = s.requiredWorkers || 0
         const coverageColor = assigned === 0 ? '#dc2626' : assigned < required ? '#d97706' : '#059669'
@@ -1407,11 +1409,11 @@ function _buildPrintHTML(days) {
           <td class="col-time">${time}</td>
           <td class="col-workers">${workers.length ? workers.join(', ') : '<span class="no-workers">No workers assigned</span>'}</td>
           <td class="col-coverage" style="color:${coverageColor}">${assigned}/${required}</td>
-          <td class="col-status status-${status.toLowerCase()}">${status.charAt(0) + status.slice(1).toLowerCase()}</td>
+          <td class="col-status status-${statusClass}">${statusLabel}</td>
         </tr>`
       }).join('')
       return `<div class="dept-block">
-        <div class="dept-label" style="border-left:4px solid ${dept.color};color:${dept.color}">${dept.name}</div>
+        <div class="dept-label" style="border-left:4px solid ${dept.color};color:${dept.color}">${esc(dept.name)}</div>
         <table><thead><tr>
           <th>Time</th><th>Assigned workers</th><th>Coverage</th><th>Status</th>
         </tr></thead><tbody>${rows}</tbody></table>
@@ -1501,22 +1503,69 @@ function _csvCell(v) {
   return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
 }
 
+const CSV_DAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
+
+function _shiftHours(s) {
+  // startTime / endTime are "HH:MM" or "HH:MM:SS" strings — work in minutes
+  // since midnight, handle overnight shifts (end <= start), return decimal hours.
+  const toMins = (t) => {
+    if (!t) return null
+    const [h, m] = t.split(':').map(Number)
+    return h * 60 + (m || 0)
+  }
+  const a = toMins(s.startTime)
+  const b = toMins(s.endTime)
+  if (a == null || b == null) return ''
+  const diff = b > a ? b - a : (24 * 60 - a) + b
+  return (diff / 60).toFixed(1)
+}
+
+function _statusLabel(s) {
+  if (typeof s !== 'string' || !s) return ''
+  return s.charAt(0) + s.slice(1).toLowerCase()
+}
+
 function _buildCSV(days) {
-  const header = ['Date', 'Department', 'Start', 'End', 'Assigned workers', 'Coverage', 'Required', 'Status']
+  // Columns chosen so the CSV reads like a flat ledger — one row per shift.
+  // Day + Date together so the reader sees "Wednesday 2026-05-28" without
+  // having to mentally map the date. Hours computed up-front so the spreadsheet
+  // doesn't need a formula. Worker count and names kept separate (count is a
+  // number for sums, names is a string for reference).
+  const header = [
+    'Day',
+    'Date',
+    'Department',
+    'Start',
+    'End',
+    'Hours',
+    'Workers required',
+    'Workers assigned',
+    'Worker names',
+    'Status',
+  ]
   const rows = [header.map(_csvCell).join(',')]
   days.forEach(({ date, shifts }) => {
+    const dayName = CSV_DAY_NAMES[date.getDay()]
     const dateStr = toYMD(date)
-    shifts.forEach(s => {
-      const dept = s.department?.name || ''
+    shifts.forEach((s) => {
+      const dept = s.department?.name || '—'
       const start = s.startTime?.substring(0, 5) || ''
       const end = s.endTime?.substring(0, 5) || ''
-      const workers = (s.assignments || []).map(a => a.worker?.name || '').filter(Boolean).join('; ')
-      const assigned = s.assignments?.length || 0
-      const required = s.requiredWorkers || 0
-      const status = s.status || ''
-      rows.push([dateStr, dept, start, end, workers, assigned, required, status].map(_csvCell).join(','))
+      const hours = _shiftHours(s)
+      const required = s.requiredWorkers ?? 0
+      const assignments = s.assignments || []
+      const assigned = assignments.length
+      const names = assignments.map((a) => a.worker?.name || '').filter(Boolean).join(', ')
+      const status = _statusLabel(s.status)
+      rows.push(
+        [dayName, dateStr, dept, start, end, hours, required, assigned, names, status]
+          .map(_csvCell)
+          .join(','),
+      )
     })
   })
+  // BOM so Excel auto-detects UTF-8 (Hebrew names, etc.) without the user
+  // opening a "data import" wizard.
   return '﻿' + rows.join('\r\n')
 }
 
@@ -1547,25 +1596,72 @@ function _downloadPDF(days) {
     showToast('PDF library not loaded', 'error')
     return
   }
-  const doc = new DOMParser().parseFromString(_buildPrintHTML(days), 'text/html')
-  const node = document.createElement('div')
-  node.style.position = 'fixed'
-  node.style.left = '-10000px'
-  node.style.top = '0'
-  node.style.width = days.length > 1 ? '1100px' : '794px'
-  node.style.background = 'white'
-  const styleTag = doc.querySelector('style')
-  if (styleTag) node.appendChild(styleTag.cloneNode(true))
-  const bodyClone = doc.body
-  while (bodyClone.firstChild) node.appendChild(bodyClone.firstChild)
-  document.body.appendChild(node)
-  html2pdf().set({
-    margin: 10,
-    filename: _exportFilename(days, 'pdf'),
-    image: { type: 'jpeg', quality: 0.95 },
-    html2canvas: { scale: 2, useCORS: true },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: days.length > 1 ? 'landscape' : 'portrait' },
-  }).from(node).save().finally(() => document.body.removeChild(node))
+
+  // Render into a same-origin iframe rather than a stray <div>:
+  //   - The iframe gets its own <body>, so the print HTML's `body { padding,
+  //     font, background }` rules actually apply (a plain <div> ignores them).
+  //   - html2canvas reliably captures iframe content; the previous off-screen
+  //     `position:fixed; left:-10000px` trick produced blank PDFs because the
+  //     element's bounding rect landed in negative space.
+  //   - Keep the iframe in-flow but hidden via opacity/pointer-events; we set
+  //     a real width so layout matches the eventual rendered size.
+  const orientation = days.length > 1 ? 'landscape' : 'portrait'
+  const widthPx = orientation === 'landscape' ? 1100 : 794
+
+  const iframe = document.createElement('iframe')
+  iframe.setAttribute('aria-hidden', 'true')
+  iframe.style.cssText = [
+    'position:fixed',
+    'right:0',
+    'bottom:0',
+    `width:${widthPx}px`,
+    'height:10px',
+    'border:0',
+    'opacity:0',
+    'pointer-events:none',
+    'z-index:-1',
+  ].join(';')
+  document.body.appendChild(iframe)
+
+  const iDoc = iframe.contentDocument
+  iDoc.open()
+  iDoc.write(_buildPrintHTML(days))
+  iDoc.close()
+
+  // Size the iframe to its actual content. html2canvas captures from the
+  // iframe's body, but if the iframe's own height is smaller than the body,
+  // some engines crop the captured canvas. Resize after layout settles.
+  const fitIframeToContent = () => {
+    const h = Math.max(
+      iDoc.body?.scrollHeight ?? 0,
+      iDoc.documentElement?.scrollHeight ?? 0,
+      300,
+    )
+    iframe.style.height = h + 'px'
+  }
+
+  // Allow one paint cycle for fonts / layout before snapshotting.
+  setTimeout(() => {
+    fitIframeToContent()
+    html2pdf()
+      .set({
+        margin: 10,
+        filename: _exportFilename(days, 'pdf'),
+        image: { type: 'jpeg', quality: 0.95 },
+        html2canvas: { scale: 2, useCORS: true, windowWidth: widthPx, backgroundColor: '#ffffff' },
+        jsPDF: { unit: 'mm', format: 'a4', orientation },
+        pagebreak: { mode: ['css', 'legacy'] },
+      })
+      .from(iDoc.body)
+      .save()
+      .catch((err) => {
+        console.error('PDF export failed', err)
+        showToast('Could not generate PDF. Please try again.', 'error')
+      })
+      .finally(() => {
+        iframe.remove()
+      })
+  }, 60)
 }
 
 export function downloadDayCSV() {
