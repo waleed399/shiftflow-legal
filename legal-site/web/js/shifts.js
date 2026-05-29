@@ -37,6 +37,9 @@ import {
   publishWeek,
   unpublishWeek,
 } from './shiftsActions.js'
+// Re-export so external files (modals.js, etc.) can keep importing from
+// shifts.js — their public surface doesn't change when we split internals.
+export { updateActionBar }
 import { renderShiftsForDay } from './shiftsListView.js'
 import { renderTableView, assignInTable } from './shiftsTableView.js'
 import { renderWeekView, assignInWeekView } from './shiftsWeekView.js'
