@@ -173,6 +173,32 @@ export default {
     printAction: 'הדפסה',
     downloadCsv: 'הורד CSV',
     downloadPdf: 'הורד PDF',
+    // PDF document strings
+    printColTime: 'שעות',
+    printColWorkers: 'עובדים משובצים',
+    printColCoverage: 'תפוסה',
+    printColStatus: 'סטטוס',
+    printNoWorkers: 'לא שובצו עובדים',
+    printGeneratedBy: 'הופק על ידי ShiftRight',
+    printWeekOf: 'שבוע של {{date}}',
+    // CSV column headers
+    csvColDay: 'יום',
+    csvColDate: 'תאריך',
+    csvColDepartment: 'מחלקה',
+    csvColStart: 'התחלה',
+    csvColEnd: 'סיום',
+    csvColHours: 'שעות',
+    csvColWorkersRequired: 'עובדים נדרשים',
+    csvColWorkersAssigned: 'עובדים משובצים',
+    csvColWorkerNames: 'שמות עובדים',
+    csvColStatus: 'סטטוס',
+    // Status labels
+    statusDraft: 'טיוטה',
+    statusPublished: 'פורסם',
+    statusActive: 'פעיל',
+    statusCompleted: 'הושלם',
+    statusCancelled: 'בוטל',
+    pdfFailed: 'יצירת ה-PDF נכשלה. נסה שוב.',
   },
 
   requests: {
