@@ -832,3 +832,238 @@ body.web-locked #btn-create-shifts { display: none !important; }
 .app-toast-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
 .app-toast-error { background: #1e1e2e; color: #fca5a5; border: 1px solid #ef444440; }
 .app-toast-success { background: #1e1e2e; color: #86efac; border: 1px solid #22c55e40; }
+
+/* ── Profile manager sections ── */
+.prof-section {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 18px; padding: 22px 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  animation: slideUp 0.32s ease both;
+  max-width: 860px; margin-top: 20px;
+}
+
+.prof-section-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px;
+}
+.prof-section-title {
+  font-size: 0.7rem; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+
+/* Monthly Hours — month nav */
+.prof-month-nav {
+  display: flex; align-items: center; gap: 8px;
+}
+.prof-month-label {
+  font-size: 0.82rem; font-weight: 700; color: var(--navy);
+  min-width: 90px; text-align: center;
+}
+.prof-month-btn {
+  width: 28px; height: 28px; border-radius: 7px;
+  border: 1px solid var(--border); background: var(--white);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  color: var(--muted); transition: all 0.15s;
+}
+.prof-month-btn:hover { border-color: var(--navy); color: var(--navy); background: #f8fafc; }
+
+/* Monthly Hours — stats row */
+.prof-hours-summary {
+  display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.prof-hours-stat {
+  flex: 1; min-width: 120px; background: #f8fafc; border: 1px solid var(--border);
+  border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px;
+}
+.prof-hours-stat-blue { background: #eff6ff; border-color: #bfdbfe; }
+.prof-hours-stat-val {
+  font-size: 1.5rem; font-weight: 800; color: var(--navy); letter-spacing: -0.04em;
+}
+.prof-hours-stat-label {
+  font-size: 0.72rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em;
+}
+
+/* Monthly Hours — worker list */
+.prof-hours-list { display: flex; flex-direction: column; gap: 0; }
+.prof-hours-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.prof-hours-row:last-child { border-bottom: none; }
+.prof-hours-rank {
+  width: 22px; font-size: 0.72rem; font-weight: 700; color: var(--muted);
+  text-align: right; flex-shrink: 0;
+}
+.prof-hours-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--navy); color: white;
+  font-size: 0.75rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; overflow: hidden;
+}
+.prof-hours-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.prof-hours-name {
+  font-size: 0.88rem; font-weight: 700; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.prof-hours-shifts {
+  font-size: 0.72rem; color: var(--muted);
+}
+.prof-hours-val {
+  font-size: 0.9rem; font-weight: 800; color: var(--navy); flex-shrink: 0;
+}
+.prof-hours-total {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 0 0; margin-top: 4px;
+  font-size: 0.8rem; font-weight: 700; color: var(--text);
+  border-top: 2px solid var(--border);
+}
+.prof-hours-done { color: var(--navy); font-size: 0.95rem; font-weight: 800; }
+.prof-hours-export-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 600;
+  border: 1px solid var(--border); background: var(--white); color: var(--muted);
+  cursor: pointer; transition: all 0.15s; font-family: inherit;
+}
+.prof-hours-export-btn:hover { border-color: var(--navy); color: var(--navy); background: #f0f4ff; }
+
+/* Team Members — nav row */
+.prof-nav-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 18px; border: 1px solid var(--border); border-radius: 14px;
+  cursor: pointer; transition: all 0.15s; background: var(--white);
+}
+.prof-nav-row:hover { border-color: #c7d2e8; box-shadow: 0 2px 10px rgba(0,0,0,0.07); transform: translateY(-1px); }
+.prof-nav-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: #eff6ff; color: var(--navy);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.prof-nav-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.prof-nav-label { font-size: 0.9rem; font-weight: 700; color: var(--text); }
+.prof-nav-sub { font-size: 0.78rem; color: var(--muted); }
+
+/* Shift Types — template rows */
+.prof-tmpl-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.prof-tmpl-row:last-child { border-bottom: none; }
+.prof-tmpl-dot {
+  width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+}
+.prof-tmpl-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.prof-tmpl-name {
+  font-size: 0.88rem; font-weight: 700; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.prof-tmpl-meta { font-size: 0.72rem; color: var(--muted); }
+.prof-tmpl-action {
+  display: flex; gap: 6px; flex-shrink: 0;
+}
+.prof-tmpl-edit-btn, .prof-tmpl-delete {
+  width: 30px; height: 30px; border-radius: 7px;
+  border: 1px solid var(--border); background: var(--white);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  color: var(--muted); transition: all 0.15s;
+}
+.prof-tmpl-edit-btn:hover { border-color: var(--navy); color: var(--navy); background: #f0f4ff; }
+.prof-tmpl-delete:hover { border-color: #ef4444; color: #ef4444; background: #fef2f2; }
+
+/* Shift Types — add / edit form */
+.prof-tmpl-form, .prof-tmpl-form-edit {
+  background: #f8fafc; border: 1px solid var(--border);
+  border-radius: 14px; padding: 18px; margin-top: 12px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.prof-color-picker {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.prof-color-swatch {
+  width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+  border: 3px solid transparent; transition: transform 0.12s, border-color 0.12s;
+  flex-shrink: 0;
+}
+.prof-color-swatch:hover { transform: scale(1.15); }
+.prof-color-swatch.selected { border-color: var(--navy); transform: scale(1.15); }
+.prof-tmpl-label {
+  font-size: 0.72rem; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; display: block;
+}
+.prof-tmpl-input {
+  width: 100%; padding: 8px 12px; border: 1px solid var(--border);
+  border-radius: 9px; font-size: 0.875rem; font-family: inherit;
+  outline: none; background: var(--white); color: var(--text);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.prof-tmpl-input:focus { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(26,45,79,0.08); }
+.prof-tmpl-times {
+  display: flex; gap: 12px;
+}
+.prof-tmpl-times > div { flex: 1; min-width: 0; }
+.prof-tmpl-workers-row {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.prof-tmpl-stepper {
+  display: flex; align-items: center; gap: 10px;
+}
+.prof-tmpl-stepper button {
+  width: 30px; height: 30px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--white);
+  cursor: pointer; font-size: 1.1rem; font-weight: 700; color: var(--text);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; line-height: 1;
+}
+.prof-tmpl-stepper button:hover { border-color: var(--navy); color: var(--navy); }
+.prof-tmpl-stepper span {
+  min-width: 28px; text-align: center; font-size: 0.95rem; font-weight: 700; color: var(--text);
+}
+.prof-tmpl-dept-fixed {
+  font-size: 0.875rem; font-weight: 600; color: var(--navy);
+  padding: 8px 12px; background: #eff6ff; border: 1px solid #bfdbfe;
+  border-radius: 9px; display: inline-block;
+}
+.prof-tmpl-form-actions {
+  display: flex; gap: 8px; justify-content: flex-end; padding-top: 4px;
+}
+.prof-tmpl-save-btn {
+  padding: 8px 20px; border-radius: 9px; font-size: 0.875rem; font-weight: 700;
+  border: none; cursor: pointer; font-family: inherit; transition: all 0.15s;
+  background: var(--navy); color: white;
+}
+.prof-tmpl-save-btn:hover { background: #0f1e38; }
+.prof-tmpl-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Departments — chips */
+.prof-dept-chips {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;
+}
+.prof-dept-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #eff6ff; border: 1px solid #bfdbfe;
+  color: var(--navy); border-radius: 20px;
+  padding: 5px 8px 5px 12px; font-size: 0.82rem; font-weight: 600;
+}
+.prof-dept-chip-del {
+  display: flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: none; border: none; cursor: pointer;
+  color: #93c5fd; transition: all 0.12s; line-height: 1;
+}
+.prof-dept-chip-del:hover { background: #bf1f3a; color: white; }
+.prof-dept-add-row {
+  display: flex; gap: 8px; align-items: center;
+}
+.prof-dept-add-btn {
+  padding: 8px 16px; border-radius: 9px; font-size: 0.875rem; font-weight: 700;
+  border: none; background: var(--navy); color: white;
+  cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap;
+}
+.prof-dept-add-btn:hover { background: #0f1e38; }
+.prof-dept-add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Shared empty state */
+.prof-empty {
+  font-size: 0.82rem; color: var(--muted); font-style: italic;
+  padding: 12px 0; text-align: center;
+}
