@@ -4,7 +4,7 @@ import {
   createResendCooldown,
 } from './auth-common.js'
 import { renderStrengthMeter, wirePasswordToggle } from './password-strength.js'
-import { initI18n, mountLanguageSwitcher } from './i18n.js'
+import { initI18n } from './i18n.js'
 
 let _email = ''
 let _verifiedToken = ''
@@ -153,7 +153,6 @@ function wireEvents() {
 
 function init() {
   initI18n()
-  mountLanguageSwitcher(document.getElementById('auth-lang-switcher'), { variant: 'auth' })
   _resend = createResendCooldown($('btn-resend'))
   wireEvents()
   showStep('email')

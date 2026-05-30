@@ -3,7 +3,7 @@ import {
   ERROR_MAP,
   getToken, getUser, getOrg, updateOrg,
 } from './auth-common.js'
-import { initI18n, mountLanguageSwitcher, t } from './i18n.js'
+import { initI18n, t } from './i18n.js'
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -443,7 +443,6 @@ function init() {
   }
 
   initI18n()
-  mountLanguageSwitcher(document.getElementById('auth-lang-switcher'), { variant: 'auth' })
   document.addEventListener('languagechange', () => { renderDays(); renderTemplates() })
 
   loadOrgIntoNav()
