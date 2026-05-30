@@ -233,7 +233,11 @@ function localizedStatus(raw) {
 // ── CSV ───────────────────────────────────────────────────────────────────────
 
 function csvCell(v) {
-  const s = (v ?? '').toString()
+  let s = (v ?? '').toString()
+  // Neutralize spreadsheet formula injection: a cell whose first character is
+  // =, +, -, @ or a tab/CR can be run as a formula by Excel/Sheets (e.g. a
+  // worker named `=HYPERLINK(...)`). Prefix a single quote so it stays literal.
+  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s
   return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
 }
 
