@@ -153,14 +153,22 @@ textarea.form-input { resize: vertical; min-height: 44px; }
   display: none; position: absolute; top: calc(100% + 6px); right: 0;
   background: var(--white); border: 1px solid var(--border);
   border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-  min-width: 160px; z-index: 50; overflow: hidden;
-  animation: fadeIn 0.12s ease;
+  min-width: 180px; z-index: 50; overflow: hidden;
+  animation: fadeIn 0.12s ease; padding: 4px 0;
 }
 [dir="rtl"] .export-dropdown { right: auto; left: 0; }
 .export-dropdown.open { display: block; }
+.export-group-label {
+  font-size: 0.65rem; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 6px 14px 4px;
+}
+.export-group-sep {
+  height: 1px; background: var(--border); margin: 4px 0;
+}
 .export-option {
   display: flex; align-items: center; gap: 9px; width: 100%;
-  padding: 10px 14px; border: none; background: none; cursor: pointer;
+  padding: 8px 14px; border: none; background: none; cursor: pointer;
   font-family: inherit; font-size: 0.85rem; font-weight: 500; color: var(--text);
   transition: background 0.1s; text-align: start;
 }
