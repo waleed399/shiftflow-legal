@@ -310,3 +310,66 @@
 [data-theme="dark"] #shift-filter-bar { background: var(--white); border-color: var(--border); }
 [data-theme="dark"] .filter-chip { border-color: #334155; color: #94a3b8; }
 [data-theme="dark"] .filter-chip.active { color: white; }
+
+/* ─────────────────────────────────────────────────────────────
+   Profile manager sections (Monthly Hours / Shift Types / Depts)
+   ───────────────────────────────────────────────────────────── */
+
+/* Section cards */
+[data-theme="dark"] .prof-section { background: var(--white); border-color: var(--border); }
+[data-theme="dark"] .prof-section-toggle-btn:hover { background: rgba(255,255,255,0.03); }
+
+/* Month nav buttons */
+[data-theme="dark"] .prof-month-btn { background: var(--white); border-color: var(--border); }
+[data-theme="dark"] .prof-month-btn:hover { background: #263447; border-color: var(--navy); color: var(--navy); }
+
+/* Hours stats */
+[data-theme="dark"] .prof-hours-stat { background: #162032; border-color: #263447; }
+[data-theme="dark"] .prof-hours-stat-blue { background: #1e3a5f; border-color: #2e4a6f; }
+
+/* Export button */
+[data-theme="dark"] .prof-hours-export-btn { background: var(--white); border-color: var(--border); }
+[data-theme="dark"] .prof-hours-export-btn:hover { border-color: var(--navy); color: var(--navy); background: #1e3a5f; }
+
+/* Team Members nav row */
+[data-theme="dark"] .prof-nav-row { background: var(--white); border-color: var(--border); }
+[data-theme="dark"] .prof-nav-row:hover { border-color: #4b6a9e; }
+[data-theme="dark"] .prof-nav-icon { background: #1e3a5f; color: #93c5fd; }
+
+/* Badge + chevron */
+[data-theme="dark"] .prof-tmpl-badge { background: #162032; border-color: #334155; }
+
+/* Template rows */
+[data-theme="dark"] .prof-tmpl-edit-btn { background: var(--white); border-color: var(--border); }
+[data-theme="dark"] .prof-tmpl-edit-btn:hover { border-color: var(--navy); color: var(--navy); background: #1e3a5f; }
+[data-theme="dark"] .prof-tmpl-delete { background: var(--white); border-color: var(--border); }
+[data-theme="dark"] .prof-tmpl-delete:hover { border-color: #ef4444; color: #f87171; background: #450a0a; }
+[data-theme="dark"] .prof-tmpl-dept-header { border-color: #263447; }
+
+/* Add / edit forms */
+[data-theme="dark"] .prof-tmpl-form,
+[data-theme="dark"] .prof-tmpl-form-edit { background: #111827; border-color: #263447; }
+[data-theme="dark"] .prof-tmpl-input { background: #162032; border-color: #334155; color: var(--text); }
+[data-theme="dark"] .prof-tmpl-input:focus { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+
+/* Color swatch selected ring */
+[data-theme="dark"] .prof-color-swatch.selected { border-color: #93c5fd; }
+
+/* Stepper buttons */
+[data-theme="dark"] .prof-tmpl-stepper button { background: var(--white); border-color: var(--border); color: var(--text); }
+[data-theme="dark"] .prof-tmpl-stepper button:hover { border-color: var(--navy); color: var(--navy); }
+
+/* Fixed dept pill (edit form) */
+[data-theme="dark"] .prof-tmpl-dept-fixed { background: #1e3a5f; border-color: #2e4a6f; color: #93c5fd; }
+
+/* Save button */
+[data-theme="dark"] .prof-tmpl-save-btn { background: var(--navy); }
+[data-theme="dark"] .prof-tmpl-save-btn:hover { background: var(--navy-mid); }
+
+/* Add trigger row */
+[data-theme="dark"] .prof-tmpl-add-area { border-color: #263447; }
+
+/* Departments */
+[data-theme="dark"] .prof-dept-chip { background: #162032; border-color: #334155; color: var(--text); }
+[data-theme="dark"] .prof-dept-add-btn { background: var(--navy); }
+[data-theme="dark"] .prof-dept-add-btn:hover { opacity: 0.9; }

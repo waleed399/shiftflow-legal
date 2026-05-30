@@ -238,6 +238,7 @@ let _profTemplates  = null
 let _profDepts      = null
 let _profNewTmpl    = false
 let _profEditTmplId = null
+let _profTmplOpen   = false
 
 function _profNowMonth() {
   const n = new Date()
@@ -290,15 +291,18 @@ function _profManagerHtml() {
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted);flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
 
-    <div class="prof-section" style="animation-delay:0.1s">
-      <div class="prof-section-head">
+    <div class="prof-section prof-section-collapsible" style="animation-delay:0.1s" id="prof-tmpl-section">
+      <button class="prof-section-toggle-btn" onclick="profileToggleShiftTypes()">
         <div class="prof-section-title">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
           <span>${t('profile.shiftTypes')}</span>
         </div>
-        <button class="btn btn-ghost btn-sm" onclick="profileToggleNewTemplate()">+ ${t('profile.addShiftType')}</button>
-      </div>
-      <div id="prof-templates-body"><div class="loader-inline"><div class="spinner"></div></div></div>
+        <div class="prof-toggle-right">
+          <span class="prof-tmpl-badge" id="prof-tmpl-badge"></span>
+          <svg class="prof-section-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </button>
+      <div id="prof-templates-body"></div>
     </div>
 
     <div class="prof-section" style="animation-delay:0.12s">
@@ -310,7 +314,7 @@ function _profManagerHtml() {
       </div>
       <div id="prof-depts-body"><div class="loader-inline"><div class="spinner"></div></div></div>
       <div class="prof-dept-add-row">
-        <input type="text" id="prof-new-dept" placeholder="${t('profile.departmentPlaceholder')}" onkeydown="if(event.key==='Enter')profileAddDept()">
+        <input type="text" class="prof-tmpl-input" id="prof-new-dept" placeholder="${t('profile.departmentPlaceholder')}" onkeydown="if(event.key==='Enter')profileAddDept()">
         <button class="prof-dept-add-btn" onclick="profileAddDept()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
@@ -395,14 +399,43 @@ function _profRenderTemplates() {
   const el = document.getElementById('prof-templates-body')
   if (!el) return
   const tmpls = _profTemplates
+
+  // Update badge count
+  const badge = document.getElementById('prof-tmpl-badge')
+  if (badge && tmpls) badge.textContent = tmpls.length > 0 ? tmpls.length : ''
+
+  // Update chevron rotation
+  const chevron = document.querySelector('#prof-tmpl-section .prof-section-chevron')
+  if (chevron) chevron.classList.toggle('open', _profTmplOpen)
+
+  if (!_profTmplOpen) { el.innerHTML = ''; return }
   if (!tmpls) { el.innerHTML = '<div class="loader-inline"><div class="spinner"></div></div>'; return }
 
   const addForm = _profNewTmpl ? _profNewTmplFormHtml() : ''
-  const rows = tmpls.length === 0 && !_profNewTmpl
-    ? `<p class="prof-empty">${t('profile.noShiftTypes')}</p>`
-    : tmpls.map(tmpl => _profEditTmplId === tmpl.id ? _profEditTmplFormHtml(tmpl) : _profTmplRowHtml(tmpl)).join('')
 
-  el.innerHTML = addForm + rows
+  let body = ''
+  if (tmpls.length === 0 && !_profNewTmpl) {
+    body = `<p class="prof-empty">${t('profile.noShiftTypes')}</p>`
+  } else {
+    // Group by department
+    const byDept = {}
+    for (const tmpl of tmpls) {
+      const key = tmpl.department?.name ?? ''
+      if (!byDept[key]) byDept[key] = []
+      byDept[key].push(tmpl)
+    }
+    for (const [deptName, deptTmpls] of Object.entries(byDept)) {
+      body += `<div class="prof-tmpl-dept-group">
+        ${deptName ? `<div class="prof-tmpl-dept-header">${esc(deptName)}</div>` : ''}
+        ${deptTmpls.map(tmpl => _profEditTmplId === tmpl.id ? _profEditTmplFormHtml(tmpl) : _profTmplRowHtml(tmpl)).join('')}
+      </div>`
+    }
+  }
+
+  el.innerHTML = `${addForm}${body}
+    <div class="prof-tmpl-add-area">
+      <button class="btn btn-ghost btn-sm" onclick="profileToggleNewTemplate()">+ ${t('profile.addShiftType')}</button>
+    </div>`
 }
 
 function _profTmplRowHtml(tmpl) {
@@ -510,6 +543,7 @@ function _profRenderDepts() {
 async function _profInitManagerSections() {
   _profNewTmpl = false
   _profEditTmplId = null
+  _profTmplOpen = false
   const [hours, templates, depts] = await Promise.all([_profLoadHours(), _profLoadTemplates(), _profLoadDepts()])
   _profHoursData = hours
   _profTemplates = templates
@@ -565,7 +599,15 @@ window.profileExportHoursCSV = function() {
 
 // ── Template actions ──
 
+window.profileToggleShiftTypes = function() {
+  _profTmplOpen = !_profTmplOpen
+  _profNewTmpl = false
+  _profEditTmplId = null
+  _profRenderTemplates()
+}
+
 window.profileToggleNewTemplate = function() {
+  if (!_profTmplOpen) { _profTmplOpen = true }
   _profNewTmpl = !_profNewTmpl
   _profEditTmplId = null
   _profRenderTemplates()
