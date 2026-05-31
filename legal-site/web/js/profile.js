@@ -462,7 +462,11 @@ function _profNewTmplFormHtml() {
       <div class="prof-color-picker" id="prof-new-color-picker">
         ${_TMPL_COLORS.map((c, i) => `<button type="button" class="prof-color-swatch${i === 0 ? ' active' : ''}" style="background:${c}" data-color="${c}" onclick="profilePickNewColor('${c}',this)"></button>`).join('')}
       </div>
-      <input type="text" class="prof-tmpl-input" id="prof-new-name" placeholder="Shift name (e.g. Morning, Evening)" maxlength="60">
+      <input type="text" class="prof-tmpl-input" id="prof-new-name" placeholder="Shift name (e.g. Morning, Evening)" maxlength="60" oninput="profileUpdateNewPreview()">
+      <div class="prof-tmpl-preview" id="prof-new-preview">
+        <span class="prof-tmpl-preview-dot" id="prof-new-preview-dot" style="background:${_TMPL_COLORS[0]}"></span>
+        <span class="prof-tmpl-preview-name" id="prof-new-preview-name">Your shift name will appear here</span>
+      </div>
       <div class="prof-tmpl-times">
         <div><label class="prof-tmpl-label">Start</label><input type="time" class="prof-tmpl-input" id="prof-new-start" value="09:00"></div>
         <div><label class="prof-tmpl-label">End</label><input type="time" class="prof-tmpl-input" id="prof-new-end" value="17:00"></div>
@@ -496,7 +500,11 @@ function _profEditTmplFormHtml(tmpl) {
       <div class="prof-color-picker" id="prof-edit-color-${safeId}">
         ${_TMPL_COLORS.map(c => `<button type="button" class="prof-color-swatch${c === tmpl.color ? ' active' : ''}" style="background:${c}" data-color="${c}" onclick="profilePickEditColor('${c}',this,'${safeId}')"></button>`).join('')}
       </div>
-      <input type="text" class="prof-tmpl-input" id="prof-edit-name-${safeId}" value="${esc(tmpl.name)}" maxlength="60">
+      <input type="text" class="prof-tmpl-input" id="prof-edit-name-${safeId}" value="${esc(tmpl.name)}" maxlength="60" oninput="profileUpdateEditPreview('${safeId}')">
+      <div class="prof-tmpl-preview" id="prof-edit-preview-${safeId}">
+        <span class="prof-tmpl-preview-dot" id="prof-edit-preview-dot-${safeId}" style="background:${esc(tmpl.color)}"></span>
+        <span class="prof-tmpl-preview-name has-name" id="prof-edit-preview-name-${safeId}">${esc(tmpl.name)}</span>
+      </div>
       <div class="prof-tmpl-times">
         <div><label class="prof-tmpl-label">Start</label><input type="time" class="prof-tmpl-input" id="prof-edit-start-${safeId}" value="${esc(tmpl.startTime)}"></div>
         <div><label class="prof-tmpl-label">End</label><input type="time" class="prof-tmpl-input" id="prof-edit-end-${safeId}" value="${esc(tmpl.endTime)}"></div>
@@ -621,11 +629,31 @@ window.profileCancelNewTemplate = function() {
 window.profilePickNewColor = function(color, btn) {
   document.querySelectorAll('#prof-new-color-picker .prof-color-swatch').forEach(b => b.classList.remove('active'))
   btn.classList.add('active')
+  const dot = document.getElementById('prof-new-preview-dot')
+  if (dot) dot.style.background = color
 }
 
 window.profilePickEditColor = function(color, btn, safeId) {
   document.querySelectorAll(`#prof-edit-color-${safeId} .prof-color-swatch`).forEach(b => b.classList.remove('active'))
   btn.classList.add('active')
+  const dot = document.getElementById(`prof-edit-preview-dot-${safeId}`)
+  if (dot) dot.style.background = color
+}
+
+window.profileUpdateNewPreview = function() {
+  const name = document.getElementById('prof-new-name')?.value.trim()
+  const el = document.getElementById('prof-new-preview-name')
+  if (!el) return
+  if (name) { el.textContent = name; el.classList.add('has-name') }
+  else { el.textContent = 'Your shift name will appear here'; el.classList.remove('has-name') }
+}
+
+window.profileUpdateEditPreview = function(safeId) {
+  const name = document.getElementById(`prof-edit-name-${safeId}`)?.value.trim()
+  const el = document.getElementById(`prof-edit-preview-name-${safeId}`)
+  if (!el) return
+  if (name) { el.textContent = name; el.classList.add('has-name') }
+  else { el.textContent = 'Your shift name will appear here'; el.classList.remove('has-name') }
 }
 
 window.profileStepWorkers = function(elId, delta) {

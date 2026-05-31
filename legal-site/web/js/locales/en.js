@@ -471,7 +471,7 @@ export default {
     password: 'Password',
     forgot: 'Forgot?',
     signIn: 'Sign in',
-    qrHintBefore: 'Have the iOS app already?',
+    qrHintBefore: 'Have the app already?',
     qrHintLink: 'Link with QR code',
     noAccount: "Don't have an account?",
     createOrg: 'Create your organization',
