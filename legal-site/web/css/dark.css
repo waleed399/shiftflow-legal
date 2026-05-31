@@ -335,6 +335,7 @@
 [data-theme="dark"] .prof-nav-row { background: var(--white); border-color: var(--border); }
 [data-theme="dark"] .prof-nav-row:hover { border-color: #4b6a9e; }
 [data-theme="dark"] .prof-nav-icon { background: #1e3a5f; color: #93c5fd; }
+[data-theme="dark"] .prof-nav-icon-team { background: #2e1065; color: #c4b5fd; }
 
 /* Badge + chevron */
 [data-theme="dark"] .prof-tmpl-badge { background: #162032; border-color: #334155; }
