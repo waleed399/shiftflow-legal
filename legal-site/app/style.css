@@ -13,8 +13,6 @@
   --border: #e2e8f0;
 }
 
-html { height: 100%; }
-
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background: linear-gradient(160deg, #1e3358 0%, #0d1b35 100%);
@@ -25,7 +23,7 @@ body {
   justify-content: center;
   padding: 88px 24px 56px;
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 /* ── Background orbs ── */
