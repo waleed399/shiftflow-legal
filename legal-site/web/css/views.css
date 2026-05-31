@@ -986,7 +986,20 @@ body.web-locked #btn-create-shifts { display: none !important; }
   flex-shrink: 0;
 }
 .prof-color-swatch:hover { transform: scale(1.15); }
-.prof-color-swatch.selected { border-color: var(--navy); transform: scale(1.15); }
+.prof-color-swatch.active { border-color: var(--navy); transform: scale(1.15); box-shadow: 0 0 0 2px white, 0 0 0 4px var(--navy); }
+
+/* Shift type color + name preview strip */
+.prof-tmpl-preview {
+  display: flex; align-items: center; gap: 9px;
+  background: var(--surface, #fff); border: 1px solid var(--border);
+  border-radius: 10px; padding: 9px 13px;
+  font-size: 0.85rem; color: var(--text);
+}
+.prof-tmpl-preview-dot {
+  width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0;
+}
+.prof-tmpl-preview-name { font-weight: 500; color: var(--muted); font-style: italic; }
+.prof-tmpl-preview-name.has-name { color: var(--text); font-style: normal; font-weight: 600; }
 .prof-tmpl-label {
   font-size: 0.72rem; font-weight: 700; color: var(--muted);
   text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; display: block;
