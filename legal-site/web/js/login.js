@@ -4,7 +4,7 @@ import {
   getToken, saveSession,
 } from './auth-common.js'
 import { wirePasswordToggle } from './password-strength.js'
-import { initI18n } from './i18n.js'
+import { initI18nForAuth } from './i18n.js'
 
 async function handleLogin() {
   const alertEl = $('alert')
@@ -32,7 +32,7 @@ async function handleLogin() {
 function init() {
   if (getToken()) { window.location.href = '/web/'; return }
 
-  initI18n()
+  initI18nForAuth()
 $('btn-login').addEventListener('click', handleLogin)
   $('email').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('password').focus() })
   $('password').addEventListener('keydown', (e) => { if (e.key === 'Enter') handleLogin() })

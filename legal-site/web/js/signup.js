@@ -5,7 +5,7 @@ import {
   createResendCooldown,
 } from './auth-common.js'
 import { renderStrengthMeter, wirePasswordToggle } from './password-strength.js'
-import { initI18n } from './i18n.js'
+import { initI18nForAuth } from './i18n.js'
 
 let _email = ''
 let _verifiedToken = ''
@@ -167,7 +167,7 @@ function wireEvents() {
 
 function init() {
   if (getToken()) { window.location.href = '/web/'; return }
-  initI18n()
+  initI18nForAuth()
   _resend = createResendCooldown($('btn-resend'))
   wireEvents()
   showStep('email')

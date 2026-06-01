@@ -71,6 +71,16 @@ export function initI18n() {
   applyTranslations()
 }
 
+// For auth pages (login, signup, forgot-password): always render in English
+// regardless of any stored language preference, and don't overwrite the stored
+// preference so the user's in-app language is preserved after they sign back in.
+export function initI18nForAuth() {
+  currentLang = 'en'
+  document.documentElement.lang = 'en'
+  document.documentElement.dir = 'ltr'
+  applyTranslations()
+}
+
 export function mountLanguageSwitcher(containerEl, { variant = 'sidebar' } = {}) {
   if (!containerEl) return
   containerEl.innerHTML = ''
