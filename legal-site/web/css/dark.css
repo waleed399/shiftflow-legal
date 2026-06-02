@@ -210,7 +210,8 @@
 /* Requests */
 [data-theme="dark"] .req-card { background: var(--white); border-color: var(--border); }
 [data-theme="dark"] .req-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.32); }
-[data-theme="dark"] .req-card-history { background: #162032; }
+[data-theme="dark"] .req-card-history { background: #0f172a; border-color: #1e293b; }
+[data-theme="dark"] .req-card-history .req-who { color: var(--muted); }
 [data-theme="dark"] .req-no-pending { background: #162032; border-color: #263447; }
 [data-theme="dark"] .req-select { background: #162032; border-color: var(--border); color: var(--text); }
 [data-theme="dark"] .req-select:focus { border-color: #a78bfa; box-shadow: 0 0 0 3px rgba(167,139,250,0.15); }
