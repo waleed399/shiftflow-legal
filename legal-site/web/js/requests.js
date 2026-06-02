@@ -22,6 +22,14 @@ function fmtDate(iso) {
   return `${parseInt(d, 10)} ${MONTHS[parseInt(m, 10) - 1]}`
 }
 
+function initials(name) {
+  if (!name) return '?'
+  const parts = name.trim().split(/\s+/)
+  return parts.length > 1
+    ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+    : parts[0].slice(0, 2).toUpperCase()
+}
+
 // ── Render ────────────────────────────────────────────────────────────────────
 
 export async function renderRequests() {
@@ -84,9 +92,10 @@ function renderTab(allSwaps, allTimeoff) {
   let html = ''
 
   if (pending.length) {
+    html += `<div class="req-section-hdr"><span class="req-section-label">${t('activity.pending')}</span><span class="req-pending-pill">${pending.length}</span></div>`
     html += pending.map(x => isTimeoff ? timeOffCard(x) : swapCard(x)).join('')
   } else {
-    html += `<div class="req-no-pending">${t('requests.noPending')}</div>`
+    html += `<div class="req-no-pending"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M5.5 8.5l2 2 3-4"/></svg>${t('requests.noPending')}</div>`
   }
 
   if (history.length) {
@@ -133,8 +142,12 @@ function swapCard(s) {
   const approveClick = isOpen ? `approveSwapOpen('${s.id}')` : `approveSwap('${s.id}')`
 
   return `<div class="req-card req-card-swap" id="swap-${esc(s.id)}">
+    <div class="req-avatar req-avatar-swap">${initials(s.requester?.name)}</div>
     <div class="req-body">
-      <div class="req-who">${esc(s.requester?.name || t('common.unknown'))}</div>
+      <div class="req-header-row">
+        <div class="req-who">${esc(s.requester?.name || t('common.unknown'))}</div>
+        <span class="req-type-chip req-type-chip-swap">${t('requests.swaps')}</span>
+      </div>
       <div class="req-details">${esc(dept)} · ${esc(date)} · ${esc(time)}</div>
       ${meta}
       ${s.reason ? `<div class="req-reason">&ldquo;${esc(s.reason)}&rdquo;</div>` : ''}
@@ -154,8 +167,12 @@ function timeOffCard(req) {
   const range = same ? start : `${start} – ${end}`
 
   return `<div class="req-card req-card-timeoff" id="timeoff-${esc(req.id)}">
+    <div class="req-avatar req-avatar-timeoff">${initials(req.worker?.name)}</div>
     <div class="req-body">
-      <div class="req-who">${esc(req.worker?.name || t('common.unknown'))}</div>
+      <div class="req-header-row">
+        <div class="req-who">${esc(req.worker?.name || t('common.unknown'))}</div>
+        <span class="req-type-chip req-type-chip-timeoff">${t('requests.timeOff')}</span>
+      </div>
       <div class="req-details">${range}</div>
       ${req.reason ? `<div class="req-reason">&ldquo;${esc(req.reason)}&rdquo;</div>` : ''}
     </div>
@@ -189,6 +206,7 @@ function swapHistoryCard(s) {
   }
 
   return `<div class="req-card req-card-history">
+    <div class="req-avatar req-avatar-history">${initials(s.requester?.name)}</div>
     <div class="req-body">
       <div class="req-who">${esc(s.requester?.name || t('common.unknown'))}</div>
       <div class="req-details">${esc(dept)} · ${esc(date)} · ${esc(time)}</div>
@@ -213,6 +231,7 @@ function timeOffHistoryCard(req) {
   }
 
   return `<div class="req-card req-card-history">
+    <div class="req-avatar req-avatar-history">${initials(req.worker?.name)}</div>
     <div class="req-body">
       <div class="req-who">${esc(req.worker?.name || t('common.unknown'))}</div>
       <div class="req-details">${range}</div>
