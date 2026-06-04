@@ -324,14 +324,14 @@ body.web-locked #btn-create-shifts { display: none !important; }
 /* ── Profile view ── */
 .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 860px; }
 .profile-card {
-  background: var(--white); border-radius: 18px; padding: 24px;
-  border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  background: var(--surface); border-radius: var(--radius-card); padding: 24px;
+  border: 1px solid var(--border); box-shadow: var(--shadow-sm);
   animation: slideUp 0.32s ease both;
 }
 .profile-card h3 { font-size: 0.7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 18px; }
 
 .profile-card-identity {
-  background: linear-gradient(160deg, #1e3358 0%, #0d1b35 100%);
+  background: linear-gradient(168deg, #213a61 0%, #15294a 52%, #0b1730 100%);
   border-color: transparent;
   display: flex; flex-direction: column; align-items: center;
   justify-content: center; text-align: center; padding: 36px 24px;
@@ -356,7 +356,7 @@ body.web-locked #btn-create-shifts { display: none !important; }
   box-shadow: 0 0 0 4px rgba(255,255,255,0.12), 0 8px 28px rgba(0,0,0,0.35);
 }
 .profile-name-xl {
-  font-size: 1.3rem; font-weight: 800; color: white; letter-spacing: -0.4px;
+  font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; color: white; letter-spacing: -0.2px;
   margin-bottom: 4px; position: relative; z-index: 1;
 }
 .profile-email-xl {
@@ -386,15 +386,15 @@ body.web-locked #btn-create-shifts { display: none !important; }
 .billing-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
 .billing-section-header h3 { font-size: 0.7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
 .billing-trial-notice { display: flex; align-items: center; gap: 8px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; font-size: 0.85rem; color: #15803d; font-weight: 500; }
-.billing-period-toggle { display: flex; background: #dde3ed; border-radius: 12px; padding: 3px; margin-bottom: 18px; width: fit-content; gap: 2px; }
-.period-btn { padding: 8px 20px; border-radius: 9px; border: none; font-size: 0.85rem; font-weight: 600; cursor: pointer; background: transparent; color: #64748b; transition: all 0.15s; display: flex; align-items: center; gap: 7px; font-family: inherit; }
-.period-btn.active { background: white; color: #0f172a; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+.billing-period-toggle { display: flex; background: var(--surface-sunken); border-radius: 12px; padding: 3px; margin-bottom: 18px; width: fit-content; gap: 2px; }
+.period-btn { padding: 8px 20px; border-radius: 9px; border: none; font-size: 0.85rem; font-weight: 600; cursor: pointer; background: transparent; color: var(--muted); transition: all 0.15s; display: flex; align-items: center; gap: 7px; font-family: inherit; }
+.period-btn.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
 .period-save-badge { background: #16a34a; color: white; font-size: 0.62rem; font-weight: 800; padding: 2px 6px; border-radius: 5px; letter-spacing: 0.02em; }
-.billing-annual-note { font-size: 0.75rem; color: #64748b; margin-bottom: 14px; }
+.billing-annual-note { font-size: 0.75rem; color: var(--muted); margin-bottom: 14px; }
 .billing-annual-note-placeholder { height: 14px; margin-bottom: 14px; }
 .billing-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.billing-plan-card { background: var(--white); border-radius: 16px; padding: 24px; border: 2px solid; display: flex; flex-direction: column; position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
-.billing-plan-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,0.1); }
+.billing-plan-card { background: var(--surface); border-radius: var(--radius-card); padding: 24px; border: 2px solid; display: flex; flex-direction: column; position: relative; overflow: hidden; box-shadow: var(--shadow-sm); transition: transform 0.2s, box-shadow 0.2s; }
+.billing-plan-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
 .billing-card-pro      { border-color: rgba(191,31,58,0.25); }
 .billing-card-business { border-color: rgba(217,119,6,0.25); }
 .billing-card-popular-badge { position: absolute; top: 14px; right: 14px; font-size: 0.65rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.04em; background: #bf1f3a; color: white; }
@@ -417,7 +417,7 @@ body.web-locked #btn-create-shifts { display: none !important; }
 .billing-card-pro      .billing-upgrade-btn { background: linear-gradient(135deg, #e8253d, #8f1127); }
 .billing-card-business .billing-upgrade-btn { background: linear-gradient(135deg, #fbbf24, #b45309); }
 .billing-footer-note { font-size: 0.75rem; color: var(--muted); margin-top: 12px; }
-.billing-current-plan { background: var(--white); border-radius: 16px; padding: 24px; border: 1px solid var(--border); display: flex; align-items: flex-start; gap: 16px; }
+.billing-current-plan { background: var(--surface); border-radius: var(--radius-card); padding: 24px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); display: flex; align-items: flex-start; gap: 16px; }
 .billing-current-icon { font-size: 2rem; flex-shrink: 0; line-height: 1; margin-top: 2px; }
 .billing-current-name { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
 .billing-current-desc { font-size: 0.875rem; color: var(--muted); line-height: 1.5; }
@@ -890,9 +890,9 @@ body.web-locked #btn-create-shifts { display: none !important; }
 
 /* ── Profile manager sections ── */
 .prof-section {
-  background: var(--white); border: 1px solid var(--border);
-  border-radius: 18px; padding: 22px 24px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-card); padding: 22px 24px;
+  box-shadow: var(--shadow-sm);
   animation: slideUp 0.32s ease both;
   max-width: 860px; margin-top: 20px;
 }
@@ -930,7 +930,7 @@ body.web-locked #btn-create-shifts { display: none !important; }
   flex: 1; min-width: 120px; background: var(--surface-sunken); border: 1px solid var(--border);
   border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px;
 }
-.prof-hours-stat-blue { background: #eff6ff; border-color: #bfdbfe; }
+.prof-hours-stat-blue { background: rgba(26,45,79,0.06); border-color: rgba(26,45,79,0.16); }
 .prof-hours-stat-val {
   font-size: 1.5rem; font-weight: 800; color: var(--navy); letter-spacing: -0.04em;
 }
@@ -951,10 +951,11 @@ body.web-locked #btn-create-shifts { display: none !important; }
 }
 .prof-hours-avatar {
   width: 34px; height: 34px; border-radius: 50%;
-  background: var(--navy); color: white;
+  background: linear-gradient(150deg, var(--navy-mid), var(--navy-deep)); color: white;
   font-size: 0.75rem; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; overflow: hidden;
+  box-shadow: 0 2px 6px rgba(13,27,53,0.2), inset 0 0 0 1px rgba(255,255,255,0.08);
 }
 .prof-hours-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .prof-hours-name {
@@ -980,19 +981,19 @@ body.web-locked #btn-create-shifts { display: none !important; }
   border: 1px solid var(--border); background: var(--white); color: var(--muted);
   cursor: pointer; transition: all 0.15s; font-family: inherit;
 }
-.prof-hours-export-btn:hover { border-color: var(--navy); color: var(--navy); background: #f0f4ff; }
+.prof-hours-export-btn:hover { border-color: var(--navy); color: var(--navy); background: rgba(26,45,79,0.07); }
 
 /* Team Members — nav row */
 .prof-nav-row {
   display: flex; align-items: center; gap: 14px;
   padding: 14px 18px; border: 1px solid var(--border); border-radius: 14px;
-  cursor: pointer; transition: all 0.15s; background: var(--white);
-  max-width: 860px; margin-top: 20px;
+  cursor: pointer; transition: all 0.15s; background: var(--surface);
+  max-width: 860px; margin-top: 20px; box-shadow: var(--shadow-sm);
 }
-.prof-nav-row:hover { border-color: #c7d2e8; box-shadow: 0 2px 10px rgba(0,0,0,0.07); transform: translateY(-1px); }
+.prof-nav-row:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); transform: translateY(-2px); }
 .prof-nav-icon {
-  width: 40px; height: 40px; border-radius: 10px;
-  background: #eff6ff; color: var(--navy);
+  width: 40px; height: 40px; border-radius: 11px;
+  background: rgba(26,45,79,0.08); color: var(--navy);
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 .prof-nav-icon-team { background: #ede9fe; color: #7c3aed; }
@@ -1020,12 +1021,12 @@ body.web-locked #btn-create-shifts { display: none !important; }
 }
 .prof-tmpl-edit-btn, .prof-tmpl-delete {
   width: 30px; height: 30px; border-radius: 7px;
-  border: 1px solid var(--border); background: var(--white);
+  border: 1px solid var(--border); background: var(--surface);
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   color: var(--muted); transition: all 0.15s;
 }
-.prof-tmpl-edit-btn:hover { border-color: var(--navy); color: var(--navy); background: #f0f4ff; }
-.prof-tmpl-delete:hover { border-color: #ef4444; color: #ef4444; background: #fef2f2; }
+.prof-tmpl-edit-btn:hover { border-color: var(--navy); color: var(--navy); background: rgba(26,45,79,0.07); }
+.prof-tmpl-delete:hover { border-color: #d9485f; color: #d9485f; background: rgba(191,31,58,0.08); }
 
 /* Shift Types — add / edit form */
 .prof-tmpl-form, .prof-tmpl-form-edit {
@@ -1090,7 +1091,7 @@ body.web-locked #btn-create-shifts { display: none !important; }
 }
 .prof-tmpl-dept-fixed {
   font-size: 0.875rem; font-weight: 600; color: var(--navy);
-  padding: 8px 12px; background: #eff6ff; border: 1px solid #bfdbfe;
+  padding: 8px 12px; background: rgba(26,45,79,0.06); border: 1px solid rgba(26,45,79,0.16);
   border-radius: 9px; display: inline-block;
 }
 .prof-tmpl-form-actions {
