@@ -164,7 +164,7 @@ export async function renderWeekView() {
         const sColor = STATUS_COLORS[s.status] || '#94a3b8'
 
         if (assignedIds.has(s.id)) {
-          return `<div class="wv-pill wv-pill-assigned" style="background:${dColor};border-color:${dColor}" onclick="openShiftModal('${s.id}')">
+          return `<div class="wv-pill wv-pill-assigned" style="background:${dColor};border-color:${dColor}" onclick="openShiftModal('${s.id}')" role="button" tabindex="0">
             <span class="wv-pill-check">✓</span>
             <span class="wv-pill-time">${start}–${end}</span>
             <span class="wv-pill-status" style="background:${sColor}"></span>
@@ -181,7 +181,7 @@ export async function renderWeekView() {
         const isWrongDept = s.department?.id && wDeptIds.length > 0 && !wDeptIds.includes(s.department.id)
         if (isWrongDept) return null
 
-        return `<div class="wv-pill wv-pill-open" data-assign="${s.id}::${w.id}" onclick="assignInWeekView('${s.id}','${w.id}')">
+        return `<div class="wv-pill wv-pill-open" data-assign="${s.id}::${w.id}" onclick="assignInWeekView('${s.id}','${w.id}')" role="button" tabindex="0">
           <span class="wv-pill-plus">+</span>
           <span class="wv-pill-time">${start}–${end}</span>
         </div>`

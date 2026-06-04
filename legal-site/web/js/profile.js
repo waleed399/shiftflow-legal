@@ -91,7 +91,7 @@ export function renderProfile() {
         <div class="info-row" style="flex-direction:column;align-items:flex-start;gap:8px;border-bottom:none">
           <span class="info-label">${t('profile.inviteCode')}</span>
           <div>
-            <div class="invite-code" onclick="copyInvite('${esc(currentOrg.inviteCode)}')" title="${t('profile.clickToCopy')}">${esc(currentOrg.inviteCode)}</div>
+            <div class="invite-code" onclick="copyInvite('${esc(currentOrg.inviteCode)}')" title="${t('profile.clickToCopy')}" role="button" tabindex="0" aria-label="${t('profile.clickToCopy')}">${esc(currentOrg.inviteCode)}</div>
             <div class="copy-hint" id="copy-hint">${t('profile.clickToCopy')}</div>
           </div>
         </div>` : ''}
@@ -280,7 +280,7 @@ function _profManagerHtml() {
       <div id="prof-hours-body"><div class="loader-inline"><div class="spinner"></div></div></div>
     </div>
 
-    <div class="prof-nav-row" onclick="showView('workers')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')showView('workers')">
+    <div class="prof-nav-row" onclick="showView('workers')" role="button" tabindex="0">
       <div class="prof-nav-icon prof-nav-icon-team">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       </div>

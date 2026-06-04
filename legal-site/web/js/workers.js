@@ -193,7 +193,7 @@ function workerCard(w, shiftCount) {
   }
 
   return `
-    <div class="worker-card worker-card-clickable" onclick="openWorkerDrawer('${esc(w.id)}')">
+    <div class="worker-card worker-card-clickable" onclick="openWorkerDrawer('${esc(w.id)}')" role="button" tabindex="0">
       <div class="worker-card-avatar" data-avatar="${esc(w.avatarUrl || '')}">${initials}</div>
       <div class="worker-card-info">
         <div class="worker-card-name">${esc(w.name || t('common.dash'))}</div>

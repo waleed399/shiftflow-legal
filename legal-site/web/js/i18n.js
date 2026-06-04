@@ -24,11 +24,37 @@ function interpolate(str, vars) {
   return str.replace(/\{\{(\w+)\}\}/g, (_, k) => (vars[k] != null ? vars[k] : ''))
 }
 
+// Dev-only missing-key detection. On localhost we surface untranslated keys in
+// the console so a raw key (e.g. "activity.pending") never silently reaches the
+// UI in production. No-op off localhost; each key warns at most once.
+const IS_DEV = (() => {
+  try {
+    const h = location.hostname
+    return h === 'localhost' || h === '127.0.0.1' || h === '' || h.endsWith('.local')
+  } catch { return false }
+})()
+const _warnedKeys = new Set()
+
+function _warnMissing(scope, key) {
+  if (!IS_DEV) return
+  const tag = `${scope}:${key}`
+  if (_warnedKeys.has(tag)) return
+  _warnedKeys.add(tag)
+  console.warn(`[i18n] ${scope}: "${key}"`)
+}
+
 export function t(key, vars) {
-  const val =
-    getNested(RESOURCES[currentLang], key) ??
-    getNested(RESOURCES.en, key) ??
-    key
+  let val = getNested(RESOURCES[currentLang], key)
+  if (val == null) {
+    const enVal = getNested(RESOURCES.en, key)
+    if (enVal == null) {
+      _warnMissing('missing key', key)
+      val = key
+    } else {
+      if (currentLang !== 'en') _warnMissing(`missing in "${currentLang}", using en`, key)
+      val = enVal
+    }
+  }
   return interpolate(val, vars)
 }
 

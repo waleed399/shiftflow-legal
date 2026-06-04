@@ -61,7 +61,7 @@ function renderGenOptions() {
     const isSelected = _genSelected === opt.id
     const coverageCls = fullyStaffed === total ? 'gen-stat-ok' : 'gen-stat-warn'
     return `
-      <div class="gen-option-card${isSelected ? ' gen-option-selected' : ''}" onclick="selectGenOption('${opt.id}')">
+      <div class="gen-option-card${isSelected ? ' gen-option-selected' : ''}" onclick="selectGenOption('${opt.id}')" role="button" tabindex="0" aria-pressed="${isSelected ? 'true' : 'false'}">
         <div class="gen-option-top">
           <span class="gen-option-label">${esc(opt.label)}</span>
           <div class="gen-option-radio${isSelected ? ' gen-radio-on' : ''}"></div>

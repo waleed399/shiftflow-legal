@@ -11,6 +11,7 @@ import { renderWorkers } from './workers.js'
 import { renderAvailability } from './availability.js'
 import { initI18n, mountLanguageSwitcher } from './i18n.js'
 import { initNotifications } from './notifications.js'
+import './a11y.js' // registers global keyboard activation for role="button" elements
 
 async function init() {
   initI18n()

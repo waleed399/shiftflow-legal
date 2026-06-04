@@ -35,6 +35,15 @@ export default {
     language: 'Language',
   },
 
+  a11y: {
+    toggleTheme: 'Toggle dark mode',
+    notifications: 'Activity and notifications',
+    prevWeek: 'Previous week',
+    nextWeek: 'Next week',
+    closeDialog: 'Close dialog',
+    exportOptions: 'Export options',
+  },
+
   dashboard: {
     goodMorning: 'Good morning, {{name}}',
     goodAfternoon: 'Good afternoon, {{name}}',

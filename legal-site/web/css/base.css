@@ -14,6 +14,21 @@
   --radius-btn: 10px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* Visible keyboard focus for all interactive elements (buttons, links, and
+   role="button" cards/rows/nav items). #3b82f6 reads clearly on both the light
+   content area and the navy sidebar. Mouse clicks don't trigger :focus-visible,
+   so this only shows for keyboard users. Form inputs keep their own focus ring. */
+:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.form-input:focus-visible,
+.picker-search:focus-visible,
+.req-select:focus-visible,
+.workers-search:focus-visible,
+.prof-tmpl-input:focus-visible { outline: none; }
 body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; }
 
 /* ── Loading ── */

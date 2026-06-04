@@ -175,7 +175,7 @@ function shiftRow(shift, color) {
   const start = shift.startTime.substring(0, 5)
   const end   = shift.endTime.substring(0, 5)
   return `
-    <div class="dept-shift-row" style="border-left:3px solid ${borderColor}" onclick="openShiftModal('${shift.id}')">
+    <div class="dept-shift-row" style="border-left:3px solid ${borderColor}" onclick="openShiftModal('${shift.id}')" role="button" tabindex="0">
       <div class="shift-time-col">
         <span class="shift-time">${start}</span>
         <div class="shift-time-sep"></div>

@@ -214,7 +214,7 @@ function renderPickerList(workers, query) {
     const initials = esc(getInitials(w.name))
     const already = assignedIds.has(w.id)
     return `
-      <div class="pick-row ${already ? 'already-assigned' : ''}" onclick="${already ? '' : `assignWorker('${w.id}')`}">
+      <div class="pick-row ${already ? 'already-assigned' : ''}" onclick="${already ? '' : `assignWorker('${w.id}')`}" ${already ? '' : 'role="button" tabindex="0"'}>
         <div class="worker-row-avatar" style="width:28px;height:28px;font-size:0.65rem" data-avatar="${esc(w.avatarUrl || '')}">${initials}</div>
         <div>
           <div class="pick-row-name">${esc(w.name || t('common.dash'))}</div>

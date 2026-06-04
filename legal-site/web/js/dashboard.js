@@ -197,7 +197,7 @@ function _buildKPIs(shiftsCount, assigned, coverage, coverColor, pendingTotal, i
           <div class="dash-kpi-label">${t('dashboard.coverage')}</div>
         </div>
       </div>
-      <div class="dash-kpi${pendingTotal > 0 ? ' dash-kpi-alert' : ''}" ${pendingTotal > 0 ? "onclick=\"window.showView('requests')\" style=\"cursor:pointer\"" : ''}>
+      <div class="dash-kpi${pendingTotal > 0 ? ' dash-kpi-alert' : ''}" ${pendingTotal > 0 ? "onclick=\"window.showView('requests')\" style=\"cursor:pointer\" role=\"button\" tabindex=\"0\"" : ''}>
         <div class="dash-kpi-icon${pendingTotal > 0 ? ' dash-kpi-icon-red' : ' dash-kpi-icon-muted'}">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         </div>
@@ -308,7 +308,7 @@ function _dashShiftRow(shift) {
   const end         = shift.endTime?.substring(0, 5) || '—'
   const dur         = _duration(shift.startTime, shift.endTime)
   return `
-    <div class="dept-shift-row" style="border-left:3px solid ${borderColor}" onclick="window.showView('shifts')">
+    <div class="dept-shift-row" style="border-left:3px solid ${borderColor}" onclick="window.showView('shifts')" role="button" tabindex="0">
       <div class="shift-time-col">
         <span class="shift-time">${start}</span>
         <div class="shift-time-sep"></div>

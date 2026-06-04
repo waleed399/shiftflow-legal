@@ -35,6 +35,15 @@ export default {
     language: 'שפה',
   },
 
+  a11y: {
+    toggleTheme: 'החלף מצב כהה',
+    notifications: 'פעילות והתראות',
+    prevWeek: 'שבוע קודם',
+    nextWeek: 'שבוע הבא',
+    closeDialog: 'סגור חלון',
+    exportOptions: 'אפשרויות ייצוא',
+  },
+
   dashboard: {
     goodMorning: 'בוקר טוב, {{name}}',
     goodAfternoon: 'צהריים טובים, {{name}}',
@@ -331,6 +340,24 @@ export default {
     bizAnnualNote: 'חיוב $959.88/שנה — חסוך $240',
     featuresPro: ['כל מה שב-Free', 'עד 50 עובדים', 'מחלקות ללא הגבלה', 'בונה כיסוי', 'תזמון אוטומטי', 'גישה לאפליקציית האינטרנט'],
     featuresBusiness: ['כל מה שב-Pro', 'עובדים ללא הגבלה', 'תמיכה בעדיפות'],
+    monthlyHours: 'שעות חודשיות',
+    monthlyHoursTotalLabel: 'סה״כ שעות בארגון',
+    monthlyHoursWorkers: 'עובדים פעילים',
+    monthlyHoursShifts: 'משמרות שהושלמו',
+    monthlyHoursEmpty: 'לא הושלמו משמרות החודש',
+    monthlyHoursExport: 'ייצוא CSV',
+    teamMembers: 'חברי הצוות',
+    teamMembersSubtitle: 'נהל, הזמן וארגן את הצוות שלך',
+    shiftTypes: 'סוגי משמרות',
+    addShiftType: 'הוסף סוג משמרת',
+    noShiftTypes: 'אין עדיין סוגי משמרות',
+    shiftTypeSaveFailed: 'שמירת סוג המשמרת נכשלה — נסה שוב',
+    shiftTypeDeleteFailed: 'מחיקת סוג המשמרת נכשלה — נסה שוב',
+    departments: 'מחלקות',
+    noDepartments: 'אין עדיין מחלקות',
+    departmentPlaceholder: 'שם מחלקה חדשה…',
+    departmentAddFailed: 'הוספת המחלקה נכשלה — נסה שוב',
+    departmentDeleteFailed: 'מחיקת המחלקה נכשלה — נסה שוב',
   },
 
   lock: {
