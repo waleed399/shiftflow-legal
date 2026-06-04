@@ -40,7 +40,7 @@ aside::before {
   flex-shrink: 0; overflow: hidden;
   box-shadow: 0 2px 8px rgba(191,31,58,0.35);
 }
-.avatar img, .profile-avatar img, .profile-avatar-xl img, .worker-row-avatar img, .dt-worker-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.avatar img, .profile-avatar img, .profile-avatar-xl img, .worker-row-avatar img, .dt-worker-avatar img, .worker-card-avatar img, .drawer-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .user-info { overflow: hidden; }
 .user-name { font-size: 0.875rem; font-weight: 600; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .user-org  { font-size: 0.72rem; color: rgba(255,255,255,0.38); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
