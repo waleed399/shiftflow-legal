@@ -40,6 +40,8 @@ export default {
     notifications: 'פעילות והתראות',
     prevWeek: 'שבוע קודם',
     nextWeek: 'שבוע הבא',
+    prevMonth: 'חודש קודם',
+    nextMonth: 'חודש הבא',
     closeDialog: 'סגור חלון',
     exportOptions: 'אפשרויות ייצוא',
   },

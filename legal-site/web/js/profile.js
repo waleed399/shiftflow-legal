@@ -1,7 +1,7 @@
 import { state } from './state.js'
 import { apiFetch } from './api.js'
 import { esc, getInitials, showToast } from './utils.js'
-import { t } from './i18n.js'
+import { t, getLanguage } from './i18n.js'
 
 let billingPeriod = 'monthly'
 
@@ -247,7 +247,8 @@ function _profNowMonth() {
 
 function _profFmtMonth(m) {
   const [y, mo] = m.split('-').map(Number)
-  return new Date(y, mo - 1, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
+  // Localize to the app language (e.g. "יוני 2026") rather than the browser default.
+  return new Date(y, mo - 1, 1).toLocaleDateString(getLanguage(), { month: 'long', year: 'numeric' })
 }
 
 function _profFmtHrs(h) {
@@ -268,11 +269,11 @@ function _profManagerHtml() {
           <span>${t('profile.monthlyHours')}</span>
         </div>
         <div class="prof-month-nav">
-          <button class="prof-month-btn" onclick="profilePrevMonth()" aria-label="Previous month">
+          <button class="prof-month-btn" onclick="profilePrevMonth()" aria-label="${t('a11y.prevMonth')}">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
           <span id="prof-month-label">${_profFmtMonth(_profHoursMonth)}</span>
-          <button class="prof-month-btn" id="prof-month-next" onclick="profileNextMonth()" ${isNow ? 'disabled' : ''} aria-label="Next month">
+          <button class="prof-month-btn" id="prof-month-next" onclick="profileNextMonth()" ${isNow ? 'disabled' : ''} aria-label="${t('a11y.nextMonth')}">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
         </div>

@@ -135,6 +135,7 @@
 /* Week-nav chevrons: flex auto-swaps button positions in RTL, but the
    chevron SVGs still point the original direction. Mirror them so "previous"
    points right and "next" points left, matching RTL reading flow. */
-[dir="rtl"] .week-nav .week-btn svg {
+[dir="rtl"] .week-nav .week-btn svg,
+[dir="rtl"] .prof-month-nav .prof-month-btn svg {
   transform: scaleX(-1);
 }

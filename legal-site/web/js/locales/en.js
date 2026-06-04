@@ -40,6 +40,8 @@ export default {
     notifications: 'Activity and notifications',
     prevWeek: 'Previous week',
     nextWeek: 'Next week',
+    prevMonth: 'Previous month',
+    nextMonth: 'Next month',
     closeDialog: 'Close dialog',
     exportOptions: 'Export options',
   },
