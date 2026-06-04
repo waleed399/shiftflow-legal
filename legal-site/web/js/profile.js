@@ -1,6 +1,6 @@
 import { state } from './state.js'
 import { apiFetch } from './api.js'
-import { esc, getInitials, showToast } from './utils.js'
+import { esc, getInitials, showToast, applyAvatars } from './utils.js'
 import { t, getLanguage } from './i18n.js'
 
 let billingPeriod = 'monthly'
@@ -392,7 +392,7 @@ function _profRenderHours() {
       ${data.map((w, i) => `
         <div class="prof-hours-row">
           <span class="prof-hours-rank">${i + 1}</span>
-          <div class="prof-hours-avatar">${esc(w.worker.name.charAt(0).toUpperCase())}</div>
+          <div class="prof-hours-avatar" data-avatar="${esc(w.worker.avatarUrl || '')}">${esc(getInitials(w.worker.name))}</div>
           <div class="prof-hours-info">
             <span class="prof-hours-name">${esc(w.worker.name)}</span>
             <span class="prof-hours-shifts">${w.shiftCount} shift${w.shiftCount !== 1 ? 's' : ''}</span>
@@ -407,6 +407,8 @@ function _profRenderHours() {
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       ${t('profile.monthlyHoursExport')}
     </button>`
+
+  applyAvatars(el)
 }
 
 function _profRenderTemplates() {
