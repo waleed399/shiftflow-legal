@@ -398,7 +398,14 @@ body.web-locked #btn-create-shifts { display: none !important; }
 .billing-card-pro      { border-color: rgba(191,31,58,0.25); }
 .billing-card-business { border-color: rgba(217,119,6,0.25); }
 .billing-card-popular-badge { position: absolute; top: 14px; right: 14px; font-size: 0.65rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.04em; background: #bf1f3a; color: white; }
+/* RTL: the card-top row reverses (icon + name flow to the right), so pin the
+   badge to the left edge to avoid it colliding with the plan name. */
+[dir="rtl"] .billing-card-popular-badge { right: auto; left: 14px; }
 .billing-card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+/* Reserve space on the badge's side so a long plan name never slides under it.
+   padding-inline-end resolves to the right in LTR and the left in RTL — i.e. the
+   badge side in both, since the badge is flipped to match. */
+.billing-card-popular-badge + .billing-card-top { padding-inline-end: 90px; }
 .billing-card-icon { font-size: 1.4rem; line-height: 1; }
 .billing-card-name { font-size: 1.1rem; font-weight: 800; color: var(--text); }
 .billing-card-price { margin-bottom: 18px; }
