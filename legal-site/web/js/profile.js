@@ -148,26 +148,39 @@ export function renderProfile() {
   }
 }
 
+const PLAN_ACCENTS = {
+  pro:      { pa: '#e8253d', pa2: '#8f1127', ink: '#ffffff' },
+  business: { pa: '#fbbf24', pa2: '#d97706', ink: '#3a2406' },
+}
+
 function billingCard(planKey, p) {
   const { price, label } = billingPeriod === 'annual' ? p.annual : p.monthly
+  const ac = PLAN_ACCENTS[p.cls] || PLAN_ACCENTS.pro
+  const features = p.features
+    .map((f, i) => `<li style="--i:${i}">${f}</li>`)
+    .join('')
   return `
-    <div class="billing-plan-card billing-card-${p.cls}">
-      ${p.popular ? `<div class="billing-card-popular-badge">${t('profile.mostPopular')}</div>` : ''}
-      <div class="billing-card-top">
-        <div class="billing-card-icon">${p.icon}</div>
-        <div class="billing-card-name">${p.name}</div>
+    <div class="plan-card plan-${p.cls}${p.popular ? ' plan-popular' : ''}"
+         style="--pa:${ac.pa};--pa2:${ac.pa2};--pa-ink:${ac.ink}">
+      <div class="plan-glow"></div>
+      <div class="plan-card-inner">
+        <div class="plan-aurora"></div>
+        <div class="plan-sheen"></div>
+        ${p.popular ? `<div class="plan-ribbon">${t('profile.mostPopular')}</div>` : ''}
+        <div class="plan-head">
+          <span class="plan-icon">${p.icon}</span>
+          <span class="plan-name">${p.name}</span>
+        </div>
+        <div class="plan-price">
+          <span class="plan-price-amount">${price}</span>
+          <span class="plan-price-per">${t('profile.perMonth')}</span>
+        </div>
+        <div class="plan-note${label ? '' : ' plan-note-empty'}">${label || ''}</div>
+        <ul class="plan-features">${features}</ul>
+        <button id="checkout-btn-${planKey}" class="plan-cta" onclick="startCheckout('${planKey}')">
+          ${t('profile.upgradeTo', { plan: p.name })}
+        </button>
       </div>
-      <div class="billing-card-price">
-        <span class="billing-price-amount">${price}</span>
-        <span class="billing-price-per">${t('profile.perMonth')}</span>
-      </div>
-      ${label ? `<div class="billing-annual-note">${label}</div>` : '<div class="billing-annual-note-placeholder"></div>'}
-      <ul class="billing-card-features">
-        ${p.features.map(f => `<li>${f}</li>`).join('')}
-      </ul>
-      <button id="checkout-btn-${planKey}" class="billing-upgrade-btn" onclick="startCheckout('${planKey}')">
-        ${t('profile.upgradeTo', { plan: p.name })}
-      </button>
     </div>`
 }
 
