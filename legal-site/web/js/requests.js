@@ -92,7 +92,7 @@ function renderTab(allSwaps, allTimeoff) {
   let html = ''
 
   if (pending.length) {
-    html += `<div class="req-section-hdr"><span class="req-section-label">${t('activity.pending')}</span><span class="req-pending-pill">${pending.length}</span></div>`
+    html += `<div class="req-section-hdr"><span class="req-section-label">${t('notifications.pending')}</span><span class="req-pending-pill">${pending.length}</span></div>`
     html += pending.map(x => isTimeoff ? timeOffCard(x) : swapCard(x)).join('')
   } else {
     html += `<div class="req-no-pending"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M5.5 8.5l2 2 3-4"/></svg>${t('requests.noPending')}</div>`
