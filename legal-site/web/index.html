@@ -325,6 +325,18 @@
       </button>
     </div>
     <div class="modal-body">
+      <div class="assign-range">
+        <div class="assign-range-tabs">
+          <button class="assign-range-tab active" id="assign-mode-full" onclick="setAssignMode('full')" data-i18n="modals.wholeShift">Whole shift</button>
+          <button class="assign-range-tab" id="assign-mode-part" onclick="setAssignMode('part')" data-i18n="modals.partOfShift">Part of shift</button>
+        </div>
+        <div class="assign-range-times hidden" id="assign-range-times">
+          <input class="form-input" type="time" id="assign-block-start" onchange="this.dataset.touched=1" data-i18n-aria="modals.blockStart" aria-label="Block start">
+          <span class="assign-range-sep">–</span>
+          <input class="form-input" type="time" id="assign-block-end" onchange="this.dataset.touched=1" data-i18n-aria="modals.blockEnd" aria-label="Block end">
+        </div>
+        <div class="form-error" id="assign-block-error"></div>
+      </div>
       <input class="picker-search" id="picker-search" data-i18n-placeholder="modals.searchWorkersPlaceholder" placeholder="Search workers…" oninput="filterPicker(this.value)">
       <div class="picker-list" id="picker-list"></div>
     </div>

@@ -417,6 +417,16 @@ export default {
     alreadyAssigned: 'כבר משובץ',
     noDepartmentsLoading: 'טוען…',
     noDepartmentsYet: 'אין עדיין מחלקות — צור אחת בלשונית העובדים',
+    wholeShift: 'משמרת מלאה',
+    partOfShift: 'חלק מהמשמרת',
+    wholeShiftLabel: 'משמרת מלאה',
+    blockStart: 'תחילת בלוק',
+    blockEnd: 'סיום בלוק',
+    blockInvalid: 'הזינו שעת התחלה וסיום תקינות',
+    coverageLabel: 'כיסוי',
+    coveredOf: 'מכוסה {{covered}} / {{total}}',
+    fullyCovered: 'מכוסה במלואו',
+    gapLabel: 'פער {{start}}–{{end}}',
   },
 
   onboarding: {

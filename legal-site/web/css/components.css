@@ -250,3 +250,31 @@ textarea.form-input { resize: vertical; min-height: 44px; }
 .notif-chevron { flex-shrink: 0; color: var(--muted); margin-top: 4px; }
 .notif-dismiss-x { flex-shrink: 0; color: #cbd5e1; margin-top: 4px; opacity: 0; transition: opacity 0.15s; }
 .notif-item:hover .notif-dismiss-x { opacity: 1; }
+
+/* ── Split-shift coverage (shift detail modal) ── */
+.worker-row-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.worker-row-info .worker-row-name { flex: none; }
+.worker-row-block { font-size: 0.72rem; color: var(--muted); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.worker-row-block-full { color: #16a34a; }
+
+.cov-block { margin-bottom: 16px; }
+.cov-block-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 7px; }
+.cov-block-sum { font-size: 0.74rem; font-weight: 600; color: var(--muted); }
+.cov-bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--border); }
+.cov-bar-seg { height: 100%; }
+.cov-bar-seg + .cov-bar-seg { box-shadow: inset 1px 0 0 rgba(255,255,255,0.55); }
+.cov-bar-covered { background: #22c55e; }
+.cov-bar-gap { background: repeating-linear-gradient(45deg, #fecaca, #fecaca 4px, #fca5a5 4px, #fca5a5 8px); }
+.cov-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.cov-gap-chip { font-size: 0.72rem; font-weight: 600; color: #b91c1c; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.22); padding: 2px 8px; border-radius: 7px; white-space: nowrap; }
+.cov-fully { display: inline-flex; align-items: center; gap: 5px; font-size: 0.74rem; font-weight: 600; color: #16a34a; }
+
+/* Assign picker — whole-shift vs part-of-shift selector */
+.assign-range { margin-bottom: 12px; }
+.assign-range-tabs { display: flex; gap: 6px; background: var(--bg); padding: 4px; border-radius: 10px; }
+.assign-range-tab { flex: 1; padding: 7px 10px; border: none; background: none; border-radius: 7px; font-family: inherit; font-size: 0.8rem; font-weight: 600; color: var(--muted); cursor: pointer; transition: all 0.12s; }
+.assign-range-tab:hover { color: var(--navy); }
+.assign-range-tab.active { background: var(--white); color: var(--navy); box-shadow: var(--shadow-sm); }
+.assign-range-times { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.assign-range-times .form-input { flex: 1; }
+.assign-range-sep { color: var(--muted); font-weight: 600; flex-shrink: 0; }

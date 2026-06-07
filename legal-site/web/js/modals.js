@@ -1,7 +1,7 @@
 import { state, ensureOrgWorkers } from './state.js'
 import { apiFetch } from './api.js'
 import { toYMD, esc, getInitials, applyAvatars, showToast } from './utils.js'
-import { loadShifts, updateActionBar } from './shifts.js'
+import { loadShifts, updateActionBar, toMins, normEnd } from './shifts.js'
 import { t } from './i18n.js'
 import { requireWebManage } from './profile.js'
 
@@ -11,6 +11,7 @@ let _editing = false
 
 const workersSectionHtml = () => `
   <div>
+    <div id="modal-coverage"></div>
     <div class="modal-section-label">${t('modals.workersLabel')}</div>
     <div id="modal-workers-list"></div>
     <button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="openAssignPicker()">
@@ -18,6 +19,61 @@ const workersSectionHtml = () => `
       ${t('modals.assignWorker')}
     </button>
   </div>`
+
+// ── Split-shift coverage helpers ───────────────────────────────────────────────
+// A shift can be covered by several workers, each over a sub-range (blockStart →
+// blockEnd). An assignment with no block times covers the whole shift. We compute
+// the covered/uncovered timeline so the manager can see — and fill — the holes.
+
+function hm(time) { return String(time || '').substring(0, 5) }
+
+function fmtMin(m) {
+  const v = ((m % 1440) + 1440) % 1440
+  return `${String(Math.floor(v / 60)).padStart(2, '0')}:${String(v % 60).padStart(2, '0')}`
+}
+
+function durLabel(mins) {
+  if (mins <= 0) return ''
+  const h = Math.floor(mins / 60), m = mins % 60
+  return m === 0 ? `${h}h` : (h === 0 ? `${m}m` : `${h}h ${m}m`)
+}
+
+// Returns { s, e, total, segments:[{covered,start,end}], gaps:[[start,end]], coveredMins }
+// All values are minutes on a timeline anchored at the shift's start (overnight-aware).
+function shiftCoverage(shift) {
+  const s = toMins(shift.startTime)
+  const e = normEnd(s, toMins(shift.endTime))
+  const total = e - s
+  const norm = m => (m < s ? m + 1440 : m)
+
+  const covered = (shift.assignments || []).map(a => {
+    if (a.blockStart && a.blockEnd) {
+      const bs = norm(toMins(a.blockStart))
+      let be = toMins(a.blockEnd); be = normEnd(bs, be < s ? be + 1440 : be)
+      return [Math.max(bs, s), Math.min(be, e)]
+    }
+    return [s, e] // whole-shift assignment
+  }).filter(([a, b]) => b > a).sort((x, y) => x[0] - y[0])
+
+  const merged = []
+  for (const [a, b] of covered) {
+    if (merged.length && a <= merged[merged.length - 1][1]) merged[merged.length - 1][1] = Math.max(merged[merged.length - 1][1], b)
+    else merged.push([a, b])
+  }
+
+  const segments = []
+  const gaps = []
+  let cur = s
+  for (const [a, b] of merged) {
+    if (a > cur) { segments.push({ covered: false, start: cur, end: a }); gaps.push([cur, a]) }
+    segments.push({ covered: true, start: a, end: b })
+    cur = b
+  }
+  if (cur < e) { segments.push({ covered: false, start: cur, end: e }); gaps.push([cur, e]) }
+
+  const coveredMins = total - gaps.reduce((n, [a, b]) => n + (b - a), 0)
+  return { s, e, total, segments, gaps, coveredMins }
+}
 
 export function openShiftModal(shiftId) {
   const all = state.shiftsCache[toYMD(state.currentWeek)] || []
@@ -52,8 +108,38 @@ function renderShiftModal(shift) {
   document.getElementById('modal-subtitle').innerHTML =
     `<span class="status-pill status-${shift.status}" style="font-size:0.7rem">${t(`shifts.status.${shift.status}`)}</span>`
   restoreModalBody()
+  renderModalCoverage(shift)
   renderModalWorkers(shift)
   renderModalFooter(shift)
+}
+
+// Horizontal covered/uncovered bar + gap chips, shown once anyone is assigned.
+function renderModalCoverage(shift) {
+  const el = document.getElementById('modal-coverage')
+  if (!el) return
+  const assigned = shift.assignments || []
+  if (assigned.length === 0) { el.innerHTML = ''; return }
+
+  const { total, segments, gaps, coveredMins } = shiftCoverage(shift)
+  if (total <= 0) { el.innerHTML = ''; return }
+
+  const bar = segments.map(g =>
+    `<div class="cov-bar-seg ${g.covered ? 'cov-bar-covered' : 'cov-bar-gap'}" style="width:${((g.end - g.start) / total * 100).toFixed(3)}%" title="${fmtMin(g.start)}–${fmtMin(g.end)}"></div>`
+  ).join('')
+
+  const chips = gaps.length
+    ? gaps.map(([a, b]) => `<span class="cov-gap-chip">${t('modals.gapLabel', { start: fmtMin(a), end: fmtMin(b) })}</span>`).join('')
+    : `<span class="cov-fully"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>${t('modals.fullyCovered')}</span>`
+
+  el.innerHTML = `
+    <div class="cov-block">
+      <div class="cov-block-head">
+        <span class="modal-section-label" style="margin:0">${t('modals.coverageLabel')}</span>
+        <span class="cov-block-sum">${t('modals.coveredOf', { covered: durLabel(coveredMins), total: durLabel(total) })}</span>
+      </div>
+      <div class="cov-bar">${bar}</div>
+      <div class="cov-chips">${chips}</div>
+    </div>`
 }
 
 function renderModalWorkers(shift) {
@@ -71,6 +157,12 @@ function renderModalWorkers(shift) {
     const initials = esc(getInitials(name))
     const att = a.attendance || 'PENDING'
 
+    const hasBlock = a.blockStart && a.blockEnd
+    const blockMins = hasBlock ? (normEnd(toMins(a.blockStart), toMins(a.blockEnd)) - toMins(a.blockStart)) : 0
+    const blockLabel = hasBlock
+      ? `<span class="worker-row-block">${hm(a.blockStart)}–${hm(a.blockEnd)} · ${durLabel(blockMins)}</span>`
+      : `<span class="worker-row-block worker-row-block-full">${t('modals.wholeShiftLabel')}</span>`
+
     const attBtns = isActive ? `
       <div class="attendance-btns">
         <button class="att-btn ${att === 'PRESENT' ? 'sel-PRESENT' : ''}" onclick="markAttendance('${shift.id}','${a.worker.id}','PRESENT')">✓</button>
@@ -87,7 +179,10 @@ function renderModalWorkers(shift) {
     return `
       <div class="worker-row">
         <div class="worker-row-avatar" data-avatar="${esc(a.worker?.avatarUrl || '')}">${initials}</div>
-        <span class="worker-row-name">${esc(name)}</span>
+        <div class="worker-row-info">
+          <span class="worker-row-name">${esc(name)}</span>
+          ${blockLabel}
+        </div>
         ${attBtns}
         ${removeBtn}
       </div>`
@@ -178,13 +273,40 @@ export async function markAttendance(shiftId, workerId, status) {
 
 // ── Assign worker picker ──────────────────────────────────────────────────────
 
+let _assignMode = 'full' // 'full' = whole shift, 'part' = custom block range
+
 export async function openAssignPicker() {
   if (!requireWebManage()) return
   document.getElementById('assign-modal').classList.remove('hidden')
   document.getElementById('picker-search').value = ''
   document.getElementById('picker-list').innerHTML = `<div style="padding:12px;color:var(--muted);font-size:0.85rem">${t('modals.pickerLoading')}</div>`
+  // Forget any manual edits from a previous open so defaults re-prefill.
+  const startEl = document.getElementById('assign-block-start')
+  if (startEl) delete startEl.dataset.touched
+  document.getElementById('assign-block-error').textContent = ''
+  setAssignMode('full')
   const workers = await ensureOrgWorkers()
   renderPickerList(workers, '')
+}
+
+// Toggle between assigning the whole shift and a sub-range. Switching to "part"
+// pre-fills the first uncovered gap so filling holes is one click + Assign.
+export function setAssignMode(mode) {
+  _assignMode = mode
+  document.getElementById('assign-mode-full')?.classList.toggle('active', mode === 'full')
+  document.getElementById('assign-mode-part')?.classList.toggle('active', mode === 'part')
+  const times = document.getElementById('assign-range-times')
+  if (times) times.classList.toggle('hidden', mode !== 'part')
+  if (mode === 'part') {
+    const shift = state.activeShiftData
+    const startEl = document.getElementById('assign-block-start')
+    const endEl   = document.getElementById('assign-block-end')
+    if (shift && startEl && endEl && !startEl.dataset.touched) {
+      const { gaps } = shiftCoverage(shift)
+      if (gaps.length) { startEl.value = fmtMin(gaps[0][0]); endEl.value = fmtMin(gaps[0][1]) }
+      else { startEl.value = hm(shift.startTime); endEl.value = hm(shift.endTime) }
+    }
+  }
 }
 
 export function closeAssignModal() {
@@ -227,10 +349,24 @@ function renderPickerList(workers, query) {
 
 export async function assignWorker(workerId) {
   if (!requireWebManage()) return
+
+  const body = { workerId }
+  if (_assignMode === 'part') {
+    const blockStart = document.getElementById('assign-block-start')?.value
+    const blockEnd   = document.getElementById('assign-block-end')?.value
+    const errEl      = document.getElementById('assign-block-error')
+    if (!blockStart || !blockEnd || blockStart === blockEnd) {
+      if (errEl) errEl.textContent = t('modals.blockInvalid')
+      return
+    }
+    body.blockStart = blockStart
+    body.blockEnd = blockEnd
+  }
+
   closeAssignModal()
   const res = await apiFetch(`/shifts/${state.activeShiftId}/assign`, {
     method: 'POST',
-    body: JSON.stringify({ workerId }),
+    body: JSON.stringify(body),
   })
   if (!res?.ok) {
     const d = await res?.json().catch(() => ({}))
@@ -283,6 +419,7 @@ export function openEditMode() {
 export function closeEditMode() {
   _editing = false
   document.getElementById('shift-modal-body').innerHTML = workersSectionHtml()
+  renderModalCoverage(state.activeShiftData)
   renderModalWorkers(state.activeShiftData)
   renderModalFooter(state.activeShiftData)
 }
@@ -383,6 +520,7 @@ window.publishShift             = publishShift
 window.removeWorker             = removeWorker
 window.markAttendance           = markAttendance
 window.openAssignPicker         = openAssignPicker
+window.setAssignMode            = setAssignMode
 window.closeAssignModal         = closeAssignModal
 window.onAssignOverlayClick     = onAssignOverlayClick
 window.filterPicker             = filterPicker

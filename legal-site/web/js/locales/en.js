@@ -419,6 +419,16 @@ export default {
     alreadyAssigned: 'Already assigned',
     noDepartmentsLoading: 'Loading…',
     noDepartmentsYet: 'No departments yet — create one in the Workers tab',
+    wholeShift: 'Whole shift',
+    partOfShift: 'Part of shift',
+    wholeShiftLabel: 'Full shift',
+    blockStart: 'Block start',
+    blockEnd: 'Block end',
+    blockInvalid: 'Enter a valid start and end time',
+    coverageLabel: 'Coverage',
+    coveredOf: 'Covered {{covered}} / {{total}}',
+    fullyCovered: 'Fully covered',
+    gapLabel: 'Gap {{start}}–{{end}}',
   },
 
   onboarding: {
