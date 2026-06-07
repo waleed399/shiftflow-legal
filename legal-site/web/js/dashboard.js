@@ -78,34 +78,59 @@ function _buildHTML() {
   const hour         = today.getHours()
 
   const panelTitle = _dayPanelTitle(isToday)
+  const glance     = _glanceLine(selShifts.length, coverage, pendingTotal)
 
   return `
-    ${_buildHero(firstName, hour)}
+    ${_buildHero(firstName, hour, glance)}
 
-    ${_buildKPIs(selShifts.length, assigned, coverage, coverColor, pendingTotal, isToday)}
+    ${_buildKPIs(selShifts.length, assigned, required, coverage, coverColor, pendingTotal, isToday)}
 
     ${_buildWeekStrip(allShifts)}
 
     <div class="dash-main">
       <div class="dash-panel">
         <div class="dash-panel-header">
-          <span class="dash-panel-title">${panelTitle}</span>
+          <div class="dash-panel-titlewrap">
+            <span class="dash-panel-ico"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+            <span class="dash-panel-title">${panelTitle}</span>
+            ${selShifts.length ? `<span class="dash-panel-chip">${selShifts.length}</span>` : ''}
+          </div>
           <button class="dash-panel-link" onclick="window.showView('shifts')">${t('dashboard.viewAll')}</button>
         </div>
         <div class="dash-shifts-list">
           ${selShifts.length
             ? _buildDeptSections(selShifts)
-            : `<div class="dash-empty-msg">${t('dashboard.noShiftsForDay')}</div>`}
+            : `<div class="dash-empty-state">
+                 <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="16" x2="15" y2="16"/></svg>
+                 <span>${t('dashboard.noShiftsForDay')}</span>
+               </div>`}
         </div>
       </div>
       <div class="dash-panel">
         <div class="dash-panel-header">
-          <span class="dash-panel-title">${t('dashboard.pendingApprovals')}</span>
+          <div class="dash-panel-titlewrap">
+            <span class="dash-panel-ico"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></span>
+            <span class="dash-panel-title">${t('dashboard.pendingApprovals')}</span>
+            ${pendingTotal > 0 ? `<span class="dash-panel-chip dash-panel-chip-alert">${pendingTotal}</span>` : ''}
+          </div>
           ${pendingTotal > 0 ? `<button class="dash-panel-link" onclick="window.showView('requests')">${t('dashboard.viewAll')}</button>` : ''}
         </div>
         <div id="dash-pending-list">${_buildPendingHTML()}</div>
       </div>
     </div>`
+}
+
+// One-line "at a glance" summary under the greeting.
+function _glanceLine(shiftsCount, coverage, pendingTotal) {
+  if (shiftsCount === 0) return t('dashboard.glanceNoShifts')
+  const parts = [
+    shiftsCount === 1 ? t('dashboard.glanceShiftsOne') : t('dashboard.glanceShifts', { n: shiftsCount }),
+    t('dashboard.glanceStaffed', { pct: coverage }),
+  ]
+  if (pendingTotal > 0) {
+    parts.push(pendingTotal === 1 ? t('dashboard.glanceRequestsOne') : t('dashboard.glanceRequests', { n: pendingTotal }))
+  }
+  return parts.join('&nbsp;&nbsp;·&nbsp;&nbsp;')
 }
 
 function _dayPanelTitle(isToday) {
@@ -142,14 +167,14 @@ const _ICONS = {
     </svg>`,
 }
 
-function _buildHero(firstName, hour) {
+function _buildHero(firstName, hour, glance) {
   const period = hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening'
   const greetKey = `dashboard.good${period[0].toUpperCase()}${period.slice(1)}`
   const iconColors = { morning: '#f59e0b', afternoon: '#f97316', evening: '#6366f1' }
   const iconBgs    = { morning: 'rgba(245,158,11,0.12)', afternoon: 'rgba(249,115,22,0.12)', evening: 'rgba(99,102,241,0.12)' }
 
   return `
-    <div class="dash-hero">
+    <div class="dash-hero dash-hero-${period}">
       <div class="dash-hero-left">
         <div class="dash-time-icon" style="color:${iconColors[period]};background:${iconBgs[period]}">
           ${_ICONS[period]}
@@ -157,6 +182,7 @@ function _buildHero(firstName, hour) {
         <div class="dash-greeting">
           <span class="dash-greeting-text">${t(greetKey, { name: esc(firstName) })}</span>
           <span class="dash-date">${_fmtFullDate(new Date())}</span>
+          <span class="dash-glance">${glance}</span>
         </div>
       </div>
       <button class="dash-refresh-btn" onclick="window._dashRefresh()" title="${t('dashboard.refresh')}">
@@ -167,10 +193,10 @@ function _buildHero(firstName, hour) {
 
 // ── KPI cards ─────────────────────────────────────────────────────────────────
 
-function _buildKPIs(shiftsCount, assigned, coverage, coverColor, pendingTotal, isToday) {
+function _buildKPIs(shiftsCount, assigned, required, coverage, coverColor, pendingTotal, isToday) {
   return `
     <div class="dash-kpis">
-      <div class="dash-kpi">
+      <div class="dash-kpi dash-kpi-accent-blue">
         <div class="dash-kpi-icon dash-kpi-icon-blue">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         </div>
@@ -179,7 +205,7 @@ function _buildKPIs(shiftsCount, assigned, coverage, coverColor, pendingTotal, i
           <div class="dash-kpi-label">${isToday ? t('dashboard.shiftsToday') : t('dashboard.shiftsDay')}</div>
         </div>
       </div>
-      <div class="dash-kpi">
+      <div class="dash-kpi dash-kpi-accent-green">
         <div class="dash-kpi-icon dash-kpi-icon-green">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </div>
@@ -188,16 +214,16 @@ function _buildKPIs(shiftsCount, assigned, coverage, coverColor, pendingTotal, i
           <div class="dash-kpi-label">${t('dashboard.workersAssigned')}</div>
         </div>
       </div>
-      <div class="dash-kpi">
-        <div class="dash-kpi-icon" style="background:${coverage >= 100 ? 'rgba(5,150,105,0.12)' : coverage >= 60 ? 'rgba(217,119,6,0.12)' : 'rgba(220,38,38,0.12)'}; color:${coverColor}">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <div class="dash-kpi dash-kpi-ring-card" style="--ring:${coverColor}">
+        <div class="dash-ring" style="--pct:${Math.min(100, coverage)};--ring:${coverColor}">
+          <span class="dash-ring-val">${coverage}<span class="dash-ring-pct">%</span></span>
         </div>
         <div class="dash-kpi-body">
-          <div class="dash-kpi-num" style="color:${coverColor}">${coverage}%</div>
+          <div class="dash-kpi-num-sm">${assigned}/${required}</div>
           <div class="dash-kpi-label">${t('dashboard.coverage')}</div>
         </div>
       </div>
-      <div class="dash-kpi${pendingTotal > 0 ? ' dash-kpi-alert' : ''}" ${pendingTotal > 0 ? "onclick=\"window.showView('requests')\" style=\"cursor:pointer\" role=\"button\" tabindex=\"0\"" : ''}>
+      <div class="dash-kpi dash-kpi-accent-red${pendingTotal > 0 ? ' dash-kpi-alert' : ''}" ${pendingTotal > 0 ? "onclick=\"window.showView('requests')\" style=\"cursor:pointer\" role=\"button\" tabindex=\"0\"" : ''}>
         <div class="dash-kpi-icon${pendingTotal > 0 ? ' dash-kpi-icon-red' : ' dash-kpi-icon-muted'}">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         </div>

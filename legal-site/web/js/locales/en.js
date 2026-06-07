@@ -70,6 +70,12 @@ export default {
     shiftsDay: 'Shifts this day',
     prevWeek: 'Previous week',
     nextWeek: 'Next week',
+    glanceNoShifts: 'No shifts scheduled',
+    glanceShifts: '{{n}} shifts',
+    glanceShiftsOne: '1 shift',
+    glanceStaffed: '{{pct}}% staffed',
+    glanceRequests: '{{n}} requests waiting',
+    glanceRequestsOne: '1 request waiting',
   },
 
   days: {

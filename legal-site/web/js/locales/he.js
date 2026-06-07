@@ -70,6 +70,12 @@ export default {
     shiftsDay: 'משמרות ביום זה',
     prevWeek: 'שבוע קודם',
     nextWeek: 'שבוע הבא',
+    glanceNoShifts: 'אין משמרות מתוכננות',
+    glanceShifts: '{{n}} משמרות',
+    glanceShiftsOne: 'משמרת אחת',
+    glanceStaffed: '{{pct}}% מאויש',
+    glanceRequests: '{{n}} בקשות ממתינות',
+    glanceRequestsOne: 'בקשה אחת ממתינה',
   },
 
   days: {
