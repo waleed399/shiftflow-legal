@@ -420,6 +420,7 @@ export default {
     wholeShift: 'משמרת מלאה',
     partOfShift: 'חלק מהמשמרת',
     wholeShiftLabel: 'משמרת מלאה',
+    editHours: 'עריכת שעות',
     blockStart: 'תחילת בלוק',
     blockEnd: 'סיום בלוק',
     blockInvalid: 'הזינו שעת התחלה וסיום תקינות',

@@ -422,6 +422,7 @@ export default {
     wholeShift: 'Whole shift',
     partOfShift: 'Part of shift',
     wholeShiftLabel: 'Full shift',
+    editHours: 'Edit hours',
     blockStart: 'Block start',
     blockEnd: 'Block end',
     blockInvalid: 'Enter a valid start and end time',

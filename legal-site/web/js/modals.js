@@ -8,6 +8,8 @@ import { requireWebManage } from './profile.js'
 // ── Shift detail modal ────────────────────────────────────────────────────────
 
 let _editing = false
+let _editingAssignment = null  // workerId whose hours are being edited inline, or null
+let _ehMode = 'full'           // 'full' | 'part' for the inline hours editor
 
 const workersSectionHtml = () => `
   <div>
@@ -80,6 +82,7 @@ export function openShiftModal(shiftId) {
   const shift = all.find(s => s.id === shiftId)
   if (!shift) return
   _editing = false
+  _editingAssignment = null
   state.activeShiftId = shiftId
   state.activeShiftData = shift
   renderShiftModal(shift)
@@ -89,6 +92,7 @@ export function openShiftModal(shiftId) {
 export function closeShiftModal() {
   document.getElementById('shift-modal').classList.add('hidden')
   _editing = false
+  _editingAssignment = null
   state.activeShiftId = null
   state.activeShiftData = null
 }
@@ -152,7 +156,11 @@ function renderModalWorkers(shift) {
     return
   }
 
+  const removable = shift.status !== 'COMPLETED' && shift.status !== 'CANCELLED'
+
   el.innerHTML = assigned.map(a => {
+    if (removable && _editingAssignment === a.worker?.id) return workerEditHoursHtml(a, shift)
+
     const name = a.worker?.name || t('common.unknown')
     const initials = esc(getInitials(name))
     const att = a.attendance || 'PENDING'
@@ -170,7 +178,10 @@ function renderModalWorkers(shift) {
         <button class="att-btn ${att === 'ABSENT'  ? 'sel-ABSENT'  : ''}" onclick="markAttendance('${shift.id}','${a.worker.id}','ABSENT')">✗</button>
       </div>` : ''
 
-    const removable = shift.status !== 'COMPLETED' && shift.status !== 'CANCELLED'
+    const editBtn = removable ? `
+      <button class="remove-btn eh-edit-btn" title="${t('modals.editHours')}" onclick="editWorkerHours('${a.worker.id}')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </button>` : ''
     const removeBtn = removable ? `
       <button class="remove-btn" title="${t('common.delete')}" onclick="removeWorker('${shift.id}','${a.worker.id}',this)">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -184,10 +195,40 @@ function renderModalWorkers(shift) {
           ${blockLabel}
         </div>
         ${attBtns}
+        ${editBtn}
         ${removeBtn}
       </div>`
   }).join('')
   applyAvatars(el)
+}
+
+// Inline editor that swaps in for a worker row when its pencil is clicked.
+function workerEditHoursHtml(a, shift) {
+  const name = esc(a.worker?.name || t('common.unknown'))
+  const initials = esc(getInitials(a.worker?.name || ''))
+  const start = a.blockStart ? hm(a.blockStart) : hm(shift.startTime)
+  const end   = a.blockEnd   ? hm(a.blockEnd)   : hm(shift.endTime)
+  return `
+    <div class="worker-row worker-row-editing">
+      <div class="worker-row-avatar" data-avatar="${esc(a.worker?.avatarUrl || '')}">${initials}</div>
+      <div class="eh-editor">
+        <span class="worker-row-name">${name}</span>
+        <div class="assign-range-tabs">
+          <button class="assign-range-tab ${_ehMode === 'full' ? 'active' : ''}" onclick="setEditHoursMode('full')">${t('modals.wholeShift')}</button>
+          <button class="assign-range-tab ${_ehMode === 'part' ? 'active' : ''}" onclick="setEditHoursMode('part')">${t('modals.partOfShift')}</button>
+        </div>
+        <div class="assign-range-times ${_ehMode === 'part' ? '' : 'hidden'}" id="eh-times">
+          <input class="form-input" type="time" id="eh-start" value="${start}" aria-label="${t('modals.blockStart')}">
+          <span class="assign-range-sep">–</span>
+          <input class="form-input" type="time" id="eh-end" value="${end}" aria-label="${t('modals.blockEnd')}">
+        </div>
+        <div class="form-error" id="eh-error"></div>
+        <div class="eh-actions">
+          <button class="btn btn-ghost btn-sm" onclick="cancelEditHours()">${t('common.cancel')}</button>
+          <button class="btn btn-success btn-sm" id="eh-save-btn" onclick="saveEditHours('${a.worker.id}')">${t('common.save')}</button>
+        </div>
+      </div>
+    </div>`
 }
 
 function renderModalFooter(shift) {
@@ -269,6 +310,69 @@ export async function markAttendance(shiftId, workerId, status) {
     state.activeShiftData = shift
     renderModalWorkers(shift)
   }
+}
+
+// ── Edit an assigned worker's hours in place ────────────────────────────────────
+// Re-uses the assign endpoint, which upserts: posting the same worker with new
+// block times updates their block; posting with none resets them to whole shift.
+
+export function editWorkerHours(workerId) {
+  if (!requireWebManage()) return
+  const a = (state.activeShiftData?.assignments || []).find(a => a.worker?.id === workerId)
+  _editingAssignment = workerId
+  _ehMode = (a?.blockStart && a?.blockEnd) ? 'part' : 'full'
+  renderModalWorkers(state.activeShiftData)
+}
+
+export function setEditHoursMode(mode) {
+  _ehMode = mode
+  document.querySelectorAll('.worker-row-editing .assign-range-tab').forEach((b, i) => {
+    b.classList.toggle('active', (i === 0) === (mode === 'full'))
+  })
+  document.getElementById('eh-times')?.classList.toggle('hidden', mode !== 'part')
+}
+
+export function cancelEditHours() {
+  _editingAssignment = null
+  renderModalWorkers(state.activeShiftData)
+}
+
+export async function saveEditHours(workerId) {
+  if (!requireWebManage()) return
+  const body = { workerId }
+  if (_ehMode === 'part') {
+    const blockStart = document.getElementById('eh-start')?.value
+    const blockEnd   = document.getElementById('eh-end')?.value
+    const errEl      = document.getElementById('eh-error')
+    if (!blockStart || !blockEnd || blockStart === blockEnd) {
+      if (errEl) errEl.textContent = t('modals.blockInvalid')
+      return
+    }
+    body.blockStart = blockStart
+    body.blockEnd = blockEnd
+  }
+
+  const btn = document.getElementById('eh-save-btn')
+  if (btn) { btn.disabled = true; btn.textContent = t('common.saving') }
+
+  const res = await apiFetch(`/shifts/${state.activeShiftId}/assign`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+  if (!res?.ok) {
+    const d = await res?.json().catch(() => ({}))
+    const errEl = document.getElementById('eh-error')
+    if (errEl) errEl.textContent = d?.error || t('shifts.failedAssign')
+    if (btn) { btn.disabled = false; btn.textContent = t('common.save') }
+    return
+  }
+
+  _editingAssignment = null
+  const key = toYMD(state.currentWeek)
+  delete state.shiftsCache[key]
+  await loadShifts()
+  const updated = (state.shiftsCache[key] || []).find(s => s.id === state.activeShiftId)
+  if (updated) { state.activeShiftData = updated; renderShiftModal(updated) }
 }
 
 // ── Assign worker picker ──────────────────────────────────────────────────────
@@ -519,6 +623,10 @@ window.onModalOverlayClick      = onModalOverlayClick
 window.publishShift             = publishShift
 window.removeWorker             = removeWorker
 window.markAttendance           = markAttendance
+window.editWorkerHours          = editWorkerHours
+window.setEditHoursMode         = setEditHoursMode
+window.cancelEditHours          = cancelEditHours
+window.saveEditHours            = saveEditHours
 window.openAssignPicker         = openAssignPicker
 window.setAssignMode            = setAssignMode
 window.closeAssignModal         = closeAssignModal
