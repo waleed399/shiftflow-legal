@@ -1,5 +1,15 @@
 /* ── Main ── */
-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+main {
+  flex: 1; display: flex; flex-direction: column; overflow: hidden;
+  /* Soft tonal wash over the paper grain (body) for depth — navy from the top,
+     a warm brass hint top-right. Transparent base lets the grain show through. */
+  background-image:
+    radial-gradient(140% 80% at 50% -20%, rgba(26,45,79,0.05), transparent 60%),
+    radial-gradient(85% 55% at 100% 0%, rgba(176,132,51,0.05), transparent 55%);
+  background-repeat: no-repeat, no-repeat;
+  background-size: 100% 760px, 100% 520px;
+  background-position: top center, top right;
+}
 #view-dashboard, #view-shifts, #view-profile, #view-requests, #view-workers, #view-availability { flex: 1; display: flex; flex-direction: column; min-height: 0; }
 #view-shifts { position: relative; }
 
