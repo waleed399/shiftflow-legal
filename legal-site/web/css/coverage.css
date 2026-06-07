@@ -1,0 +1,77 @@
+/* ── Coverage view ──────────────────────────────────────────────────────────── */
+
+.cov-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.cov-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-inline-start: 4px solid var(--border-strong);
+  border-radius: var(--radius-card);
+  padding: 16px 18px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+.cov-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+
+.cov-card-top {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  margin-bottom: 10px;
+}
+.cov-dept {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.92rem; font-weight: 700; color: var(--text);
+}
+.cov-dept svg { color: var(--muted); flex-shrink: 0; }
+
+.cov-pct {
+  font-size: 0.72rem; font-weight: 700; padding: 3px 9px; border-radius: 99px;
+  white-space: nowrap;
+}
+
+.cov-time {
+  display: flex; align-items: center; gap: 7px; margin-bottom: 8px;
+}
+.cov-time svg { color: var(--navy); flex-shrink: 0; }
+.cov-time-range { font-size: 0.92rem; font-weight: 600; color: var(--text); }
+.cov-duration { font-size: 0.78rem; color: var(--muted); }
+
+.cov-notes {
+  font-size: 0.8rem; color: var(--muted); font-style: italic;
+  margin-bottom: 10px; line-height: 1.4;
+}
+
+.cov-gaps { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.cov-gap-chip {
+  font-size: 0.72rem; font-weight: 600; color: #b45309;
+  background: rgba(217,119,6,0.12); border: 1px solid rgba(217,119,6,0.2);
+  padding: 3px 8px; border-radius: 7px; white-space: nowrap;
+}
+
+.cov-fully {
+  display: inline-flex; align-items: center; gap: 5px; margin-bottom: 12px;
+  font-size: 0.76rem; font-weight: 600; color: #059669;
+}
+
+.cov-card-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding-top: 12px; border-top: 1px solid var(--border);
+}
+.cov-meta { font-size: 0.76rem; color: var(--muted); }
+.cov-actions { display: flex; gap: 6px; }
+.cov-action {
+  width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--white); cursor: pointer; display: flex; align-items: center;
+  justify-content: center; color: var(--muted); transition: all 0.15s;
+}
+.cov-action:hover { border-color: var(--navy); color: var(--navy); background: var(--surface-sunken); }
+.cov-action-del:hover { border-color: var(--red); color: var(--red); background: rgba(191,31,58,0.06); }
+
+.cov-empty-hint { font-size: 0.8rem; margin-top: 6px; opacity: 0.8; }
+
+/* Mutating controls disappear on a locked (FREE / expired-trial) workspace. */
+body.web-locked #fab-new-coverage,
+body.web-locked #view-coverage .btn-create-shifts { display: none !important; }

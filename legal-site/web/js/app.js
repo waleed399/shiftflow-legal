@@ -9,6 +9,7 @@ import { renderRequests, loadPendingCount } from './requests.js'
 import { renderDashboard } from './dashboard.js'
 import { renderWorkers } from './workers.js'
 import { renderAvailability } from './availability.js'
+import { renderCoverage } from './coverage.js'
 import { initI18n, mountLanguageSwitcher } from './i18n.js'
 import { initNotifications } from './notifications.js'
 import './a11y.js' // registers global keyboard activation for role="button" elements
@@ -130,10 +131,10 @@ export function applyWebLockState() {
   if (banner) banner.style.display = locked ? 'flex' : 'none'
 }
 
-const ON_ENTER = { dashboard: renderDashboard, profile: renderProfile, requests: renderRequests, workers: renderWorkers, availability: renderAvailability }
+const ON_ENTER = { dashboard: renderDashboard, profile: renderProfile, requests: renderRequests, workers: renderWorkers, availability: renderAvailability, coverage: renderCoverage }
 
 function getActiveView() {
-  for (const v of ['dashboard', 'shifts', 'profile', 'requests', 'workers', 'availability']) {
+  for (const v of ['dashboard', 'shifts', 'profile', 'requests', 'workers', 'availability', 'coverage']) {
     const el = document.getElementById(`view-${v}`)
     if (el && el.style.display !== 'none') return v
   }
@@ -141,7 +142,7 @@ function getActiveView() {
 }
 
 function showView(view) {
-  for (const v of ['dashboard', 'shifts', 'profile', 'requests', 'workers', 'availability']) {
+  for (const v of ['dashboard', 'shifts', 'profile', 'requests', 'workers', 'availability', 'coverage']) {
     document.getElementById(`view-${v}`).style.display = v === view ? 'flex' : 'none'
     document.getElementById(`nav-${v}`).classList.toggle('active', v === view)
   }

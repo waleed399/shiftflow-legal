@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/i18n.css">
   <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/coverage.css">
   <link rel="stylesheet" href="css/dark.css">
 </head>
 <body>
@@ -78,6 +79,10 @@
       <div class="nav-item" id="nav-availability" onclick="showView('availability')" role="button" tabindex="0">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8.01" y2="14"/><line x1="12" y1="14" x2="12.01" y2="14"/><line x1="16" y1="14" x2="16.01" y2="14"/></svg>
         <span data-i18n="nav.availability">Availability</span>
+      </div>
+      <div class="nav-item" id="nav-coverage" onclick="showView('coverage')" role="button" tabindex="0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        <span data-i18n="nav.coverage">Coverage</span>
       </div>
       <div class="nav-item" id="nav-profile" onclick="showView('profile')" role="button" tabindex="0">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -238,6 +243,40 @@
       <div class="content-area">
         <div id="avail-content"></div>
       </div>
+    </div>
+
+    <!-- Coverage view -->
+    <div id="view-coverage" style="display:none">
+      <div class="topbar">
+        <span class="topbar-title" data-i18n="coverage.title">Coverage</span>
+        <div class="topbar-right">
+          <div class="week-nav">
+            <button class="week-btn" onclick="changeCoverageWeek(-1)" data-i18n-aria="a11y.prevWeek" aria-label="Previous week">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <span class="week-label" id="coverage-week-label"></span>
+            <button class="week-btn" onclick="changeCoverageWeek(1)" data-i18n-aria="a11y.nextWeek" aria-label="Next week">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+          <button class="btn-create-shifts" onclick="openCoverageModal()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span data-i18n="coverage.newBlock">New block</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="day-tabs" id="coverage-day-tabs"></div>
+
+      <div class="content-area">
+        <div id="coverage-content">
+          <div class="loader-inline"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+      <button class="fab" id="fab-new-coverage" onclick="openCoverageModal()" data-i18n-title="coverage.newBlock" data-i18n-aria="coverage.newBlock" title="New block" aria-label="New block">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
     </div>
 
     <!-- Workers view -->
@@ -436,6 +475,48 @@
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeGenerateModal()" data-i18n="common.cancel">Cancel</button>
       <button class="btn btn-success" id="gen-apply-btn" onclick="confirmGenerate()" disabled data-i18n="shifts.generateApply">Apply schedule</button>
+    </div>
+  </div>
+</div>
+
+<!-- Coverage block modal -->
+<div class="modal-overlay hidden" id="coverage-modal" onclick="onCoverageOverlayClick(event)">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <div class="modal-title" id="cov-modal-title" data-i18n="coverage.createBlock">New coverage block</div>
+        <div class="modal-subtitle" id="cov-modal-subtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeCoverageModal()" data-i18n-aria="a11y.closeDialog" aria-label="Close dialog">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="coverage-form" onsubmit="event.preventDefault();submitCoverageBlock()" autocomplete="off">
+        <div class="form-row">
+          <label class="form-label" for="cov-department" data-i18n="coverage.department">Department</label>
+          <select class="form-input" id="cov-department" required></select>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-row">
+            <label class="form-label" for="cov-open" data-i18n="coverage.openTime">Open time</label>
+            <input class="form-input" type="time" id="cov-open" required>
+          </div>
+          <div class="form-row">
+            <label class="form-label" for="cov-close" data-i18n="coverage.closeTime">Close time</label>
+            <input class="form-input" type="time" id="cov-close" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="cov-notes"><span data-i18n="coverage.notes">Notes</span> <span class="form-optional" data-i18n="common.optional">(optional)</span></label>
+          <textarea class="form-input" id="cov-notes" rows="2" maxlength="500" data-i18n-placeholder="coverage.notesPlaceholder" placeholder="Anything the team should know"></textarea>
+        </div>
+        <div id="cov-error" class="form-error"></div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeCoverageModal()" data-i18n="common.cancel">Cancel</button>
+      <button class="btn btn-success" id="cov-submit" onclick="submitCoverageBlock()" data-i18n="coverage.newBlock">New block</button>
     </div>
   </div>
 </div>
