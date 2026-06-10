@@ -1,4 +1,4 @@
-const API = 'https://shift-right-production.up.railway.app/api'
+import { API } from './config.js'
 
 export function getToken()        { return localStorage.getItem('shiftflow_token') }
 export function getRefreshToken() { return localStorage.getItem('shiftflow_refresh_token') }

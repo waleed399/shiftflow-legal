@@ -1,4 +1,4 @@
-const API = 'https://shift-right-production.up.railway.app/api'
+import { API } from '/web/js/config.js'
 
 let pollInterval = null
 let countdownInterval = null

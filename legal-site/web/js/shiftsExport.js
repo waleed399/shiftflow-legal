@@ -326,8 +326,28 @@ function downloadCSVForDays(days) {
   downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), exportFilename(days, 'csv'))
 }
 
-function downloadPDFForDays(days) {
-  if (typeof html2pdf === 'undefined') {
+// Lazy-load the ~900KB html2pdf bundle on first PDF export instead of paying
+// for it on every dashboard visit. Failed loads reset the promise so a flaky
+// connection can retry on the next click.
+let _html2pdfPromise = null
+function loadHtml2pdf() {
+  if (typeof html2pdf !== 'undefined') return Promise.resolve()
+  if (!_html2pdfPromise) {
+    _html2pdfPromise = new Promise((resolve, reject) => {
+      const s = document.createElement('script')
+      s.src = 'js/vendor/html2pdf.bundle.min.js'
+      s.onload = resolve
+      s.onerror = () => { _html2pdfPromise = null; reject(new Error('html2pdf failed to load')) }
+      document.head.appendChild(s)
+    })
+  }
+  return _html2pdfPromise
+}
+
+async function downloadPDFForDays(days) {
+  try {
+    await loadHtml2pdf()
+  } catch {
     showToast(t('shifts.pdfFailed'), 'error')
     return
   }

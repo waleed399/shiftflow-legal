@@ -1,4 +1,5 @@
 import { state } from './state.js'
+import { API } from './config.js'
 import { getToken, getRefreshToken, clearSession, apiFetch } from './api.js'
 import { getWeekStartOf, getInitials, showToast } from './utils.js'
 import { renderWeekLabel, renderDayTabs, loadShifts } from './shifts.js'
@@ -170,7 +171,7 @@ document.addEventListener('languagechange', () => {
 function signOut() {
   const refresh = getRefreshToken()
   if (refresh) {
-    fetch('https://shift-right-production.up.railway.app/api/auth/logout', {
+    fetch(`${API}/auth/logout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken: refresh }),

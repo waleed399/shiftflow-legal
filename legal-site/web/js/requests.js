@@ -22,12 +22,14 @@ function fmtDate(iso) {
   return `${parseInt(d, 10)} ${MONTHS[parseInt(m, 10) - 1]}`
 }
 
+// Result is interpolated into innerHTML templates — esc() guards names
+// whose first characters are HTML-significant (e.g. "<").
 function initials(name) {
   if (!name) return '?'
   const parts = name.trim().split(/\s+/)
-  return parts.length > 1
+  return esc(parts.length > 1
     ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-    : parts[0].slice(0, 2).toUpperCase()
+    : parts[0].slice(0, 2).toUpperCase())
 }
 
 // ── Render ────────────────────────────────────────────────────────────────────

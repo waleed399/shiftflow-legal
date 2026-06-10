@@ -4,7 +4,8 @@
 // Keeps these pages thin: each one imports what it needs, no duplication.
 // ES module — load via <script type="module" src="...">.
 
-export const API = 'https://shift-right-production.up.railway.app/api'
+import { API } from './config.js'
+export { API }
 
 export const EMAIL_RE = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/
 

@@ -1,6 +1,5 @@
 import { initI18n, t } from './i18n.js'
-
-const API = 'https://shift-right-production.up.railway.app/api'
+import { API } from './config.js'
 
 let _token = null
 let _period = 'monthly'
