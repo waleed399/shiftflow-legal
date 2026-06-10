@@ -12,40 +12,46 @@ export function clearSession() {
   ['shiftflow_token', 'shiftflow_refresh_token', 'shiftflow_user', 'shiftflow_org'].forEach(k => localStorage.removeItem(k))
 }
 
-let _retrying = false
+// Single in-flight refresh shared by every concurrent 401 — same pattern as
+// the mobile app's services/api.ts refreshPromise. Without this, requests that
+// 401 while a refresh is already running would fail instead of waiting for it.
+let _refreshPromise = null
 
-export async function apiFetch(path, opts = {}) {
+function refreshSession() {
+  if (!_refreshPromise) {
+    _refreshPromise = (async () => {
+      const refresh = getRefreshToken()
+      if (!refresh) return false
+      const res = await fetch(API + '/auth/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: refresh }),
+      })
+      if (!res.ok) return false
+      const { token, refreshToken } = await res.json()
+      saveTokens(token, refreshToken)
+      return true
+    })()
+      .catch(() => false)
+      .finally(() => { _refreshPromise = null })
+  }
+  return _refreshPromise
+}
+
+export async function apiFetch(path, opts = {}, _isRetry = false) {
   const token = getToken()
   const res = await fetch(API + path, {
     ...opts,
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, ...(opts.headers || {}) },
   })
 
-  if (res.status === 401 && !_retrying) {
-    _retrying = true
-    try {
-      const refresh = getRefreshToken()
-      if (refresh) {
-        const rRes = await fetch(API + '/auth/refresh', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ refreshToken: refresh }),
-        })
-        if (rRes.ok) {
-          const { token: t, refreshToken: r } = await rRes.json()
-          saveTokens(t, r)
-          _retrying = false
-          return apiFetch(path, opts)
-        }
-      }
-    } finally {
-      _retrying = false
-    }
+  if (res.status === 401 && !_isRetry) {
+    const refreshed = await refreshSession()
+    if (refreshed) return apiFetch(path, opts, true)
     clearSession()
     window.location.href = '/app/'
     return null
   }
 
-  _retrying = false
   return res
 }

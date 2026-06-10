@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Every non-vendor JS file must parse as a valid ES module.
+      # (Plain scripts like main.js parse fine in module mode too —
+      # module mode is a superset for syntax-checking purposes.)
+      - name: Syntax-check JS
+        run: |
+          set -e
+          failed=0
+          while IFS= read -r f; do
+            if ! node --input-type=module --check < "$f" 2>/tmp/err; then
+              echo "SYNTAX ERROR in $f:"
+              cat /tmp/err
+              failed=1
+            fi
+          done < <(find legal-site -name '*.js' -not -path '*/vendor/*' -not -name 'qrcode.min.js')
+          exit $failed
+
+      # Locale parity, t() key usage, and {{placeholder}} consistency.
+      - name: i18n completeness
+        run: node legal-site/web/js/locales/check-i18n.mjs
