@@ -4,13 +4,14 @@ import { getToken, getRefreshToken, clearSession, apiFetch } from './api.js'
 import { getWeekStartOf, getInitials, showToast } from './utils.js'
 import { renderWeekLabel, renderDayTabs, loadShifts } from './shifts.js'
 import { renderProfile, getEffectivePlan, canManageWeb } from './profile.js'
+import { isManagement } from './roles.js'
 import './modals.js' // registers window.openShiftModal and other modal handlers
 import './createShift.js' // registers window.openCreateShiftModal and submit handlers
 import { renderRequests, loadPendingCount } from './requests.js'
 import { renderDashboard } from './dashboard.js'
 import { renderWorkers } from './workers.js'
 import { renderAvailability } from './availability.js'
-import { initI18n, mountLanguageSwitcher } from './i18n.js'
+import { initI18n, mountLanguageSwitcher, t } from './i18n.js'
 import { initNotifications } from './notifications.js'
 import './a11y.js' // registers global keyboard activation for role="button" elements
 
@@ -35,6 +36,15 @@ async function init() {
 
     localStorage.setItem('shiftflow_user', JSON.stringify(state.currentUser))
     localStorage.setItem('shiftflow_org',  JSON.stringify(state.currentOrg))
+
+    // This shell is the management console. A worker holds a perfectly valid
+    // token, so bouncing them to /web/login would just loop — show them where
+    // to go instead. (Their data is scoped server-side either way; this is
+    // about not presenting a UI where every button fails.)
+    if (!isManagement(state.currentUser)) {
+      showWorkerNotice()
+      return
+    }
 
     // First-run managers haven't finished setup yet — send them to the wizard.
     // Workers always skip this check (they joined an org that's already set up).
@@ -122,6 +132,30 @@ function renderSidebar() {
   applyWebLockState()
 
   mountLanguageSwitcher(document.getElementById('sb-lang-switcher'), { variant: 'header' })
+}
+
+// Shown instead of the console when a worker signs in here. Built with the DOM
+// rather than innerHTML so the CSP's script-src rules are never a factor.
+function showWorkerNotice() {
+  const loadingEl = document.getElementById('loading')
+  if (loadingEl) loadingEl.style.display = 'none'
+
+  const wrap = document.createElement('div')
+  wrap.className = 'worker-notice'
+
+  const title = document.createElement('h2')
+  title.textContent = t('worker.webTitle')
+
+  const body = document.createElement('p')
+  body.textContent = t('worker.webBody')
+
+  const btn = document.createElement('button')
+  btn.className = 'btn btn-primary'
+  btn.textContent = t('nav.signOut')
+  btn.addEventListener('click', signOut)
+
+  wrap.append(title, body, btn)
+  document.body.appendChild(wrap)
 }
 
 export function applyWebLockState() {

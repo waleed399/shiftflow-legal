@@ -139,3 +139,22 @@ body {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* Shown when a worker signs in to the management console (see app.js
+   showWorkerNotice) — there is no worker surface on the web. */
+.worker-notice {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 32px;
+  text-align: center;
+  background: var(--bg);
+  color: var(--text);
+  z-index: 50;
+}
+.worker-notice h2 { font-size: 20px; font-weight: 700; margin: 0; }
+.worker-notice p  { max-width: 34rem; color: var(--muted); line-height: 1.6; margin: 0; }

@@ -2,6 +2,7 @@ import { state } from './state.js'
 import { apiFetch } from './api.js'
 import { esc, getInitials, showToast, applyAvatars } from './utils.js'
 import { t, getLanguage } from './i18n.js'
+import { isOwner, isManagement } from './roles.js'
 
 let billingPeriod = 'monthly'
 
@@ -98,6 +99,7 @@ export function renderProfile() {
       </div>
     </div>
 
+    ${!isOwner(currentUser) ? '' : `
     <div class="billing-section">
       <div class="billing-section-header">
         <h3>${t('profile.planBilling')}</h3>
@@ -131,8 +133,8 @@ export function renderProfile() {
       </div>
       <p class="billing-footer-note">${t('profile.cancelAnytime')}</p>
       `}
-    </div>
-    ${currentUser.role === 'MANAGER' ? _profManagerHtml() : ''}`
+    </div>`}
+    ${isManagement(currentUser) ? _profManagerHtml() : ''}`
 
   if (currentUser.avatarUrl) {
     const slot = document.getElementById('profile-avatar')
@@ -143,7 +145,7 @@ export function renderProfile() {
     img.src = currentUser.avatarUrl
   }
 
-  if (currentUser.role === 'MANAGER') {
+  if (isManagement(currentUser)) {
     _profInitManagerSections()
   }
 }
@@ -319,6 +321,7 @@ function _profManagerHtml() {
       <div id="prof-templates-body"></div>
     </div>
 
+    ${!isOwner(state.currentUser) ? '' : `
     <div class="prof-section" style="animation-delay:0.12s">
       <div class="prof-section-head">
         <div class="prof-section-title">
@@ -333,7 +336,7 @@ function _profManagerHtml() {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
       </div>
-    </div>`
+    </div>`}`
 }
 
 // ── API loaders ──

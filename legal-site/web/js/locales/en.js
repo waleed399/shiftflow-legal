@@ -35,6 +35,11 @@ export default {
     language: 'Language',
   },
 
+  worker: {
+    webTitle: 'Use the ShiftRight app',
+    webBody: 'This site is for managers. Your shifts, availability, swaps and time off are all in the ShiftRight mobile app.',
+  },
+
   a11y: {
     toggleTheme: 'Toggle dark mode',
     notifications: 'Activity and notifications',

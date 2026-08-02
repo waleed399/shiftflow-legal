@@ -35,6 +35,11 @@ export default {
     language: 'שפה',
   },
 
+  worker: {
+    webTitle: 'השתמשו באפליקציית ShiftRight',
+    webBody: 'האתר הזה מיועד למנהלים. המשמרות, הזמינות, ההחלפות והחופשות שלך נמצאים באפליקציית ShiftRight לנייד.',
+  },
+
   a11y: {
     toggleTheme: 'החלף מצב כהה',
     notifications: 'פעילות והתראות',
