@@ -1,8 +1,9 @@
 import { state, ensureOrgWorkers } from './state.js'
 import { apiFetch } from './api.js'
-import { esc, getInitials, applyAvatars, toYMD } from './utils.js'
+import { esc, getInitials, applyAvatars, toYMD, showToast } from './utils.js'
 import { t } from './i18n.js'
 import { requireWebManage } from './profile.js'
+import { isOwner } from './roles.js'
 
 // ── Module state ──────────────────────────────────────────────────────────────
 
@@ -12,6 +13,23 @@ let _allInvitations  = []
 let _counts          = null
 let _drawerWorkerId  = null
 let _confirmCallback = null
+
+// Department managers, owner view only (/organization/managers is owner-gated).
+let _allManagers = []
+
+// Invite form: who they'll be, and which departments they land in. Managers
+// need at least one department, and so does anyone invited by a department
+// manager — the API rejects the invite otherwise.
+let _inviteRole    = 'WORKER'
+let _inviteDeptIds = new Set()
+
+// The drawer serves three jobs:
+//   'worker'  — toggle a worker's department membership, saved per tap
+//   'manager' — replace a manager's whole scope, never allowed to be empty
+//   'promote' — stage a selection, then commit role + scope together
+let _drawerMode = 'worker'
+let _promoteSelection = new Set()
+let _promoteAllowed   = null   // null = any department may be chosen
 
 // ── Dept color ────────────────────────────────────────────────────────────────
 
@@ -32,14 +50,21 @@ export async function renderWorkers() {
   state.orgWorkers = null  // force fresh fetch so departmentIds are current
   _counts = null
 
-  const [workers, depts, invitations] = await Promise.all([
+  const [workers, depts, invitations, managers] = await Promise.all([
     ensureOrgWorkers(),
     fetchDepts(),
     fetchPendingInvitations(),
+    fetchManagers(),
   ])
   _allWorkers     = workers
   _allDepts       = depts
   _allInvitations = invitations
+  _allManagers    = managers
+
+  // Default the invite form to the only department a scoped manager has —
+  // saves them a click and satisfies the API's requirement automatically.
+  _inviteRole = 'WORKER'
+  _inviteDeptIds = new Set(!isOwner(state.currentUser) && depts.length === 1 ? [depts[0].id] : [])
 
   renderPage()
 }
@@ -48,6 +73,15 @@ export async function renderWorkers() {
 
 async function fetchDepts() {
   const res = await apiFetch('/departments')
+  if (!res?.ok) return []
+  return res.json()
+}
+
+// Owner-only endpoint; department managers get 403 and simply see no
+// managers section.
+async function fetchManagers() {
+  if (!isOwner(state.currentUser)) return []
+  const res = await apiFetch('/organization/managers')
   if (!res?.ok) return []
   return res.json()
 }
@@ -118,10 +152,12 @@ function renderPage() {
           <input class="form-input" type="email" id="invite-email" placeholder="${t('workers.invitePlaceholder')}" onkeydown="onInviteKey(event)">
           <button class="btn btn-success btn-sm" id="invite-submit-btn" onclick="submitInvite()">${t('workers.sendInvite')}</button>
           <button class="btn btn-ghost btn-sm" onclick="closeInviteForm()">${t('common.cancel')}</button>
+          ${inviteOptionsHtml()}
           <span class="invite-error" id="invite-error"></span>
         </div>
 
         <div class="workers-panel-scroll">
+          ${managersHtml()}
           ${_allWorkers.length === 0 ? `
             <div class="empty-state">
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -138,6 +174,166 @@ function renderPage() {
     </div>`
 
   applyAvatars(el)
+}
+
+// ── Department managers (owner view) ──────────────────────────────────────────
+
+function managersHtml() {
+  if (!isOwner(state.currentUser) || _allManagers.length === 0) return ''
+  return `
+    <div class="workers-section-divider"><span>${t('workers.managersTitle')}</span></div>
+    <div class="managers-list" id="managers-list">
+      ${_allManagers.map(m => `
+        <div class="manager-row">
+          <div class="manager-avatar" data-avatar="${esc(m.avatarUrl || '')}">${esc(getInitials(m.name))}</div>
+          <div class="manager-main">
+            <div class="manager-name">${esc(m.name)}</div>
+            <div class="manager-depts">
+              ${m.departments.length === 0
+                ? `<span class="manager-nodept">${t('workers.managerNoDepts')}</span>`
+                : m.departments.map(d => `<span class="manager-dept-chip" style="--chip:${deptColor(d.id)}">${esc(d.name)}</span>`).join('')}
+            </div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="editManagerDepts('${esc(m.id)}')">${t('workers.managerEdit')}</button>
+          <button class="btn btn-ghost btn-sm manager-demote" onclick="demoteManagerPrompt('${esc(m.id)}')">${t('workers.managerRemove')}</button>
+        </div>`).join('')}
+    </div>`
+}
+
+// Owner edits which departments a manager runs. Saved as a complete set, and
+// never allowed to be empty — an unscoped manager can see nothing.
+export function editManagerDepts(managerId) {
+  if (!requireWebManage()) return
+  const mgr = _allManagers.find(m => m.id === managerId)
+  if (!mgr) return
+  openDrawerFor(
+    { id: mgr.id, name: mgr.name, email: mgr.email, avatarUrl: mgr.avatarUrl },
+    'manager',
+    mgr.departments.map(d => d.id),
+  )
+}
+
+export function demoteManagerPrompt(managerId) {
+  if (!requireWebManage()) return
+  const mgr = _allManagers.find(m => m.id === managerId)
+  if (!mgr) return
+  showConfirmDialog(
+    t('workers.demoteTitle'),
+    t('workers.demoteBody', { name: mgr.name }),
+    async () => {
+      const res = await apiFetch(`/organization/managers/${managerId}`, { method: 'DELETE' })
+      if (!res?.ok) { showToast(t('workers.demoteFailed')); return }
+      await renderWorkers()
+    },
+    t('workers.managerRemove'),
+  )
+}
+
+// Owner promotes a worker. Departments are staged first, then committed with
+// the role change in one call — a manager must never exist without a scope.
+export function promoteWorkerPrompt(workerId) {
+  if (!requireWebManage()) return
+  const worker = _allWorkers.find(w => w.id === workerId)
+  if (!worker) return
+  // A worker who belongs to departments can only manage those; one who belongs
+  // to none implicitly belongs everywhere. Same rule the API applies.
+  const own = worker.departmentIds || []
+  openDrawerFor(worker, 'promote', own, own.length > 0 ? own : null)
+}
+
+export async function confirmPromote() {
+  if (!_drawerWorkerId) return
+  const departmentIds = [..._promoteSelection]
+  if (departmentIds.length === 0) { showToast(t('workers.managerNeedsDept')); return }
+
+  const btn = document.getElementById('promote-confirm-btn')
+  if (btn) { btn.disabled = true; btn.textContent = t('common.sending') }
+
+  const res = await apiFetch('/organization/managers', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId: _drawerWorkerId, departmentIds }),
+  })
+
+  if (!res?.ok) {
+    const d = await res?.json().catch(() => ({}))
+    if (btn) { btn.disabled = false; btn.textContent = t('workers.promoteConfirm') }
+    if (handleManagerLimit(d)) return
+    showToast(d?.error || t('workers.promoteFailed'))
+    return
+  }
+  closeWorkerDrawer()
+  await renderWorkers()
+}
+
+// Plan caps come back as { code: 'LIMIT_REACHED', limitType: 'managers' }.
+// Offer the upgrade rather than leaving the owner at a dead end.
+// Returns true when it handled the error.
+function handleManagerLimit(errBody) {
+  if (errBody?.code !== 'LIMIT_REACHED' || errBody?.limitType !== 'managers') return false
+  closeWorkerDrawer()
+  showConfirmDialog(
+    t('workers.managerLimitTitle'),
+    esc(errBody.error || ''),
+    () => { window.showView('profile') },   // billing lives on the profile view
+    t('workers.managerLimitCta'),
+    false,
+  )
+  return true
+}
+
+// ── Invite options (role + departments) ───────────────────────────────────────
+
+// Appointing managers is the owner's job. Departments are mandatory for a
+// manager invite, and for any invite sent by a department manager — both are
+// enforced by the API, so mirror them here rather than letting the user hit a
+// 400 they can't act on.
+function inviteOptionsHtml() {
+  const owner = isOwner(state.currentUser)
+  const deptsRequired = _inviteRole === 'MANAGER' || !owner
+
+  return `
+    ${!owner ? '' : `
+    <div class="invite-subrow">
+      <div class="invite-role-toggle">
+        ${['WORKER', 'MANAGER'].map(r => `
+          <button class="invite-role-btn ${_inviteRole === r ? 'active' : ''}" onclick="setInviteRole('${r}')">
+            ${r === 'WORKER' ? t('workers.roleWorker') : t('workers.roleManager')}
+          </button>`).join('')}
+      </div>
+    </div>`}
+
+    ${_allDepts.length === 0 ? '' : `
+    <div class="invite-subrow">
+      <span class="invite-subrow-label">
+        ${deptsRequired ? t('workers.inviteDeptsRequired') : t('workers.inviteDeptsOptional')}
+      </span>
+      <div class="invite-dept-chips" id="invite-dept-chips">
+        ${_allDepts.map(d => `
+          <button class="invite-dept-chip ${_inviteDeptIds.has(d.id) ? 'on' : ''}"
+                  style="--chip:${deptColor(d.id)}"
+                  onclick="toggleInviteDept('${esc(d.id)}')">${esc(d.name)}</button>`).join('')}
+      </div>
+    </div>`}`
+}
+
+function refreshInviteOptions() {
+  const form = document.getElementById('invite-form')
+  if (!form) return
+  form.querySelectorAll('.invite-subrow').forEach(n => n.remove())
+  const errEl = document.getElementById('invite-error')
+  errEl.insertAdjacentHTML('beforebegin', inviteOptionsHtml())
+}
+
+export function setInviteRole(role) {
+  _inviteRole = role === 'MANAGER' ? 'MANAGER' : 'WORKER'
+  refreshInviteOptions()
+}
+
+export function toggleInviteDept(deptId) {
+  if (_inviteDeptIds.has(deptId)) _inviteDeptIds.delete(deptId)
+  else _inviteDeptIds.add(deptId)
+  refreshInviteOptions()
 }
 
 // ── Dept panel HTML ───────────────────────────────────────────────────────────
@@ -339,32 +535,59 @@ export function deleteDept(id) {
 export function openWorkerDrawer(workerId) {
   const worker = _allWorkers.find(w => w.id === workerId)
   if (!worker) return
-  _drawerWorkerId = workerId
+  openDrawerFor(worker, 'worker', worker.departmentIds || [])
+}
+
+// One drawer, three jobs — see _drawerMode. `allowedIds` limits which
+// departments may be picked (promote mode only); null means no limit.
+function openDrawerFor(person, mode, selectedIds, allowedIds = null) {
+  _drawerWorkerId    = person.id
+  _drawerMode        = mode
+  _promoteSelection  = new Set(mode === 'promote' ? selectedIds : [])
+  _promoteAllowed    = allowedIds ? new Set(allowedIds) : null
 
   const drawer   = document.getElementById('worker-drawer')
   const backdrop = document.getElementById('drawer-backdrop')
-  const deptIds  = worker.departmentIds || []
+
+  const label =
+    mode === 'promote' ? t('workers.promoteTitle')
+    : mode === 'manager' ? t('workers.managerDeptsTitle')
+    : t('workers.deptMembership')
+
+  const hint =
+    mode === 'promote' ? (_promoteAllowed ? t('workers.promoteHint') : t('workers.promoteHintAny'))
+    : mode === 'manager' ? t('workers.managerDeptsHint')
+    : (selectedIds.length === 0 ? t('workers.accessAll') : t('workers.toggleHint'))
+
+  // Only the owner appoints managers, and only a plain worker can be promoted.
+  const canPromote = mode === 'worker' && isOwner(state.currentUser)
 
   drawer.innerHTML = `
     <div class="drawer-header">
       <div class="drawer-worker-info">
-        <div class="drawer-avatar" data-avatar="${esc(worker.avatarUrl || '')}">${esc(getInitials(worker.name))}</div>
+        <div class="drawer-avatar" data-avatar="${esc(person.avatarUrl || '')}">${esc(getInitials(person.name))}</div>
         <div>
-          <div class="drawer-worker-name">${esc(worker.name || t('common.dash'))}</div>
-          <div class="drawer-worker-email">${esc(worker.email || '')}</div>
+          <div class="drawer-worker-name">${esc(person.name || t('common.dash'))}</div>
+          <div class="drawer-worker-email">${esc(person.email || '')}</div>
         </div>
       </div>
       <button class="modal-close" onclick="closeWorkerDrawer()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <div class="drawer-section-label">${t('workers.deptMembership')}</div>
-    <div class="drawer-dept-hint">
-      ${deptIds.length === 0 ? t('workers.accessAll') : t('workers.toggleHint')}
-    </div>
+    <div class="drawer-section-label">${label}</div>
+    <div class="drawer-dept-hint">${hint}</div>
     <div class="drawer-dept-list" id="drawer-dept-list">
-      ${drawerDeptListHtml(deptIds)}
-    </div>`
+      ${drawerDeptListHtml(selectedIds)}
+    </div>
+    ${mode !== 'promote' ? '' : `
+      <button class="btn btn-primary drawer-promote-btn" id="promote-confirm-btn" onclick="confirmPromote()">
+        ${t('workers.promoteConfirm')}
+      </button>`}
+    ${!canPromote ? '' : `
+      <button class="btn btn-ghost drawer-promote-btn" onclick="promoteWorkerPrompt('${esc(person.id)}')">
+        ${t('workers.makeManager')}
+      </button>`}`
 
   applyAvatars(drawer)
   backdrop.classList.add('active')
@@ -372,12 +595,18 @@ export function openWorkerDrawer(workerId) {
 }
 
 function drawerDeptListHtml(deptIds) {
-  if (!_allDepts.length) {
+  // In promote mode the choices are capped to the worker's own departments.
+  const list = _drawerMode === 'promote' && _promoteAllowed
+    ? _allDepts.filter(d => _promoteAllowed.has(d.id))
+    : _allDepts
+
+  if (!list.length) {
     return `<div class="dept-empty" style="padding:12px 0">${t('workers.noDeptsCreated')}</div>`
   }
-  return _allDepts.map(d => {
+  const selected = _drawerMode === 'promote' ? [..._promoteSelection] : deptIds
+  return list.map(d => {
     const color   = deptColor(d.id)
-    const checked = deptIds.includes(d.id)
+    const checked = selected.includes(d.id)
     return `
       <div class="drawer-dept-toggle ${checked ? 'checked' : ''}" id="drawer-toggle-${esc(d.id)}"
            onclick="toggleDeptMembership('${esc(d.id)}')">
@@ -393,12 +622,59 @@ function drawerDeptListHtml(deptIds) {
 export function closeWorkerDrawer() {
   document.getElementById('worker-drawer').classList.remove('open')
   document.getElementById('drawer-backdrop').classList.remove('active')
-  _drawerWorkerId = null
+  _drawerWorkerId   = null
+  _drawerMode       = 'worker'
+  _promoteSelection = new Set()
+  _promoteAllowed   = null
 }
 
 export async function toggleDeptMembership(deptId) {
   if (!requireWebManage()) return
   if (!_drawerWorkerId) return
+
+  // Promote mode stages the selection locally; nothing is saved until the
+  // owner confirms, because role and scope must be committed together.
+  if (_drawerMode === 'promote') {
+    if (_promoteSelection.has(deptId)) _promoteSelection.delete(deptId)
+    else _promoteSelection.add(deptId)
+    const listEl = document.getElementById('drawer-dept-list')
+    if (listEl) listEl.innerHTML = drawerDeptListHtml([])
+    return
+  }
+
+  // Editing an existing manager replaces their entire scope in one call, and
+  // an empty scope is refused — it would leave them able to see nothing.
+  if (_drawerMode === 'manager') {
+    const mgr = _allManagers.find(m => m.id === _drawerWorkerId)
+    if (!mgr) return
+    const current = mgr.departments.map(d => d.id)
+    const next = current.includes(deptId)
+      ? current.filter(id => id !== deptId)
+      : [...current, deptId]
+    if (next.length === 0) { showToast(t('workers.managerNeedsDept')); return }
+
+    const el = document.getElementById(`drawer-toggle-${deptId}`)
+    if (el) { el.style.opacity = '0.45'; el.style.pointerEvents = 'none' }
+
+    const res = await apiFetch(`/organization/managers/${_drawerWorkerId}/departments`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ departmentIds: next }),
+    })
+    if (!res?.ok) {
+      if (el) { el.style.opacity = ''; el.style.pointerEvents = '' }
+      showToast(t('workers.deptUpdateFailed'))
+      return
+    }
+    const updated = await res.json()
+    _allManagers = _allManagers.map(m => m.id === _drawerWorkerId ? { ...m, departments: updated.departments } : m)
+    const listEl = document.getElementById('drawer-dept-list')
+    if (listEl) listEl.innerHTML = drawerDeptListHtml(next)
+    const mgrListEl = document.getElementById('managers-list')
+    if (mgrListEl) mgrListEl.outerHTML = managersHtml()
+    return
+  }
+
   const worker  = _allWorkers.find(w => w.id === _drawerWorkerId)
   if (!worker) return
   const deptIds = worker.departmentIds || []
@@ -452,10 +728,19 @@ function renderWorkersGrid() {
 
 // ── Confirm dialog ────────────────────────────────────────────────────────────
 
-function showConfirmDialog(title, bodyHtml, onConfirm) {
+// `okLabel`/`danger` let non-destructive prompts (e.g. "upgrade your plan")
+// reuse this dialog without shouting "Delete" in red. Both reset to the
+// destructive default on every call so no caller leaks styling into the next.
+function showConfirmDialog(title, bodyHtml, onConfirm, okLabel = null, danger = true) {
   _confirmCallback = onConfirm
   document.getElementById('confirm-title').textContent = title
   document.getElementById('confirm-body').innerHTML    = bodyHtml
+
+  const ok = document.getElementById('confirm-ok-btn')
+  if (ok) {
+    ok.textContent = okLabel || t('common.delete')
+    ok.className   = danger ? 'btn btn-danger' : 'btn btn-primary'
+  }
   document.getElementById('confirm-overlay').classList.add('active')
 }
 
@@ -503,6 +788,7 @@ export function closeInviteForm() {
   document.getElementById('invite-form').classList.add('hidden')
   document.getElementById('invite-email').value = ''
   document.getElementById('invite-error').textContent = ''
+  refreshInviteOptions()
 }
 
 export function onInviteKey(e) {
@@ -518,6 +804,14 @@ export async function submitInvite() {
   const email   = emailEl.value.trim()
 
   if (!email) { errEl.textContent = t('workers.inviteNeedEmail'); return }
+
+  const departmentIds = [..._inviteDeptIds]
+  const deptsRequired = _inviteRole === 'MANAGER' || !isOwner(state.currentUser)
+  if (deptsRequired && departmentIds.length === 0) {
+    errEl.textContent = t('workers.inviteNeedDept')
+    return
+  }
+
   errEl.textContent = ''
   btn.disabled = true
   btn.textContent = t('common.sending')
@@ -526,7 +820,7 @@ export async function submitInvite() {
     const res = await apiFetch('/organization/invitations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, role: _inviteRole, departmentIds }),
     })
     if (!res?.ok) {
       const d = await res?.json().catch(() => ({}))
@@ -535,6 +829,8 @@ export async function submitInvite() {
     }
     const inv = await res.json()
     _allInvitations = [inv, ..._allInvitations]
+    _inviteDeptIds = new Set()
+    _inviteRole = 'WORKER'
     closeInviteForm()
     document.getElementById('invitations-section').innerHTML = invitationsHtml(_allInvitations)
   } finally {
@@ -578,6 +874,16 @@ export async function cancelInvite(id) {
 
 // ── Invitations HTML ──────────────────────────────────────────────────────────
 
+// Which departments this invite drops them into. Names are resolved against
+// the loaded list; ids we don't recognise (e.g. a department archived since)
+// are skipped rather than shown as raw uuids.
+function inviteDeptsLabel(inv) {
+  const names = (inv.departmentIds || [])
+    .map(id => _allDepts.find(d => d.id === id)?.name)
+    .filter(Boolean)
+  return names.length === 0 ? '' : ` &middot; ${esc(names.join(', '))}`
+}
+
 function invitationsHtml(invitations) {
   if (!invitations.length) return ''
   return `
@@ -587,8 +893,13 @@ function invitationsHtml(invitations) {
         <div class="pending-invite-row" id="inv-${esc(inv.id)}">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           <div class="pending-invite-info">
-            <span class="pending-invite-email">${esc(inv.email || inv.phone || t('common.dash'))}</span>
-            <span class="pending-invite-meta">${t('workers.sent', { ago: daysAgo(inv.createdAt) })} &middot; ${daysUntil(inv.expiresAt)}</span>
+            <span class="pending-invite-email">
+              ${esc(inv.email || inv.phone || t('common.dash'))}
+              ${inv.role === 'MANAGER' ? `<span class="pending-invite-role">${t('workers.roleManager')}</span>` : ''}
+            </span>
+            <span class="pending-invite-meta">
+              ${t('workers.sent', { ago: daysAgo(inv.createdAt) })} &middot; ${daysUntil(inv.expiresAt)}${inviteDeptsLabel(inv)}
+            </span>
           </div>
           <div class="pending-invite-actions">
             <button class="btn btn-ghost btn-sm" onclick="resendInvite('${esc(inv.id)}')">${t('requests.resend')}</button>
@@ -630,3 +941,10 @@ window.closeWorkerDrawer    = closeWorkerDrawer
 window.toggleDeptMembership = toggleDeptMembership
 window.closeConfirmDialog   = closeConfirmDialog
 window.confirmDialogOk      = confirmDialogOk
+// Multi-manager
+window.setInviteRole        = setInviteRole
+window.toggleInviteDept     = toggleInviteDept
+window.editManagerDepts     = editManagerDepts
+window.demoteManagerPrompt  = demoteManagerPrompt
+window.promoteWorkerPrompt  = promoteWorkerPrompt
+window.confirmPromote       = confirmPromote

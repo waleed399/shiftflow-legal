@@ -158,3 +158,56 @@ body {
 }
 .worker-notice h2 { font-size: 20px; font-weight: 700; margin: 0; }
 .worker-notice p  { max-width: 34rem; color: var(--muted); line-height: 1.6; margin: 0; }
+
+/* ── Multi-manager: invite options + managers list ───────────────────────── */
+.invite-subrow { flex-basis: 100%; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.invite-subrow-label { font-size: 0.74rem; color: var(--muted); font-weight: 600; }
+
+.invite-role-toggle { display: inline-flex; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 2px; }
+.invite-role-btn {
+  border: 0; background: transparent; color: var(--muted);
+  font-size: 0.78rem; font-weight: 600; padding: 5px 14px;
+  border-radius: 8px; cursor: pointer;
+}
+.invite-role-btn.active { background: var(--surface); color: var(--accent, #6366f1); }
+
+.invite-dept-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.invite-dept-chip {
+  border: 1.5px solid var(--border); background: transparent; color: var(--muted);
+  font-size: 0.76rem; font-weight: 600; padding: 4px 10px;
+  border-radius: 999px; cursor: pointer;
+}
+.invite-dept-chip.on { border-color: var(--chip); color: var(--chip); background: color-mix(in srgb, var(--chip) 12%, transparent); }
+
+.managers-list { display: flex; flex-direction: column; gap: 8px; max-width: 860px; }
+.manager-row {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 10px 14px;
+}
+.manager-avatar {
+  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface-sunken); font-size: 0.74rem; font-weight: 700;
+  overflow: hidden;
+}
+.manager-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.manager-main { flex: 1; min-width: 0; }
+.manager-name { font-weight: 600; font-size: 0.88rem; }
+.manager-depts { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+.manager-dept-chip {
+  font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+  color: var(--chip); border: 1px solid var(--chip);
+}
+.manager-nodept { font-size: 0.72rem; color: var(--muted); }
+.manager-demote { color: #dc2626; }
+
+.drawer-promote-btn { width: 100%; margin-top: 14px; }
+
+/* Marks a pending invitation as being for a department manager. */
+.pending-invite-role {
+  font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.04em; padding: 1px 6px; margin-inline-start: 6px;
+  border-radius: 999px; color: #6366f1; border: 1px solid #6366f1;
+  vertical-align: middle;
+}
