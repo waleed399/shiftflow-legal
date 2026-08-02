@@ -269,6 +269,7 @@ export default {
     workerCountMany: '{{n}} עובדים',
     searchPlaceholder: 'חיפוש…',
     inviteWorker: 'הזמן עובד',
+    invitePerson: 'הזמנה',
     invitePlaceholder: 'worker@email.com',
     sendInvite: 'שלח הזמנה',
     inviteNeedEmail: 'יש להזין כתובת אימייל',

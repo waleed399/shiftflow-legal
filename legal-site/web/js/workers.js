@@ -144,7 +144,7 @@ function renderPage() {
           <input class="workers-search" id="workers-search" placeholder="${t('workers.searchPlaceholder')}" oninput="filterWorkers(this.value)">
           <button class="btn btn-success btn-sm" onclick="openInviteForm()">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            ${t('workers.inviteWorker')}
+            ${isOwner(state.currentUser) ? t('workers.invitePerson') : t('workers.inviteWorker')}
           </button>
         </div>
 

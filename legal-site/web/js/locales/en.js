@@ -270,6 +270,9 @@ export default {
     workerCountMany: '{{n}} workers',
     searchPlaceholder: 'Search…',
     inviteWorker: 'Invite worker',
+    // Owners can invite either a worker or a department manager, so the button
+    // that opens the form must not promise only one of them.
+    invitePerson: 'Invite',
     invitePlaceholder: 'worker@email.com',
     sendInvite: 'Send invite',
     inviteNeedEmail: 'Enter an email address',
