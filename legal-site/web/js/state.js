@@ -1,4 +1,5 @@
 import { apiFetch } from './api.js'
+import { isSchedulable } from './roles.js'
 
 export const state = {
   currentUser: null,
@@ -19,6 +20,8 @@ export async function ensureOrgWorkers() {
   if (!res?.ok) return []
   const data = await res.json()
   const all = Array.isArray(data) ? data : (data.members || data.users || [])
-  state.orgWorkers = all.filter(w => w.role === 'WORKER').sort((a, b) => a.name.localeCompare(b.name))
+  // Everyone assignable to a shift — workers plus department managers, who are
+  // working supervisors. The owner is excluded (see isSchedulable).
+  state.orgWorkers = all.filter(isSchedulable).sort((a, b) => a.name.localeCompare(b.name))
   return state.orgWorkers
 }

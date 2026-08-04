@@ -28,3 +28,15 @@ export function isManagement(user) {
 export function isWorker(user) {
   return !!user && !isManagement(user)
 }
+
+// Can this person be put on a shift? Department managers are usually working
+// supervisors, so they belong in the assignment pickers; the owner runs the
+// business and does not work shifts. Mirrors SCHEDULABLE_ROLES on the server,
+// which enforces the same rule.
+export function isSchedulable(member) {
+  if (!member) return false
+  // Older responses have no accessLevel; back then "MANAGER" meant the sole
+  // owner, who was never schedulable.
+  if (!member.accessLevel) return member.role === 'WORKER'
+  return member.accessLevel === 'WORKER' || member.accessLevel === 'MANAGER'
+}

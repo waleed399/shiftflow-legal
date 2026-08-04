@@ -4,7 +4,7 @@ import { getToken, getRefreshToken, clearSession, apiFetch } from './api.js'
 import { getWeekStartOf, getInitials, showToast } from './utils.js'
 import { renderWeekLabel, renderDayTabs, loadShifts } from './shifts.js'
 import { renderProfile, getEffectivePlan, canManageWeb } from './profile.js'
-import { isManagement } from './roles.js'
+import { isManagement, isOwner } from './roles.js'
 import './modals.js' // registers window.openShiftModal and other modal handlers
 import './createShift.js' // registers window.openCreateShiftModal and submit handlers
 import { renderRequests, loadPendingCount } from './requests.js'
@@ -46,12 +46,14 @@ async function init() {
       return
     }
 
-    // First-run managers haven't finished setup yet — send them to the wizard.
-    // Workers always skip this check (they joined an org that's already set up).
+    // A first-run owner hasn't finished setup yet — send them to the wizard.
+    // Only the owner: the wizard configures departments and org settings, which
+    // a department manager has no permission for, and workers joined an org
+    // that was already set up.
     if (
       state.currentOrg &&
       state.currentOrg.onboardingComplete === false &&
-      state.currentUser?.role === 'MANAGER'
+      isOwner(state.currentUser)
     ) {
       window.location.href = '/web/onboarding.html'
       return

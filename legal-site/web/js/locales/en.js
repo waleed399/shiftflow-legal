@@ -380,8 +380,8 @@ export default {
     proTrialOneDay: 'Pro Trial (1 day left)',
     proAnnualNote: 'Billed $479.88/yr — save $120',
     bizAnnualNote: 'Billed $959.88/yr — save $240',
-    featuresPro: ['Everything in Free', 'Up to 50 workers', 'Unlimited departments', 'Coverage builder', 'Auto-scheduling', 'Web app access'],
-    featuresBusiness: ['Everything in Pro', 'Unlimited workers', 'Priority support'],
+    featuresPro: ['Everything in Free', 'Up to 50 workers', 'Unlimited departments', 'Up to 2 department managers', 'Coverage builder', 'Auto-scheduling', 'Web app access'],
+    featuresBusiness: ['Everything in Pro', 'Unlimited workers', 'Unlimited department managers', 'Priority support'],
     // Manager sections
     monthlyHours: 'Monthly Hours',
     monthlyHoursTotalLabel: 'Total org hours',

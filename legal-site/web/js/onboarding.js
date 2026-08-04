@@ -4,6 +4,7 @@ import {
   getToken, getUser, getOrg, updateOrg,
 } from './auth-common.js'
 import { initI18n, t } from './i18n.js'
+import { isOwner } from './roles.js'
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -435,9 +436,11 @@ function wireEvents() {
 function init() {
   if (!getToken()) { window.location.href = '/web/login.html'; return }
 
-  // Workers don't onboard the org — bounce them to the dashboard.
+  // Only the owner sets up the organisation. The wizard configures departments
+  // and org settings, which department managers cannot change and workers have
+  // no business seeing — bounce everyone else to the dashboard.
   const user = getUser()
-  if (user && user.role && user.role !== 'MANAGER') {
+  if (user && !isOwner(user)) {
     window.location.href = '/web/'
     return
   }
