@@ -356,10 +356,10 @@ function deptListHtml() {
           <div class="dept-item-count">${memberCount === 1 ? t('workers.workerCountOne', { n: 1 }) : t('workers.workerCountMany', { n: memberCount })}</div>
         </div>
         <div class="dept-item-actions">
-          <button class="dept-action-btn" title="${t('workers.rename')}" onclick="renameDept('${esc(d.id)}')">
+          <button class="dept-action-btn" title="${t('workers.rename')}" onclick="renameDept('${esc(d.id)}')" aria-label="${t('workers.rename')}">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>
-          <button class="dept-action-btn dept-action-delete" title="${t('common.delete')}" onclick="deleteDept('${esc(d.id)}')">
+          <button class="dept-action-btn dept-action-delete" title="${t('common.delete')}" onclick="deleteDept('${esc(d.id)}')" aria-label="${t('common.delete')}">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
           </button>
         </div>
@@ -571,7 +571,7 @@ function openDrawerFor(person, mode, selectedIds, allowedIds = null) {
           <div class="drawer-worker-email">${esc(person.email || '')}</div>
         </div>
       </div>
-      <button class="modal-close" onclick="closeWorkerDrawer()">
+      <button class="modal-close" onclick="closeWorkerDrawer()" aria-label="${t('a11y.closeDialog')}">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>

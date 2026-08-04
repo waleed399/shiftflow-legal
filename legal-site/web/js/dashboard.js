@@ -185,7 +185,7 @@ function _buildHero(firstName, hour, glance) {
           <span class="dash-glance">${glance}</span>
         </div>
       </div>
-      <button class="dash-refresh-btn" onclick="window._dashRefresh()" title="${t('dashboard.refresh')}">
+      <button class="dash-refresh-btn" onclick="window._dashRefresh()" title="${t('dashboard.refresh')}" aria-label="${t('dashboard.refresh')}">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       </button>
     </div>`
@@ -273,11 +273,11 @@ function _buildWeekStrip(allShifts) {
   return `
     <div class="dash-week-section">
       <div class="dash-week-nav">
-        <button class="dash-week-nav-btn" onclick="window._dashChangeWeek(-1)" title="${t('dashboard.prevWeek')}">
+        <button class="dash-week-nav-btn" onclick="window._dashChangeWeek(-1)" title="${t('dashboard.prevWeek')}" aria-label="${t('dashboard.prevWeek')}">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <span class="dash-week-nav-label">${weekLabel}</span>
-        <button class="dash-week-nav-btn" onclick="window._dashChangeWeek(1)" title="${t('dashboard.nextWeek')}">
+        <button class="dash-week-nav-btn" onclick="window._dashChangeWeek(1)" title="${t('dashboard.nextWeek')}" aria-label="${t('dashboard.nextWeek')}">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </div>

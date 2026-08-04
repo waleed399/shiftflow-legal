@@ -49,6 +49,9 @@ export default {
     nextMonth: 'חודש הבא',
     closeDialog: 'סגור חלון',
     exportOptions: 'אפשרויות ייצוא',
+    addDepartment: 'הוספת מחלקה',
+    edit: 'עריכה',
+    colourOption: 'בחירת צבע',
   },
 
   dashboard: {

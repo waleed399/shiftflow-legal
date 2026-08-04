@@ -49,6 +49,9 @@ export default {
     nextMonth: 'Next month',
     closeDialog: 'Close dialog',
     exportOptions: 'Export options',
+    addDepartment: 'Add department',
+    edit: 'Edit',
+    colourOption: 'Choose colour',
   },
 
   dashboard: {

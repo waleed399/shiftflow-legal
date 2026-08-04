@@ -332,7 +332,7 @@ function _profManagerHtml() {
       <div id="prof-depts-body"><div class="loader-inline"><div class="spinner"></div></div></div>
       <div class="prof-dept-add-row">
         <input type="text" class="prof-tmpl-input" id="prof-new-dept" placeholder="${t('profile.departmentPlaceholder')}" onkeydown="if(event.key==='Enter')profileAddDept()">
-        <button class="prof-dept-add-btn" onclick="profileAddDept()">
+        <button class="prof-dept-add-btn" onclick="profileAddDept()" aria-label="${t('a11y.addDepartment')}">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
       </div>
@@ -465,10 +465,10 @@ function _profTmplRowHtml(tmpl) {
         <span class="prof-tmpl-name">${esc(tmpl.name)}</span>
         <span class="prof-tmpl-meta">${esc(tmpl.startTime)} – ${esc(tmpl.endTime)} · ${esc(tmpl.department?.name ?? '')} · ${tmpl.requiredWorkers} worker${tmpl.requiredWorkers !== 1 ? 's' : ''}</span>
       </div>
-      <button class="prof-tmpl-action" onclick="profileEditTemplate('${esc(tmpl.id)}')" title="Edit">
+      <button class="prof-tmpl-action" onclick="profileEditTemplate('${esc(tmpl.id)}')" title="${t('a11y.edit')}" aria-label="${t('a11y.edit')}">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
       </button>
-      <button class="prof-tmpl-action prof-tmpl-delete" onclick="profileDeleteTemplate('${esc(tmpl.id)}')" title="Delete">
+      <button class="prof-tmpl-action prof-tmpl-delete" onclick="profileDeleteTemplate('${esc(tmpl.id)}')" title="${t('common.delete')}" aria-label="${t('common.delete')}">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
       </button>
     </div>`
@@ -479,7 +479,7 @@ function _profNewTmplFormHtml() {
   return `
     <div class="prof-tmpl-form">
       <div class="prof-color-picker" id="prof-new-color-picker">
-        ${_TMPL_COLORS.map((c, i) => `<button type="button" class="prof-color-swatch${i === 0 ? ' active' : ''}" style="background:${c}" data-color="${c}" onclick="profilePickNewColor('${c}',this)"></button>`).join('')}
+        ${_TMPL_COLORS.map((c, i) => `<button type="button" class="prof-color-swatch${i === 0 ? ' active' : ''}" style="background:${c}" data-color="${c}" aria-label="${t('a11y.colourOption')}" onclick="profilePickNewColor('${c}',this)"></button>`).join('')}
       </div>
       <input type="text" class="prof-tmpl-input" id="prof-new-name" placeholder="Shift name (e.g. Morning, Evening)" maxlength="60" oninput="profileUpdateNewPreview()">
       <div class="prof-tmpl-preview" id="prof-new-preview">
@@ -517,7 +517,7 @@ function _profEditTmplFormHtml(tmpl) {
   return `
     <div class="prof-tmpl-form prof-tmpl-form-edit">
       <div class="prof-color-picker" id="prof-edit-color-${safeId}">
-        ${_TMPL_COLORS.map(c => `<button type="button" class="prof-color-swatch${c === tmpl.color ? ' active' : ''}" style="background:${c}" data-color="${c}" onclick="profilePickEditColor('${c}',this,'${safeId}')"></button>`).join('')}
+        ${_TMPL_COLORS.map(c => `<button type="button" class="prof-color-swatch${c === tmpl.color ? ' active' : ''}" style="background:${c}" data-color="${c}" aria-label="${t('a11y.colourOption')}" onclick="profilePickEditColor('${c}',this,'${safeId}')"></button>`).join('')}
       </div>
       <input type="text" class="prof-tmpl-input" id="prof-edit-name-${safeId}" value="${esc(tmpl.name)}" maxlength="60" oninput="profileUpdateEditPreview('${safeId}')">
       <div class="prof-tmpl-preview" id="prof-edit-preview-${safeId}">
@@ -558,7 +558,7 @@ function _profRenderDepts() {
     : `<div class="prof-dept-chips">${depts.map(d => `
         <div class="prof-dept-chip">
           <span>${esc(d.name)}</span>
-          <button class="prof-dept-chip-del" onclick="profileDeleteDept('${esc(d.id)}','${esc(d.name)}')" title="Delete">
+          <button class="prof-dept-chip-del" onclick="profileDeleteDept('${esc(d.id)}','${esc(d.name)}')" title="${t('common.delete')}" aria-label="${t('common.delete')}">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>`).join('')}

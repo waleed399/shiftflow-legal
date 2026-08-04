@@ -126,11 +126,11 @@ function renderCreateShiftsGrid() {
   document.getElementById('cs-modal-body').innerHTML = `
     <div class="cs-section-label">${t('shifts.csStartWeek')}</div>
     <div class="cs-week-nav">
-      <button class="week-btn" onclick="csNavWeek(-1)" ${canPrev ? '' : 'disabled style="opacity:.3"'}>
+      <button class="week-btn" onclick="csNavWeek(-1)" aria-label="${t('a11y.prevWeek')}" ${canPrev ? '' : 'disabled style="opacity:.3"'}>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
       <span class="cs-week-label">${weekLabel}</span>
-      <button class="week-btn" onclick="csNavWeek(1)">
+      <button class="week-btn" onclick="csNavWeek(1)" aria-label="${t('a11y.nextWeek')}">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
     </div>
