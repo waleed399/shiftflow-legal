@@ -136,6 +136,14 @@ function swapCard(s) {
     } else {
       meta = `<div class="req-meta req-dim">${t('requests.openNoVolunteers')}</div>`
     }
+  } else if (s.targetAssignment) {
+    // Mutual swap — both sides move, so show what comes back or the manager
+    // can't tell what they're approving from the requester's shift alone.
+    const ta     = s.targetAssignment
+    const taTime = `${ta.blockStart || ta.shift.startTime}–${ta.blockEnd || ta.shift.endTime}`
+    const taDept = ta.shift?.department?.name || t('common.dash')
+    meta = `<div class="req-meta">⇄ ${esc(s.targetWorker?.name || t('common.unknown'))}</div>
+      <div class="req-meta req-dim">${t('requests.inExchangeFor')}: ${esc(taTime)} · ${esc(taDept)}</div>`
   } else {
     meta = `<div class="req-meta">→ ${esc(s.targetWorker?.name || t('common.unknown'))}</div>`
   }

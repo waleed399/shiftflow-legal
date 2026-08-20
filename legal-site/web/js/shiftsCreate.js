@@ -48,19 +48,13 @@ export async function openCreateShiftsModal() {
   _csStartWeek = addDays(_csMinWeek, 7)
 
   try {
-    const [tmplRes, latestRes] = await Promise.all([
-      apiFetch('/shift-templates'),
-      apiFetch('/shifts/latest-date'),
-    ])
-    if (!tmplRes || !latestRes) { closeCreateShiftsModal(); return }
+    // Defaults to next week. The picked range is now authoritative — it
+    // replaces whatever drafts are already in it — so there's no longer any
+    // reason to skip ahead of the last scheduled shift. That old jump is what
+    // made the generator look like it could only ever add one week at a time.
+    const tmplRes = await apiFetch('/shift-templates')
+    if (!tmplRes) { closeCreateShiftsModal(); return }
     _csTemplates = await tmplRes.json()
-    const { latestDate } = await latestRes.json()
-    if (latestDate) {
-      const latestWeek    = getWeekStartOf(new Date(latestDate + 'T00:00:00'), ws)
-      const weekAfterLatest = addDays(latestWeek, 7)
-      const nextWeek      = addDays(_csMinWeek, 7)
-      _csStartWeek = weekAfterLatest > nextWeek ? weekAfterLatest : nextWeek
-    }
     const wd = csWorkDays()
     _csTemplates.forEach(tmpl => { _csGrid[tmpl.id] = new Set(wd) })
     renderCreateShiftsGrid()
@@ -186,14 +180,21 @@ export async function submitCreateShifts() {
   btn.disabled = true
   btn.textContent = t('shifts.csGenerating')
 
+  // The whole picked range is replaced, not just the ticked days — so
+  // unticking a day removes it, which is what "regenerate" has to mean.
+  const rangeEnd = addDays(_csStartWeek, (_csWeeksAhead - 1) * 7 + 6)
+
   try {
     const res = await apiFetch('/shifts/bulk', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ shifts: jobs }),
+      body: JSON.stringify({
+        shifts: jobs,
+        replaceRange: { from: toYMD(_csStartWeek), to: toYMD(rangeEnd) },
+      }),
     })
     if (res?.ok) {
-      const { created, skipped } = await res.json()
+      const { created, skipped, replaced } = await res.json()
       closeCreateShiftsModal()
       // Navigate to the start week so user sees the created shifts
       state.currentWeek = _csStartWeek
@@ -202,13 +203,18 @@ export async function submitCreateShifts() {
       renderWeekLabel()
       renderDayTabs()
       await loadShifts()
-      const msg = skipped > 0
-        ? `${t('shifts.csDone', { count: created })} · ${t('shifts.csSkipped', { count: skipped })}`
-        : t('shifts.csDone', { count: created })
-      showToast(msg, 'success')
+      const parts = [t('shifts.csDone', { count: created })]
+      if (replaced > 0) parts.push(t('shifts.csReplaced', { count: replaced }))
+      if (skipped > 0)  parts.push(t('shifts.csSkipped', { count: skipped }))
+      showToast(parts.join(' · '), 'success')
     } else {
       const d = await res?.json().catch(() => ({}))
-      showToast(d?.error || t('shifts.csFailed'))
+      if (d?.code === 'RANGE_HAS_PUBLISHED') {
+        const weeks = Array.isArray(d.weeks) ? d.weeks : []
+        showToast(t('shifts.csPublishedBlocked', { count: weeks.length, weeks: weeks.join(', ') }))
+      } else {
+        showToast(d?.error || t('shifts.csFailed'))
+      }
       btn.disabled = false; btn.textContent = prev
     }
   } catch {
