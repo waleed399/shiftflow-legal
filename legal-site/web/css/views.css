@@ -1,6 +1,7 @@
 /* ── Main ── */
 main {
   flex: 1; display: flex; flex-direction: column; overflow: hidden;
+  background-color: var(--page);
   /* Soft tonal wash over the paper grain (body) for depth — navy from the top,
      a warm brass hint top-right. Transparent base lets the grain show through. */
   background-image:
@@ -1333,3 +1334,34 @@ body.dt-focus #shifts-content { height: 100%; }
 .shifts-focus-exit:hover { background: var(--border); }
 /* In RTL the sidebar sits on the right, so the exit moves to the left. */
 [dir="rtl"] .shifts-focus-exit { right: auto; left: 18px; }
+
+/* ── Week roster: coverage and load ──────────────────────────────────────────
+   The week view answers a different question from the day roster. The roster
+   is where a manager assigns; the week is where they see whether the week
+   holds together. So the day headers carry coverage and the worker cells
+   carry comparative load, on the same three-stop scale used everywhere else. */
+.wv-day-meter {
+  height: 4px; border-radius: 2px; margin: 5px 6px 3px;
+  background: var(--border); overflow: hidden;
+}
+.wv-day-meter > i { display: block; height: 100%; border-radius: 2px; background: var(--state, var(--muted)); }
+.wv-day-cov {
+  font-size: 0.62rem; font-weight: 800; color: var(--state, var(--muted));
+  font-variant-numeric: tabular-nums; padding-bottom: 2px;
+}
+.wv-day-cov-none { color: var(--muted); opacity: 0.5; font-weight: 600; }
+
+.wv-state-ok    { --state: var(--ok); }
+.wv-state-thin  { --state: var(--thin); }
+.wv-state-short { --state: var(--short); }
+.wv-state-none  { --state: var(--muted); }
+
+/* A short day should read as short before anything else on the header. */
+.wv-day-th.wv-state-short { box-shadow: inset 0 -2px 0 var(--short); }
+.wv-day-th.wv-state-thin  { box-shadow: inset 0 -2px 0 var(--thin); }
+
+.wv-worker-load {
+  height: 3px; border-radius: 2px; margin-top: 3px;
+  background: var(--border); overflow: hidden;
+}
+.wv-worker-load > i { display: block; height: 100%; border-radius: 2px; background: var(--navy); opacity: 0.55; }

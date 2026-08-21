@@ -80,11 +80,39 @@ export async function renderWeekView() {
     })
   )
 
+  // Coverage per day. The week view had no notion of required-vs-assigned at
+  // all: an unfilled shift only ever appeared as a "+" pill on the rows of
+  // workers eligible to take it, so a shift NOBODY could fill rendered nowhere
+  // and the hole was invisible in the one view meant to show the whole week.
+  const dayCoverage = new Map()
+  weekDays.forEach(({ date }) => {
+    const list = shiftsByDay.get(toYMD(date)) || []
+    const required = list.reduce((n, s) => n + (s.requiredWorkers || 0), 0)
+    const assigned = list.reduce((n, s) => n + (s.assignments?.length || 0), 0)
+    dayCoverage.set(toYMD(date), { required, assigned, short: Math.max(0, required - assigned) })
+  })
+
+  // Load bars are scaled to the busiest worker rather than to a contract
+  // target, which the app does not model. That makes the bars comparative —
+  // who is carrying the week — not a measure of over-work.
+  const maxWeekMins = Math.max(0, ...workerWeekMins.values())
+
   const dayHeaders = weekDays.map(({ date }) => {
     const isToday = isSameDay(date, today)
-    return `<th class="wv-day-th${isToday ? ' wv-today' : ''}">
+    const cov     = dayCoverage.get(toYMD(date)) || { required: 0, assigned: 0, short: 0 }
+    // Not `state` — that name is the imported app store in this module.
+    const covState = cov.required === 0 ? 'none'
+                   : cov.assigned === 0 ? 'short'
+                   : cov.short > 0      ? 'thin' : 'ok'
+    const pct     = cov.required > 0 ? Math.min(100, Math.round(cov.assigned / cov.required * 100)) : 0
+    const meter   = cov.required > 0
+      ? `<div class="wv-day-meter"><i style="width:${pct}%"></i></div>
+         <div class="wv-day-cov">${cov.assigned}/${cov.required}</div>`
+      : '<div class="wv-day-cov wv-day-cov-none">—</div>'
+    return `<th class="wv-day-th wv-state-${covState}${isToday ? ' wv-today' : ''}">
       <div class="wv-day-name">${DAYS[date.getDay()]}</div>
       <div class="wv-day-num">${date.getDate()}</div>
+      ${meter}
     </th>`
   }).join('')
 
@@ -201,6 +229,7 @@ export async function renderWeekView() {
         <div class="wv-worker-info">
           <div class="wv-worker-name">${esc(w.name.split(' ')[0])}</div>
           ${hoursLabel ? `<div class="wv-worker-mins">${hoursLabel}</div>` : ''}
+          ${maxWeekMins > 0 ? `<div class="wv-worker-load" title="${esc(hoursLabel || '0h')}"><i style="width:${Math.round((weekMins / maxWeekMins) * 100)}%"></i></div>` : ''}
         </div>
       </td>
       ${cells}
