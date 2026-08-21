@@ -14,6 +14,7 @@ import { renderAvailability } from './availability.js'
 import { initI18n, mountLanguageSwitcher, t } from './i18n.js'
 import { initNotifications } from './notifications.js'
 import './a11y.js' // registers global keyboard activation for role="button" elements
+import { exitTableFocus } from './shiftsFocus.js' // also registers window.toggleTableFocus
 
 async function init() {
   initI18n()
@@ -178,6 +179,10 @@ function getActiveView() {
 }
 
 function showView(view) {
+  // Focus mode hides the sidebar and topbar. Anything that navigates away has
+  // to leave it first, or the new view renders with no chrome and no way back.
+  if (view !== 'shifts') exitTableFocus()
+
   for (const v of ['dashboard', 'shifts', 'profile', 'requests', 'workers', 'availability']) {
     document.getElementById(`view-${v}`).style.display = v === view ? 'flex' : 'none'
     document.getElementById(`nav-${v}`).classList.toggle('active', v === view)

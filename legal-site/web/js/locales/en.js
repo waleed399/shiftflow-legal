@@ -101,6 +101,8 @@ export default {
     listView: 'List view',
     dayRoster: 'Day roster',
     weekRoster: 'Week roster',
+    expand: 'Expand',
+    exitExpand: 'Exit full screen',
     dayLabel: 'Day:',
     weekLabel: 'Week:',
     publishDay: 'Publish day',

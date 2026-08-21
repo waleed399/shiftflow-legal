@@ -3,6 +3,7 @@ import { apiFetch } from './api.js'
 import { DAYS, MONTHS, DEPT_COLORS, DAY_FULL, AVAIL_ICONS, addDays, isSameDay, toYMD, fmtDate, getWeekStartOf, esc, getInitials, applyAvatars, showToast } from './utils.js'
 import { t } from './i18n.js'
 import { requireWebManage } from './profile.js'
+import { exitTableFocus } from './shiftsFocus.js'
 import {
   exportDay,
   exportWeek,
@@ -154,6 +155,12 @@ export function setShiftsView(view) {
   document.getElementById('view-table-btn')?.classList.toggle('active', view === 'table')
   document.getElementById('view-week-btn')?.classList.toggle('active',  view === 'week')
   document.getElementById('day-tabs').style.display = view === 'week' ? 'none' : ''
+
+  // Focus mode belongs to the day roster matrix only. Leaving that view has to
+  // drop out of it too, or the chrome would stay hidden on a view that needs it.
+  const expandBtn = document.getElementById('view-expand-btn')
+  if (expandBtn) expandBtn.style.display = view === 'table' ? '' : 'none'
+  if (view !== 'table') exitTableFocus()
 
   const contentArea = document.getElementById('shifts-content').parentElement
   if (view === 'list') {

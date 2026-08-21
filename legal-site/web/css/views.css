@@ -1281,3 +1281,32 @@ body.web-locked #btn-create-shifts { display: none !important; }
   padding: 12px 0 6px; border-top: 1px solid var(--border); margin-top: 8px;
 }
 .prof-tmpl-add-area .btn { font-size: 0.82rem; }
+
+/* ── Day roster focus mode ────────────────────────────────────────────────────
+   The roster is a shifts × workers matrix, so the page chrome around it is
+   what decides how much of the matrix fits. Focus mode hides the chrome and
+   hands the whole viewport to the table. The filter bar stays on purpose:
+   department filtering is what trims worker columns, so it is the one control
+   that makes the table smaller rather than larger. */
+body.dt-focus aside,
+body.dt-focus #view-shifts > .topbar,
+body.dt-focus #view-shifts > .action-bar,
+body.dt-focus #view-shifts > .day-tabs,
+body.dt-focus .fab { display: none !important; }
+
+body.dt-focus .content-area { padding: 0; }
+body.dt-focus #shifts-content { height: 100%; }
+
+/* Floating exit. Fixed to the viewport rather than the topbar, because the
+   topbar is one of the things focus mode hides. */
+.shifts-focus-exit {
+  position: fixed; top: 14px; right: 18px; z-index: 60;
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface-sunken); color: var(--text);
+  border: 1px solid var(--border); cursor: pointer;
+  box-shadow: 0 2px 10px rgba(31,28,24,0.12);
+}
+.shifts-focus-exit:hover { background: var(--border); }
+/* In RTL the sidebar sits on the right, so the exit moves to the left. */
+[dir="rtl"] .shifts-focus-exit { right: auto; left: 18px; }

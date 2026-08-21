@@ -101,6 +101,8 @@ export default {
     listView: 'תצוגת רשימה',
     dayRoster: 'סידור יומי',
     weekRoster: 'סידור שבועי',
+    expand: 'הרחבה',
+    exitExpand: 'יציאה ממסך מלא',
     dayLabel: 'יום:',
     weekLabel: 'שבוע:',
     publishDay: 'פרסם יום',
