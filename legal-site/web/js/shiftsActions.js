@@ -19,7 +19,11 @@ export function updateActionBar() {
   if (weekActive.length === 0) { bar.style.display = 'none'; return }
   bar.style.display = 'flex'
 
-  const showDay = getShiftsView() === 'list'
+  // The day roster is the day-scoped view, so that is where publishing a single
+  // day belongs. This used to read === 'list'; when the list view was removed
+  // the condition could never be true again and the day controls silently
+  // disappeared. The week roster spans seven days, so it keeps week actions only.
+  const showDay = getShiftsView() === 'table'
   ;['action-label-day', 'btn-publish-day', 'btn-unpublish-day', 'action-bar-sep'].forEach(id => {
     document.getElementById(id).style.display = showDay ? '' : 'none'
   })
