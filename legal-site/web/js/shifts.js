@@ -43,7 +43,7 @@ import {
 export { updateActionBar }
 import { syncFilterRow } from './shiftsFilterBar.js'
 import { renderTableView, assignInTable } from './shiftsTableView.js'
-import { renderWeekView, assignInWeekView } from './shiftsWeekView.js'
+import { renderWeekView } from './shiftsWeekView.js'
 
 let shiftsView = 'table'   // 'table' (day roster) | 'week' (week roster)
 let _activeFilters = new Set()
@@ -265,7 +265,6 @@ window.publishWeek      = publishWeek
 window.unpublishWeek    = unpublishWeek
 window.setShiftsView    = setShiftsView
 window.assignInTable    = assignInTable
-window.assignInWeekView = assignInWeekView
 window.openCreateShiftsModal     = openCreateShiftsModal
 window.closeCreateShiftsModal    = closeCreateShiftsModal
 window.submitCreateShifts        = submitCreateShifts

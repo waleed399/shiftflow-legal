@@ -1371,3 +1371,60 @@ body.dt-focus #shifts-content { height: 100%; }
   background: var(--border); overflow: hidden;
 }
 .wv-worker-load > i { display: block; height: 100%; border-radius: 2px; background: var(--navy); opacity: 0.55; }
+
+/* ── Week roster: shift slots x days ─────────────────────────────────────────
+   Rows are shift slots grouped by department, columns are days. A cell is one
+   shift: the faces on it, how full it is, and a click into the shift modal.
+   Assignment is not done inline here on purpose — see the note at the top of
+   shiftsWeekView.js. */
+.wv-slot-cell {
+  position: sticky; left: 0; z-index: 1; background: var(--white);
+  min-width: 92px; width: 92px; padding: 10px 12px;
+  border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  box-shadow: 4px 0 6px -4px rgba(15,23,42,0.07);
+}
+.wv-slot-time { font-size: 0.84rem; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
+.wv-slot-end  { font-size: 0.72rem; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.wv-cell {
+  min-width: 120px; padding: 7px 8px; vertical-align: top; cursor: pointer;
+  border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  transition: background 0.12s;
+}
+.wv-cell:hover { background: rgba(26,45,79,0.07); }
+.wv-cell:focus-visible { outline: 2px solid var(--navy); outline-offset: -2px; }
+/* No shift in this slot on this day — not a gap to fix, just nothing planned. */
+.wv-cell-nil {
+  min-width: 120px; cursor: default; background: var(--surface-sunken);
+  border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+}
+
+.wv-cell-inner { display: flex; flex-direction: column; gap: 5px; }
+.wv-faces { display: flex; flex-wrap: wrap; gap: 3px; }
+.wv-face {
+  width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+  background: var(--navy); color: #fff; font-size: 0.58rem; font-weight: 800;
+}
+.wv-face img { width: 100%; height: 100%; object-fit: cover; }
+.wv-face-more { background: var(--border-strong); color: var(--text); }
+/* Nobody on it yet. Reads as a slot to fill rather than an empty box. */
+.wv-face-empty {
+  background: rgba(26,45,79,0.06); color: rgba(26,45,79,0.5);
+  border: 1.5px dashed rgba(26,45,79,0.28); font-size: 0.9rem; font-weight: 600;
+}
+
+.wv-cell-foot { display: flex; align-items: center; gap: 5px; }
+.wv-cell-cov {
+  font-size: 0.68rem; font-weight: 800; color: var(--state, var(--muted));
+  font-variant-numeric: tabular-nums;
+}
+.wv-cell-status { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+/* Short cells carry a left edge so a hole is findable by scanning, not reading. */
+.wv-cell.wv-state-short { background: var(--short-soft); box-shadow: inset 3px 0 0 var(--short); }
+.wv-cell.wv-state-thin  { box-shadow: inset 3px 0 0 var(--thin); }
+
+[dir="rtl"] .wv-slot-cell { left: auto; right: 0; box-shadow: -4px 0 6px -4px rgba(15,23,42,0.07); }
+[dir="rtl"] .wv-cell.wv-state-short { box-shadow: inset -3px 0 0 var(--short); }
+[dir="rtl"] .wv-cell.wv-state-thin  { box-shadow: inset -3px 0 0 var(--thin); }

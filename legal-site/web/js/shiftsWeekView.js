@@ -1,264 +1,177 @@
-// Week roster view — workers down the side, days across the top. Each cell
-// shows the worker's shifts that day (✓ for assigned, "+" pill for open slots
-// the worker can fill). Honors availability prefs, conflicts, dept membership.
+// Week roster — shift slots down the side, days across the top, grouped by
+// department. Each cell is one shift on one day: who is on it, how close it is
+// to full, and a click straight into the shift modal to change it.
+//
+// ── Why this shape ──────────────────────────────────────────────────────────
+// The previous version put workers down the side and, in every worker × day
+// cell, a pill for every shift that worker could take. That grows as
+// workers × days × shifts: ten workers, seven days and six shift times is ~420
+// individually clickable pills with nothing to say which one matters. It also
+// competed with the day roster, which already does shifts × workers well for a
+// single day.
+//
+// Turning the matrix on its side makes the cell count shifts × days — around
+// forty — and, crucially, it stops growing when the org hires. It is also the
+// shape a schedule takes when it is printed and put on a wall.
+//
+// Assignment is deliberately NOT done inline here. Clicking a cell opens the
+// shift modal, so the manager makes one decision about one shift instead of
+// choosing among hundreds of pills at once.
 //
 // Public surface:
-//   renderWeekView, assignInWeekView
+//   renderWeekView
 
-import { state, ensureOrgWorkers } from './state.js'
-import { apiFetch } from './api.js'
-import { DAYS, DAY_FULL, AVAIL_ICONS, isSameDay, toYMD, esc, getInitials, applyAvatars, showToast } from './utils.js'
+import { state } from './state.js'
+import { DAYS, isSameDay, toYMD, esc, getInitials, applyAvatars } from './utils.js'
 import { t } from './i18n.js'
-import { requireWebManage } from './profile.js'
 import {
-  loadShifts,
   getDeptColor,
   getWeekViewDays,
   STATUS_COLORS,
-  availPref,
   applyShiftFilters,
-  toMins,
-  normEnd,
-  getAvailRosterCache,
 } from './shifts.js'
 import { renderFilterBar } from './shiftsFilterBar.js'
 
+// Avatars shown in a cell before collapsing the rest into a "+n" chip.
+const MAX_FACES = 4
+
 export async function renderWeekView() {
   const key = toYMD(state.currentWeek)
-  const allShifts = state.shiftsCache[key] || []
-  const el = document.getElementById('shifts-content')
+  const el  = document.getElementById('shifts-content')
+  const allActive = (state.shiftsCache[key] || []).filter(s => s.status !== 'CANCELLED')
 
-  const availCache = getAvailRosterCache()
-  if (!state.orgWorkers || !availCache[key]) {
-    el.innerHTML = '<div class="loader-inline"><div class="spinner"></div></div>'
-    await Promise.all([
-      state.orgWorkers ? null : ensureOrgWorkers(),
-      availCache[key] ? null : apiFetch(`/availability/week-roster/${key}`)
-        .then(r => r?.ok ? r.json() : null)
-        .then(d => { if (d) availCache[key] = d })
-        .catch(() => {}),
-    ].filter(Boolean))
-  }
+  renderFilterBar(allActive)
+  const shifts = applyShiftFilters(allActive)
 
-  const workers = state.orgWorkers || []
-  if (workers.length === 0) {
-    el.innerHTML = `<div class="empty-state"><p>${t('shifts.noWorkersFoundShort')}</p></div>`
+  if (shifts.length === 0) {
+    el.innerHTML = `<div class="empty-state"><p>${t('shifts.noShiftsWeek')}</p></div>`
     return
   }
 
   const weekDays = getWeekViewDays()
   const today    = new Date()
 
-  const allActiveShifts = allShifts.filter(s => s.status !== 'CANCELLED')
-  renderFilterBar(allActiveShifts)
+  // ── Rows: one per (department, time slot) ────────────────────────────────
+  // Shifts carry no template object here, so the slot IS its time range. Two
+  // shifts at 07:00–15:00 in the same department on different days are the
+  // same row, which is what a manager means by "the morning shift".
+  const depts = new Map()   // deptId -> { name, color, slots: Map(slotKey -> row) }
+  for (const s of shifts) {
+    const deptId = s.department?.id || '__none'
+    if (!depts.has(deptId)) {
+      depts.set(deptId, {
+        name:  s.department?.name || t('shifts.noDepartment'),
+        color: getDeptColor(s.department?.id),
+        slots: new Map(),
+      })
+    }
+    const slotKey = `${s.startTime}-${s.endTime}`
+    const slots   = depts.get(deptId).slots
+    if (!slots.has(slotKey)) {
+      slots.set(slotKey, { start: s.startTime, end: s.endTime, byDay: new Map() })
+    }
+    // Same slot twice on one day (a duplicate shift) — keep both so neither
+    // silently disappears from the week.
+    const byDay = slots.get(slotKey).byDay
+    const ymd   = s.date.substring(0, 10)
+    if (!byDay.has(ymd)) byDay.set(ymd, [])
+    byDay.get(ymd).push(s)
+  }
 
-  const shiftsByDay = new Map()
-  const workerWeekMins = new Map()
-  allActiveShifts.forEach(s => {
-    const ymd = s.date.substring(0, 10)
-    if (!shiftsByDay.has(ymd)) shiftsByDay.set(ymd, [])
-    shiftsByDay.get(ymd).push(s)
-    const sStart = toMins(s.startTime)
-    const sEnd   = normEnd(sStart, toMins(s.endTime))
-    ;(s.assignments || []).forEach(a => {
-      const wid    = a.worker?.id || a.id
-      const aStart = a.blockStart ? toMins(a.blockStart) : sStart
-      const aEnd   = a.blockEnd   ? normEnd(aStart, toMins(a.blockEnd)) : sEnd
-      workerWeekMins.set(wid, (workerWeekMins.get(wid) || 0) + (aEnd - aStart))
-    })
-  })
+  // ── Per-day totals for the header ────────────────────────────────────────
+  const dayTotals = new Map()
+  for (const { ymd } of weekDays) dayTotals.set(ymd, { assigned: 0, required: 0 })
+  for (const s of shifts) {
+    const bucket = dayTotals.get(s.date.substring(0, 10))
+    if (!bucket) continue
+    bucket.assigned += s.assignments?.length || 0
+    bucket.required += s.requiredWorkers || 0
+  }
 
-  const workerAvail = new Map(
-    (availCache[key] || []).map(r => {
-      const slots = new Map()
-      ;(r.availability?.slots || []).forEach(s => slots.set(s.day, {
-        preference: s.preference,
-        startTime: s.startTime,
-        endTime: s.endTime,
-      }))
-      return [r.worker.id, { hasAvail: !!r.availability, slots }]
-    })
-  )
+  const stateOf = (assigned, required) =>
+    required === 0 ? 'none' : assigned === 0 ? 'short' : assigned < required ? 'thin' : 'ok'
 
-  // Coverage per day. The week view had no notion of required-vs-assigned at
-  // all: an unfilled shift only ever appeared as a "+" pill on the rows of
-  // workers eligible to take it, so a shift NOBODY could fill rendered nowhere
-  // and the hole was invisible in the one view meant to show the whole week.
-  const dayCoverage = new Map()
-  weekDays.forEach(({ date }) => {
-    const list = shiftsByDay.get(toYMD(date)) || []
-    const required = list.reduce((n, s) => n + (s.requiredWorkers || 0), 0)
-    const assigned = list.reduce((n, s) => n + (s.assignments?.length || 0), 0)
-    dayCoverage.set(toYMD(date), { required, assigned, short: Math.max(0, required - assigned) })
-  })
-
-  // Load bars are scaled to the busiest worker rather than to a contract
-  // target, which the app does not model. That makes the bars comparative —
-  // who is carrying the week — not a measure of over-work.
-  const maxWeekMins = Math.max(0, ...workerWeekMins.values())
-
-  const dayHeaders = weekDays.map(({ date }) => {
+  const dayHeaders = weekDays.map(({ date, ymd }) => {
     const isToday = isSameDay(date, today)
-    const cov     = dayCoverage.get(toYMD(date)) || { required: 0, assigned: 0, short: 0 }
-    // Not `state` — that name is the imported app store in this module.
-    const covState = cov.required === 0 ? 'none'
-                   : cov.assigned === 0 ? 'short'
-                   : cov.short > 0      ? 'thin' : 'ok'
-    const pct     = cov.required > 0 ? Math.min(100, Math.round(cov.assigned / cov.required * 100)) : 0
-    const meter   = cov.required > 0
-      ? `<div class="wv-day-meter"><i style="width:${pct}%"></i></div>
-         <div class="wv-day-cov">${cov.assigned}/${cov.required}</div>`
-      : '<div class="wv-day-cov wv-day-cov-none">—</div>'
-    return `<th class="wv-day-th wv-state-${covState}${isToday ? ' wv-today' : ''}">
+    const { assigned, required } = dayTotals.get(ymd)
+    const pct = required > 0 ? Math.min(100, Math.round(assigned / required * 100)) : 0
+    return `<th class="wv-day-th wv-state-${stateOf(assigned, required)}${isToday ? ' wv-today' : ''}">
       <div class="wv-day-name">${DAYS[date.getDay()]}</div>
       <div class="wv-day-num">${date.getDate()}</div>
-      ${meter}
+      ${required > 0
+        ? `<div class="wv-day-meter"><i style="width:${pct}%"></i></div>
+           <div class="wv-day-cov">${assigned}/${required}</div>`
+        : '<div class="wv-day-cov wv-day-cov-none">—</div>'}
     </th>`
   }).join('')
 
-  // Seed dept sections from shifts — every dept with shifts this week gets a band
-  const deptMap = new Map() // deptId → {dept, workers[]}
-  allShifts.filter(s => s.status !== 'CANCELLED' && s.department).forEach(s => {
-    if (!deptMap.has(s.department.id)) deptMap.set(s.department.id, { dept: s.department, workers: [] })
-  })
-
-  // Group workers by department memberships:
-  // • No memberships (no restrictions) → appears in every dept section
-  // • Has memberships → appears in each dept section they belong to that has shifts this week
-  // • Has memberships but none have shifts this week → Unassigned
-  const unassigned = []
-  workers.forEach(w => {
-    const deptIds = w.departmentIds || []
-    if (deptIds.length === 0) {
-      deptMap.forEach(entry => entry.workers.push(w))
-    } else {
-      let placed = false
-      deptIds.forEach(id => { if (deptMap.has(id)) { deptMap.get(id).workers.push(w); placed = true } })
-      if (!placed) unassigned.push(w)
+  // ── Cells ────────────────────────────────────────────────────────────────
+  function cell(dayShifts) {
+    if (!dayShifts || dayShifts.length === 0) {
+      return '<td class="wv-cell wv-cell-nil"></td>'
     }
-  })
-  const deptGroups = [...deptMap.values()].sort((a, b) => a.dept.name.localeCompare(b.dept.name))
-  if (unassigned.length) deptGroups.push({ dept: null, workers: unassigned })
+    return dayShifts.map(s => {
+      const assigned = s.assignments || []
+      const required = s.requiredWorkers || 0
+      const cellState = stateOf(assigned.length, required)
+      const statusColor = STATUS_COLORS[s.status] || '#94a3b8'
+
+      const faces = assigned.slice(0, MAX_FACES).map(a => `
+        <span class="wv-face" data-avatar="${esc(a.worker?.avatarUrl || '')}"
+              title="${esc(a.worker?.name || '')}">${esc(getInitials(a.worker?.name || '?'))}</span>`).join('')
+      const overflow = assigned.length > MAX_FACES
+        ? `<span class="wv-face wv-face-more">+${assigned.length - MAX_FACES}</span>` : ''
+      // An empty slot needs a target of its own, or a fully unstaffed shift
+      // would be a blank cell that does not look clickable.
+      const empty = assigned.length === 0
+        ? `<span class="wv-face wv-face-empty">+</span>` : ''
+
+      return `<td class="wv-cell wv-state-${cellState}"
+                  onclick="openShiftModal('${s.id}')" role="button" tabindex="0"
+                  title="${esc(`${s.startTime.substring(0,5)}–${s.endTime.substring(0,5)}`)}">
+        <div class="wv-cell-inner">
+          <div class="wv-faces">${faces}${overflow}${empty}</div>
+          <div class="wv-cell-foot">
+            <span class="wv-cell-cov">${assigned.length}/${required}</span>
+            <span class="wv-cell-status" style="background:${statusColor}"></span>
+          </div>
+        </div>
+      </td>`
+    }).join('')
+  }
 
   const colSpan = weekDays.length + 1
 
-  function workerRow(w, deptId = null, rowIdx = 0) {
-    const initials = esc(getInitials(w.name))
-    const altCls   = rowIdx % 2 === 1 ? ' wv-row-alt' : ''
-    const cells = weekDays.map(({ date, ymd }) => {
-      const dayShifts = applyShiftFilters(
-        (shiftsByDay.get(ymd) || [])
-          .filter(s => deptId === null || s.department?.id === deptId)
-          .sort((a, b) => a.startTime.localeCompare(b.startTime))
-      )
+  const bodyRows = [...depts.entries()]
+    .sort((a, b) => a[1].name.localeCompare(b[1].name))
+    .map(([, dept]) => {
+      const band = `<tr class="wv-dept-band"><td colspan="${colSpan}" class="wv-dept-label">
+        <span class="wv-dept-stripe" style="background:${dept.color}"></span>
+        <span style="color:${dept.color}">${esc(dept.name)}</span>
+      </td></tr>`
 
-      const dayFull = DAY_FULL[date.getDay()]
-      const avail   = workerAvail.get(w.id)
-      const slot    = avail?.hasAvail ? (avail.slots.get(dayFull) || { preference: 'off' }) : null
-      const prefKey = slot?.preference || (slot?.startTime && slot?.endTime ? 'custom' : null)
-      const showChip = prefKey && prefKey !== 'any'
-      const cfg     = showChip ? availPref(prefKey) : null
-      const isOff   = prefKey === 'off'
-      const isToday = isSameDay(date, today)
-      const availChip = cfg
-        ? `<div class="wv-avail-chip" style="background:${cfg.color}1A;border-color:${cfg.color}66;color:${cfg.color}">
-            <span class="wv-avail-icon">${AVAIL_ICONS[prefKey]}</span>
-            <span class="wv-avail-label">${esc(prefKey === 'custom' && slot.startTime ? `${slot.startTime.substring(0,5)}–${slot.endTime.substring(0,5)}` : cfg.label)}</span>
-          </div>`
-        : ''
-      const cellCls = `wv-cell${isOff ? ' wv-cell-off' : ''}${isToday ? ' wv-cell-today' : ''}`
+      const rows = [...dept.slots.values()]
+        .sort((a, b) => a.start.localeCompare(b.start))
+        .map(slot => {
+          const cells = weekDays.map(({ ymd }) => cell(slot.byDay.get(ymd))).join('')
+          return `<tr class="wv-slot-row">
+            <td class="wv-slot-cell">
+              <div class="wv-slot-time">${esc(slot.start.substring(0, 5))}</div>
+              <div class="wv-slot-end">${esc(slot.end.substring(0, 5))}</div>
+            </td>
+            ${cells}
+          </tr>`
+        }).join('')
 
-      if (dayShifts.length === 0) {
-        return `<td class="${cellCls}">${availChip}${availChip ? '' : '<span class="wv-empty">—</span>'}</td>`
-      }
-
-      const assignedIds = new Set(
-        dayShifts.filter(s => (s.assignments || []).some(a => (a.worker?.id || a.id) === w.id)).map(s => s.id)
-      )
-      const assignedRanges = dayShifts
-        .filter(s => assignedIds.has(s.id))
-        .map(s => {
-          const a  = (s.assignments || []).find(a => (a.worker?.id || a.id) === w.id)
-          const sS = toMins(s.startTime)
-          const aS = a?.blockStart ? toMins(a.blockStart) : sS
-          const aE = a?.blockEnd   ? normEnd(aS, toMins(a.blockEnd)) : normEnd(sS, toMins(s.endTime))
-          return { startMins: aS, endMins: aE }
-        })
-
-      const pills = dayShifts.map(s => {
-        const start  = s.startTime.substring(0, 5)
-        const end    = s.endTime.substring(0, 5)
-        const dColor = getDeptColor(s.department?.id)
-        const sColor = STATUS_COLORS[s.status] || '#94a3b8'
-
-        if (assignedIds.has(s.id)) {
-          return `<div class="wv-pill wv-pill-assigned" style="background:${dColor};border-color:${dColor}" onclick="openShiftModal('${s.id}')" role="button" tabindex="0">
-            <span class="wv-pill-check">✓</span>
-            <span class="wv-pill-time">${start}–${end}</span>
-            <span class="wv-pill-status" style="background:${sColor}"></span>
-          </div>`
-        }
-
-        const isFull      = (s.assignments || []).length >= (s.requiredWorkers || 1)
-        if (isFull) return null
-        const sStart      = toMins(s.startTime)
-        const sEnd        = normEnd(sStart, toMins(s.endTime))
-        const hasConflict = assignedRanges.some(r => r.startMins < sEnd && r.endMins > sStart)
-        if (hasConflict) return null
-        const wDeptIds    = w.departmentIds || []
-        const isWrongDept = s.department?.id && wDeptIds.length > 0 && !wDeptIds.includes(s.department.id)
-        if (isWrongDept) return null
-
-        return `<div class="wv-pill wv-pill-open" data-assign="${s.id}::${w.id}" onclick="assignInWeekView('${s.id}','${w.id}')" role="button" tabindex="0">
-          <span class="wv-pill-plus">+</span>
-          <span class="wv-pill-time">${start}–${end}</span>
-        </div>`
-      }).filter(Boolean).join('')
-
-      return `<td class="${cellCls}">${availChip}${pills || (availChip ? '' : '<span class="wv-empty">—</span>')}</td>`
+      return band + rows
     }).join('')
-
-    const weekMins = workerWeekMins.get(w.id) || 0
-    const hoursLabel = weekMins
-      ? (weekMins % 60 === 0 ? `${weekMins / 60}h` : `${Math.floor(weekMins / 60)}h ${weekMins % 60}m`)
-      : ''
-
-    return `<tr class="wv-worker-row${altCls}">
-      <td class="wv-worker-cell">
-        <div class="wv-worker-avatar" data-avatar="${esc(w.avatarUrl || '')}">${initials}</div>
-        <div class="wv-worker-info">
-          <div class="wv-worker-name">${esc(w.name.split(' ')[0])}</div>
-          ${hoursLabel ? `<div class="wv-worker-mins">${hoursLabel}</div>` : ''}
-          ${maxWeekMins > 0 ? `<div class="wv-worker-load" title="${esc(hoursLabel || '0h')}"><i style="width:${Math.round((weekMins / maxWeekMins) * 100)}%"></i></div>` : ''}
-        </div>
-      </td>
-      ${cells}
-    </tr>`
-  }
-
-  const bodyRows = deptGroups.map(({ dept, workers: grp }) => {
-    const color = getDeptColor(dept?.id)
-    const band  = dept
-      ? `<tr class="wv-dept-band"><td colspan="${colSpan}" class="wv-dept-label">
-          <span class="wv-dept-stripe" style="background:${color}"></span>
-          <span style="color:${color}">${esc(dept.name)}</span>
-        </td></tr>`
-      : `<tr class="wv-dept-band"><td colspan="${colSpan}" class="wv-dept-label wv-dept-unassigned">
-          <span class="wv-dept-stripe" style="background:#94a3b8"></span>
-          <span>${t('shifts.unassignedThisWeek')}</span>
-        </td></tr>`
-    const emptyRow = grp.length === 0
-      ? `<tr><td colspan="${colSpan}" class="wv-dept-empty">${t('shifts.deptNoWorkers')}</td></tr>`
-      : ''
-    return band + emptyRow + grp.map((w, i) => workerRow(w, dept?.id ?? null, i)).join('')
-  }).join('')
 
   el.innerHTML = `
     <div class="wv-outer">
       <div class="wv-scroll">
         <table class="wv-table">
           <thead><tr>
-            <th class="wv-corner">${t('shifts.cell.workers')}</th>
+            <th class="wv-corner">${t('shifts.weekSlotHeader')}</th>
             ${dayHeaders}
           </tr></thead>
           <tbody>${bodyRows}</tbody>
@@ -266,37 +179,4 @@ export async function renderWeekView() {
       </div>
     </div>`
   applyAvatars(el)
-}
-
-export async function assignInWeekView(shiftId, workerId) {
-  if (!requireWebManage()) return
-  const pill = document.querySelector(`.wv-pill-open[data-assign="${shiftId}::${workerId}"]`)
-  if (!pill || pill.dataset.assigning) return
-  pill.dataset.assigning = '1'
-  const prev = pill.innerHTML
-  pill.innerHTML = '<div class="spinner" style="width:12px;height:12px;border-width:2px"></div>'
-  pill.style.pointerEvents = 'none'
-
-  try {
-    const res = await apiFetch(`/shifts/${shiftId}/assign`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ workerId }),
-    })
-    if (res?.ok) {
-      delete state.shiftsCache[toYMD(state.currentWeek)]
-      await loadShifts()
-    } else {
-      const d = await res?.json().catch(() => ({}))
-      showToast(d?.error || t('shifts.failedAssign'))
-      pill.innerHTML = prev
-      pill.style.pointerEvents = ''
-      delete pill.dataset.assigning
-    }
-  } catch {
-    showToast(t('common.networkError'))
-    pill.innerHTML = prev
-    pill.style.pointerEvents = ''
-    delete pill.dataset.assigning
-  }
 }
