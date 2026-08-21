@@ -199,6 +199,9 @@ export async function renderTableView() {
           clickAttr = ''
           content = `<div class="dt-cell-blocked"><span class="dt-blocked-icon">🕐</span><span class="dt-blocked-label dt-blocked-warn">${t('shifts.cell.busy')}</span></div>`
         } else if (canAssign) {
+          // The whole cell is the click target, so the whole cell carries the
+          // affordance. The + is just its label.
+          bgCls = ' dt-cell-open'
           clickAttr = `onclick="assignInTable('${s.id}','${w.id}')"`
           content = `<div class="dt-cell-plus">+</div>`
         } else {
