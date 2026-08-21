@@ -41,7 +41,7 @@ import {
 // Re-export so external files (modals.js, etc.) can keep importing from
 // shifts.js — their public surface doesn't change when we split internals.
 export { updateActionBar }
-import { renderShiftsForDay } from './shiftsListView.js'
+import { renderShiftsForDay, syncFilterRow } from './shiftsListView.js'
 import { renderTableView, assignInTable } from './shiftsTableView.js'
 import { renderWeekView, assignInWeekView } from './shiftsWeekView.js'
 
@@ -160,6 +160,7 @@ export function setShiftsView(view) {
   // drop out of it too, or the chrome would stay hidden on a view that needs it.
   const expandBtn = document.getElementById('view-expand-btn')
   if (expandBtn) expandBtn.style.display = view === 'table' ? '' : 'none'
+  syncFilterRow()
   if (view !== 'table') exitTableFocus()
 
   const contentArea = document.getElementById('shifts-content').parentElement

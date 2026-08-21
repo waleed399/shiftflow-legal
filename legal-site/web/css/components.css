@@ -191,6 +191,11 @@ textarea.form-input { resize: vertical; min-height: 44px; }
 .gen-warnings-box p { font-size: 0.78rem; font-weight: 700; color: #b45309; margin: 0 0 6px; }
 .gen-warnings-box ul { margin: 0; padding-left: 16px; }
 .gen-warnings-box li { font-size: 0.74rem; color: #78350f; line-height: 1.6; }
+.gen-warnings-box .gen-warn-summary { font-weight: 600; margin: 0 0 4px; }
+.gen-warnings-box .gen-warn-hint { font-weight: 500; color: #92400e; margin: 0 0 6px; }
+.gen-warn-details > summary { font-size: 0.74rem; font-weight: 700; color: #b45309; cursor: pointer; list-style: revert; }
+.gen-warn-details[open] > summary { margin-bottom: 6px; }
+.gen-warn-details > ul { max-height: 220px; overflow-y: auto; }
 .gen-invalid-box { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 10px; padding: 10px 14px; font-size: 0.76rem; color: #9a3412; line-height: 1.5; }
 
 /* ── Notification bell (header icon) ── */

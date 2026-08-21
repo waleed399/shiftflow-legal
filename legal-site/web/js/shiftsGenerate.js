@@ -7,7 +7,7 @@
 
 import { state } from './state.js'
 import { apiFetch } from './api.js'
-import { toYMD, esc, showToast } from './utils.js'
+import { toYMD, esc, showToast, fmtDate } from './utils.js'
 import { t } from './i18n.js'
 import { requireWebManage } from './profile.js'
 import { loadShifts } from './shifts.js'
@@ -50,6 +50,49 @@ export async function openGenerateModal() {
   }
 }
 
+// A line per understaffed shift is unreadable once a week has a few dozen of
+// them, and the manager cannot act on any single line anyway — the response is
+// always the same: chase availability. So lead with the totals and keep the
+// per-shift list behind a disclosure for whoever wants it.
+//
+// Built from `preview`, not from the server's `warnings` array: preview is
+// structured, so this stays translatable. The warnings strings are assembled
+// in English on the server and would have shown as English to a Hebrew manager.
+function renderWarnings(selected) {
+  const preview = selected?.preview || []
+  const short = preview.filter(s => s.understaffed)
+  if (short.length === 0) return ''
+
+  const unfilled = short.reduce(
+    (n, s) => n + Math.max(0, (s.requiredWorkers || 0) - (s.assignedWorkers?.length || 0)), 0
+  )
+  // Nobody at all was available, as opposed to a partial fill. Almost always
+  // means availability was never submitted for the week, or the workers are
+  // not in these departments — worth saying, because the totals alone read
+  // like a mild shortfall.
+  const noneAtAll = short.every(s => (s.assignedWorkers?.length || 0) === 0)
+
+  const rows = short.map(s => {
+    const when = `${esc(s.departmentName || '')} ${esc(s.startTime)}\u2013${esc(s.endTime)}`
+    const day  = fmtDate(s.date)
+    const got  = `${s.assignedWorkers?.length || 0}/${s.requiredWorkers || 0}`
+    return `<li>${when} · ${esc(day)} — ${esc(got)}</li>`
+  }).join('')
+
+  return `
+    <div class="gen-warnings-box">
+      <p>${t('shifts.generateWarningsFor', { label: esc(selected.label) })}</p>
+      <p class="gen-warn-summary">${t('shifts.generateUnderstaffedSummary', {
+        count: short.length, total: preview.length, slots: unfilled,
+      })}</p>
+      ${noneAtAll ? `<p class="gen-warn-hint">${t('shifts.generateNoneAvailable')}</p>` : ''}
+      <details class="gen-warn-details">
+        <summary>${t('shifts.generateShowShifts', { count: short.length })}</summary>
+        <ul>${rows}</ul>
+      </details>
+    </div>`
+}
+
 function renderGenOptions() {
   if (!_genData) return
   const { options, invalidAvailability } = _genData
@@ -75,11 +118,7 @@ function renderGenOptions() {
   }).join('')
 
   const selected = options.find(o => o.id === _genSelected)
-  const warningsHtml = selected?.warnings?.length ? `
-    <div class="gen-warnings-box">
-      <p>${t('shifts.generateWarningsFor', { label: esc(selected.label) })}</p>
-      <ul>${selected.warnings.map(w => `<li>${esc(w)}</li>`).join('')}</ul>
-    </div>` : ''
+  const warningsHtml = renderWarnings(selected)
 
   const invalidHtml = invalidAvailability?.length ? `
     <div class="gen-invalid-box">

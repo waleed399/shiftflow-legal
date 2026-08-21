@@ -66,10 +66,23 @@ export function renderShiftsForDay() {
   updateActionBar()
 }
 
+// The filter row holds two independent things — the scrolling chips and the
+// Expand button — and either can be hidden on its own. Show the row (and the
+// dividing rule it carries) only when at least one of them is actually there.
+export function syncFilterRow() {
+  const row = document.getElementById('filter-row')
+  if (!row) return
+  const shown = (id) => {
+    const el = document.getElementById(id)
+    return !!el && el.style.display !== 'none'
+  }
+  row.style.display = (shown('shift-filter-bar') || shown('view-expand-btn')) ? 'flex' : 'none'
+}
+
 export function renderFilterBar(dayShifts) {
   const bar = document.getElementById('shift-filter-bar')
   if (!bar) return
-  if (dayShifts.length === 0) { bar.style.display = 'none'; return }
+  if (dayShifts.length === 0) { bar.style.display = 'none'; syncFilterRow(); return }
   bar.style.display = ''
 
   const active = getActiveFilters()
@@ -123,6 +136,7 @@ export function renderFilterBar(dayShifts) {
     : ''
 
   bar.innerHTML = `<div class="filter-bar-scroll">${clearBtn}${understaffedChip}${chips}${deptChips}</div>`
+  syncFilterRow()
 }
 
 function renderDayStats(dayShifts) {

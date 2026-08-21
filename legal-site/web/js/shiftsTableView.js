@@ -22,6 +22,7 @@ import {
   getAvailRosterCache,
 } from './shifts.js'
 import { renderFilterBar } from './shiftsListView.js'
+import { applyColumnStretch } from './shiftsTableFit.js'
 
 export async function renderTableView() {
   const key = toYMD(state.currentWeek)
@@ -246,6 +247,7 @@ export async function renderTableView() {
       </div>
     </div>`
   applyAvatars(el)
+  applyColumnStretch()
 }
 
 export async function assignInTable(shiftId, workerId) {

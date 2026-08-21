@@ -129,10 +129,29 @@ body.web-locked #btn-create-shifts { display: none !important; }
 .loader-inline .spinner { border-color: rgba(0,0,0,0.08); border-top-color: var(--navy); }
 
 /* ── Shift filter bar ── */
-#shift-filter-bar {
+/* The filter row carries the rule and ground now, because it holds both the
+   scrolling chips and the Expand button on one line. */
+.filter-row {
+  display: flex; align-items: center;
   border-bottom: 1px solid var(--border);
   background: var(--white);
 }
+/* The chips scroll; the button beside them must not scroll away, hence
+   min-width:0 here and flex-shrink:0 on the button. */
+#shift-filter-bar { flex: 1; min-width: 0; }
+
+/* Deliberately solid rather than an outline chip: it sits in a row of outline
+   chips, and an outline would read as just another filter. */
+.btn-expand {
+  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+  flex-shrink: 0; margin-inline-start: 10px; margin-inline-end: 20px;
+  padding: 6px 14px; border-radius: 20px;
+  border: 1.5px solid var(--navy); background: var(--navy); color: #fff;
+  font-size: 0.75rem; font-weight: 700; cursor: pointer; font-family: inherit;
+  transition: opacity 0.15s;
+}
+.btn-expand:hover { opacity: 0.85; }
+.btn-expand:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
 .filter-bar-scroll {
   display: flex; align-items: center; gap: 6px;
   padding: 8px 20px; overflow-x: auto;
@@ -241,7 +260,7 @@ body.web-locked #btn-create-shifts { display: none !important; }
 .dt-corner-label { position: absolute; font-size: 0.6rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
 .dt-corner-top    { top: 6px; right: 50px; }
 .dt-corner-bottom { bottom: 6px; left: 65px; }
-.dt-worker-th { width: 88px; min-width: 88px; padding: 8px 4px; text-align: center; background: var(--surface-sunken); border-left: 1px solid var(--border); border-bottom: 2px solid var(--border); vertical-align: middle; }
+.dt-worker-th { width: var(--dt-col-w, 88px); min-width: var(--dt-col-w, 88px); padding: 8px 4px; text-align: center; background: var(--surface-sunken); border-left: 1px solid var(--border); border-bottom: 2px solid var(--border); vertical-align: middle; }
 .dt-worker-avatar-wrap { position: relative; width: 28px; margin: 0 auto 4px; }
 .dt-worker-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--navy); color: white; font-size: 0.62rem; font-weight: 800; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .dt-worker-name { font-size: 0.68rem; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; }
@@ -259,7 +278,7 @@ body.web-locked #btn-create-shifts { display: none !important; }
 .dt-shift-dur  { font-size: 0.65rem; color: var(--muted); margin-bottom: 4px; }
 .dt-shift-meta { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
 .dt-status-pill { font-size: 0.58rem; font-weight: 700; padding: 1px 5px; border-radius: 4px; text-transform: uppercase; }
-.dt-worker-cell { width: 88px; min-width: 88px; text-align: center; vertical-align: middle; height: 64px; border-left: 1px solid var(--border); border-top: 1px solid var(--border); transition: background 0.1s; }
+.dt-worker-cell { width: var(--dt-col-w, 88px); min-width: var(--dt-col-w, 88px); text-align: center; vertical-align: middle; height: 64px; border-left: 1px solid var(--border); border-top: 1px solid var(--border); transition: background 0.1s; }
 .dt-row-border { border-top: 1px solid var(--border); }
 .dt-cell-check { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; font-weight: 700; color: white; margin: 0 auto; }
 .dt-cell-plus  { width: 26px; height: 26px; border-radius: 50%; border: 1.5px dashed var(--border-strong); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: var(--border-strong); margin: 0 auto; transition: border-color 0.12s, color 0.12s; }
@@ -1292,7 +1311,8 @@ body.dt-focus aside,
 body.dt-focus #view-shifts > .topbar,
 body.dt-focus #view-shifts > .action-bar,
 body.dt-focus #view-shifts > .day-tabs,
-body.dt-focus .fab { display: none !important; }
+body.dt-focus .fab,
+body.dt-focus #view-expand-btn { display: none !important; }
 
 body.dt-focus .content-area { padding: 0; }
 body.dt-focus #shifts-content { height: 100%; }

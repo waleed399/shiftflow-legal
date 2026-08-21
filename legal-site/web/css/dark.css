@@ -100,6 +100,8 @@
 [data-theme="dark"] .gen-warnings-box { background: #1c1408; border-color: #78350f; }
 [data-theme="dark"] .gen-warnings-box p { color: #fcd34d; }
 [data-theme="dark"] .gen-warnings-box li { color: #fde68a; }
+[data-theme="dark"] .gen-warnings-box .gen-warn-hint { color: #fcd34d; }
+[data-theme="dark"] .gen-warn-details > summary { color: #fcd34d; }
 [data-theme="dark"] .gen-invalid-box { background: #1c0d08; border-color: #7c2d12; color: #fdba74; }
 
 /* Notification panel */

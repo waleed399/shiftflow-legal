@@ -20,6 +20,7 @@
 // the page would be left with hidden chrome and no visible way back.
 
 import { t } from './i18n.js'
+import { applyColumnStretch } from './shiftsTableFit.js'
 
 let active = false
 
@@ -59,6 +60,7 @@ export function enterTableFocus() {
     exit.setAttribute('aria-label', t('shifts.exitExpand'))
     exit.setAttribute('title', t('shifts.exitExpand'))
   }
+  applyColumnStretch()
   requestFullscreen()
 }
 
@@ -68,6 +70,7 @@ export function exitTableFocus() {
   document.body.classList.remove('dt-focus')
   const exit = chrome()
   if (exit) exit.style.display = 'none'
+  applyColumnStretch()
   exitFullscreen()
 }
 
