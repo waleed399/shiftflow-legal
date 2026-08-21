@@ -148,18 +148,34 @@ export function renderDayTabs() {
 
 // ── View toggle ───────────────────────────────────────────────────────────────
 
+// Everything around the roster that depends on which view is active: the
+// toggle's pressed state, the day tabs, and the Expand button.
+//
+// Split out of setShiftsView because the shifts view is reachable WITHOUT
+// going through it — on first load nothing calls setShiftsView, so the Expand
+// button kept the display:none it carries in the markup and only appeared
+// after a round-trip through the week roster. Runs on entry too now.
+export function syncViewChrome() {
+  document.getElementById('view-table-btn')?.classList.toggle('active', shiftsView === 'table')
+  document.getElementById('view-week-btn')?.classList.toggle('active',  shiftsView === 'week')
+
+  const dayTabs = document.getElementById('day-tabs')
+  if (dayTabs) dayTabs.style.display = shiftsView === 'week' ? 'none' : ''
+
+  // Focus mode belongs to the day roster matrix only.
+  const expandBtn = document.getElementById('view-expand-btn')
+  if (expandBtn) expandBtn.style.display = shiftsView === 'table' ? '' : 'none'
+
+  syncFilterRow()
+}
+
 export function setShiftsView(view) {
   shiftsView = view
   _activeFilters = new Set()
-  document.getElementById('view-table-btn')?.classList.toggle('active', view === 'table')
-  document.getElementById('view-week-btn')?.classList.toggle('active',  view === 'week')
-  document.getElementById('day-tabs').style.display = view === 'week' ? 'none' : ''
+  syncViewChrome()
 
-  // Focus mode belongs to the day roster matrix only. Leaving that view has to
-  // drop out of it too, or the chrome would stay hidden on a view that needs it.
-  const expandBtn = document.getElementById('view-expand-btn')
-  if (expandBtn) expandBtn.style.display = view === 'table' ? '' : 'none'
-  syncFilterRow()
+  // Leaving the day roster has to drop out of focus mode too, or the page
+  // chrome would stay hidden on a view that needs it.
   if (view !== 'table') exitTableFocus()
 
   // Both remaining views are full-bleed matrices, so the content area is

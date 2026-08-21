@@ -2,7 +2,7 @@ import { state } from './state.js'
 import { API } from './config.js'
 import { getToken, getRefreshToken, clearSession, apiFetch } from './api.js'
 import { getWeekStartOf, getInitials, showToast } from './utils.js'
-import { renderWeekLabel, renderDayTabs, loadShifts } from './shifts.js'
+import { renderWeekLabel, renderDayTabs, loadShifts, syncViewChrome } from './shifts.js'
 import { renderProfile, getEffectivePlan, canManageWeb } from './profile.js'
 import { isManagement, isOwner } from './roles.js'
 import './modals.js' // registers window.openShiftModal and other modal handlers
@@ -168,7 +168,10 @@ export function applyWebLockState() {
   if (banner) banner.style.display = locked ? 'flex' : 'none'
 }
 
-const ON_ENTER = { dashboard: renderDashboard, profile: renderProfile, requests: renderRequests, workers: renderWorkers, availability: renderAvailability }
+// `shifts` syncs its chrome rather than re-rendering: the roster is already
+// painted by the boot path, but nothing else sets the Expand button's
+// visibility, which is view-dependent.
+const ON_ENTER = { dashboard: renderDashboard, shifts: syncViewChrome, profile: renderProfile, requests: renderRequests, workers: renderWorkers, availability: renderAvailability }
 
 function getActiveView() {
   for (const v of ['dashboard', 'shifts', 'profile', 'requests', 'workers', 'availability']) {
