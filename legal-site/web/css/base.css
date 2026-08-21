@@ -16,24 +16,24 @@
      codebase is already slate (#f8fafc, #cbd5e1, #64748b, #e2e8f0), so the warm
      tokens were fighting their own components. Sharing the marketing site's
      palette also means signing in does not look like changing product. */
-  --bg: #eaf0f8;
+  --bg: #e8eef7;
   /* The ground behind the content area only. Kept separate from --bg because
      --bg is also the fill for ghost buttons, list rows, disabled inputs and a
      number of hovers — darkening the page should not drag those with it. */
-  --page: #dce5f2;
+  --page: #ccd7e6;
   /* Chrome: the stacked full-width bands (topbar, day tabs, action bar, filter
      row). They cover more of the screen than the cards do, so painting them
      --white made the app read as a big white slab on a blue field. Tinted into
      the family and kept lighter than the page but never as light as a card, so
      content stays the brightest thing on screen. */
-  --chrome: #e9eef7;
+  --chrome: #d8e1ee;
   --white: #fbfcfe;        /* not pure white: #fff against the ground reads clinical */
   --surface: var(--white);
-  --surface-sunken: #eef3fa;
+  --surface-sunken: #e9eff8;
   --text: #0f172a;
   --muted: #64748b;
-  --border: #d7dfec;
-  --border-strong: #c2cee0;
+  --border: #c5d0e2;
+  --border-strong: #b3c1d8;
   --primary: var(--navy);
 
   /* ── Operational state ──

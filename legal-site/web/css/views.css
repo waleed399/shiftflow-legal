@@ -106,10 +106,10 @@ body.web-locked #btn-create-shifts { display: none !important; }
 .action-bar-label { font-size: 0.78rem; color: var(--muted); font-weight: 500; margin-right: 4px; }
 .action-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; font-family: inherit; }
 .action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.btn-publish-day   { background: #eff6ff; color: #1a2d4f; }
-.btn-publish-day:hover:not(:disabled)   { background: #1a2d4f; color: white; }
-.btn-unpublish-day { background: #f1f5f9; color: #64748b; }
-.btn-unpublish-day:hover:not(:disabled) { background: #64748b; color: white; }
+.btn-publish-day   { background: #f0fdf4; color: #16a34a; }
+.btn-publish-day:hover:not(:disabled)   { background: #16a34a; color: white; }
+.btn-unpublish-day { background: #fef2f2; color: #dc2626; }
+.btn-unpublish-day:hover:not(:disabled) { background: #dc2626; color: white; }
 .action-bar-sep { width: 1px; height: 20px; background: var(--border); margin: 0 6px; flex-shrink: 0; }
 .btn-publish-week   { background: #f0fdf4; color: #16a34a; }
 .btn-publish-week:hover:not(:disabled)   { background: #16a34a; color: white; }
