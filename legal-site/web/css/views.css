@@ -49,7 +49,7 @@ body.web-locked #btn-create-shifts { display: none !important; }
 
 /* ── Topbar ── */
 .topbar {
-  background: var(--white); border-bottom: 1px solid var(--border);
+  background: var(--chrome); border-bottom: 1px solid var(--border);
   padding: 0 30px; height: 64px; display: flex; align-items: center;
   justify-content: space-between; flex-shrink: 0;
   box-shadow: 0 1px 0 rgba(15,23,42,0.03); position: relative; z-index: 10;
@@ -77,7 +77,7 @@ body.web-locked #btn-create-shifts { display: none !important; }
 .week-btn:hover { border-color: var(--navy); color: var(--navy); background: var(--surface-sunken); }
 
 /* ── Day tabs ── */
-.day-tabs { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 20px; display: flex; gap: 2px; flex-shrink: 0; }
+.day-tabs { background: var(--chrome); border-bottom: 1px solid var(--border); padding: 0 20px; display: flex; gap: 2px; flex-shrink: 0; }
 .day-tab {
   padding: 10px 10px 8px; font-size: 0.68rem; font-weight: 600;
   cursor: pointer; color: var(--muted); text-transform: uppercase;
@@ -102,7 +102,7 @@ body.web-locked #btn-create-shifts { display: none !important; }
 .day-tab.today:not(.active) .day-num { color: var(--red); font-weight: 800; }
 
 /* ── Action bar ── */
-.action-bar { background: var(--white); border-bottom: 1px solid var(--border); padding: 8px 28px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.action-bar { background: var(--chrome); border-bottom: 1px solid var(--border); padding: 8px 28px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .action-bar-label { font-size: 0.78rem; color: var(--muted); font-weight: 500; margin-right: 4px; }
 .action-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; font-family: inherit; }
 .action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -135,7 +135,7 @@ body.web-locked #btn-create-shifts { display: none !important; }
 .filter-row {
   display: flex; align-items: center;
   border-bottom: 1px solid var(--border);
-  background: var(--white);
+  background: var(--chrome);
 }
 /* The chips scroll; the button beside them must not scroll away, hence
    min-width:0 here and flex-shrink:0 on the button. */
@@ -550,7 +550,7 @@ body.web-locked #btn-create-shifts { display: none !important; }
 .billing-current-desc { font-size: 0.875rem; color: var(--muted); line-height: 1.5; }
 
 /* ── Request tabs ── */
-.req-tabs { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 28px; display: flex; gap: 4px; flex-shrink: 0; }
+.req-tabs { background: var(--chrome); border-bottom: 1px solid var(--border); padding: 0 28px; display: flex; gap: 4px; flex-shrink: 0; }
 .req-tab { padding: 14px 18px; font-size: 0.875rem; font-weight: 600; color: var(--muted); background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: color 0.15s; margin-bottom: -1px; font-family: inherit; }
 .req-tab:hover { color: var(--navy); }
 .req-tab.active { color: var(--navy); border-bottom-color: var(--navy); }

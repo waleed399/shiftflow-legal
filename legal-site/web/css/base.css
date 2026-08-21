@@ -21,6 +21,12 @@
      --bg is also the fill for ghost buttons, list rows, disabled inputs and a
      number of hovers — darkening the page should not drag those with it. */
   --page: #dce5f2;
+  /* Chrome: the stacked full-width bands (topbar, day tabs, action bar, filter
+     row). They cover more of the screen than the cards do, so painting them
+     --white made the app read as a big white slab on a blue field. Tinted into
+     the family and kept lighter than the page but never as light as a card, so
+     content stays the brightest thing on screen. */
+  --chrome: #e9eef7;
   --white: #fbfcfe;        /* not pure white: #fff against the ground reads clinical */
   --surface: var(--white);
   --surface-sunken: #eef3fa;
