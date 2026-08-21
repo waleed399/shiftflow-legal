@@ -146,12 +146,20 @@ body.web-locked #btn-create-shifts { display: none !important; }
 .btn-expand {
   display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
   flex-shrink: 0; margin-inline-start: 10px; margin-inline-end: 20px;
+  position: relative;
   padding: 6px 14px; border-radius: 20px;
   border: 1.5px solid var(--navy); background: var(--navy); color: #fff;
   font-size: 0.75rem; font-weight: 700; cursor: pointer; font-family: inherit;
   transition: opacity 0.15s;
 }
 .btn-expand:hover { opacity: 0.85; }
+/* Hairline tying the button to the chip row, so it reads as part of the bar
+   rather than floating at the far edge. On the button itself, so it only ever
+   appears when the button does. inset-inline-start keeps it correct in RTL. */
+.btn-expand::before {
+  content: ""; position: absolute; inset-inline-start: -11px; top: 50%;
+  transform: translateY(-50%); width: 1px; height: 18px; background: var(--border);
+}
 .btn-expand:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
 .filter-bar-scroll {
   display: flex; align-items: center; gap: 6px;

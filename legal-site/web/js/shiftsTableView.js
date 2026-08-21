@@ -22,6 +22,7 @@ import {
   getAvailRosterCache,
 } from './shifts.js'
 import { renderFilterBar } from './shiftsFilterBar.js'
+import { syncViewChrome } from './shifts.js'
 import { applyColumnStretch } from './shiftsTableFit.js'
 
 export async function renderTableView() {
@@ -46,6 +47,7 @@ export async function renderTableView() {
           ${t('shifts.createFirst')}
         </button>
       </div>`
+    syncViewChrome()
     return
   }
 
@@ -65,6 +67,7 @@ export async function renderTableView() {
   const workers = state.orgWorkers || []
   if (workers.length === 0) {
     el.innerHTML = `<div class="empty-state"><p>${t('shifts.noWorkersFound')}</p></div>`
+    syncViewChrome()
     return
   }
 
@@ -106,6 +109,7 @@ export async function renderTableView() {
         <p style="color:var(--muted)">${t('shifts.filterNoMatch')}</p>
         <button class="btn-link" style="margin-top:8px" onclick="clearShiftFilters()">${t('shifts.filterClearLink')}</button>
       </div>`
+    syncViewChrome()
     return
   }
   const byDept = new Map()
@@ -251,6 +255,7 @@ export async function renderTableView() {
     </div>`
   applyAvatars(el)
   applyColumnStretch()
+  syncViewChrome()
 }
 
 export async function assignInTable(shiftId, workerId) {

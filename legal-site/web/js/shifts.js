@@ -162,9 +162,14 @@ export function syncViewChrome() {
   const dayTabs = document.getElementById('day-tabs')
   if (dayTabs) dayTabs.style.display = shiftsView === 'week' ? 'none' : ''
 
-  // Focus mode belongs to the day roster matrix only.
+  // Focus mode belongs to the day roster matrix only, and only when there is a
+  // matrix to expand. renderTableView has three exits — no shifts, no workers,
+  // and the real table — and only the last one draws .dt-outer, so its presence
+  // is the honest test. Without this the button sat alone on an otherwise empty
+  // filter row on days with nothing scheduled.
   const expandBtn = document.getElementById('view-expand-btn')
-  if (expandBtn) expandBtn.style.display = shiftsView === 'table' ? '' : 'none'
+  const hasTable  = !!document.querySelector('#shifts-content .dt-outer')
+  if (expandBtn) expandBtn.style.display = (shiftsView === 'table' && hasTable) ? '' : 'none'
 
   syncFilterRow()
 }
