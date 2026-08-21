@@ -558,3 +558,47 @@
 [dir="rtl"] .dash-kpi-arrow    { right: auto; left: 16px; }
 [dir="rtl"] .dash-week-nav-btn svg { transform: scaleX(-1); }
 [dir="rtl"] .dash-panel-link { margin-left: 0; margin-right: 8px; }
+
+/* ── Dashboard department rows ────────────────────────────────────────────────
+   Replaces the per-shift list. Colour here is load-bearing: the department
+   stripe identifies, the meter and count carry coverage state. Everything else
+   stays neutral so the coloured parts are the ones that catch the eye. */
+.dash-dept-row {
+  display: grid;
+  grid-template-columns: 3px minmax(80px, 1fr) minmax(60px, 1.4fr) auto auto auto;
+  align-items: center; gap: 10px;
+  width: 100%; padding: 11px 14px 11px 0;
+  background: none; border: none; border-bottom: 1px solid var(--border);
+  font-family: inherit; text-align: left; cursor: pointer;
+  transition: background 0.12s;
+}
+.dash-dept-row:last-child { border-bottom: none; }
+.dash-dept-row:hover { background: var(--surface-sunken); }
+.dash-dept-row:focus-visible { outline: 2px solid var(--navy); outline-offset: -2px; }
+
+.dash-dept-stripe { height: 26px; border-radius: 0 2px 2px 0; background: var(--dept, var(--navy)); }
+.dash-dept-name {
+  font-size: 0.84rem; font-weight: 700; color: var(--text);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.dash-dept-meter { height: 6px; border-radius: 3px; background: var(--border); overflow: hidden; }
+.dash-dept-meter > i { display: block; height: 100%; border-radius: 3px; background: var(--state); }
+.dash-dept-count { font-size: 0.8rem; font-weight: 800; color: var(--state); font-variant-numeric: tabular-nums; }
+.dash-dept-shifts { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
+.dash-dept-gap {
+  font-size: 0.68rem; font-weight: 700; white-space: nowrap;
+  padding: 2px 8px; border-radius: 20px;
+  color: var(--state); background: var(--state-soft);
+}
+
+/* The three coverage stops, bound once. */
+.dash-state-ok    { --state: var(--ok);    --state-soft: var(--ok-soft); }
+.dash-state-thin  { --state: var(--thin);  --state-soft: var(--thin-soft); }
+.dash-state-short { --state: var(--short); --state-soft: var(--short-soft); }
+
+/* Pending approvals only shouts when there is something pending. */
+.dash-kpi-alert { border-color: var(--short); background: var(--short-soft); }
+.dash-kpi-alert .dash-kpi-num { color: var(--short); }
+
+[dir="rtl"] .dash-dept-row { text-align: right; padding: 11px 0 11px 14px; }
+[dir="rtl"] .dash-dept-stripe { border-radius: 2px 0 0 2px; }

@@ -76,6 +76,8 @@ export default {
     openSwap: 'החלפה פתוחה — מתנדבים מוזמנים',
     shifts: 'משמרות',
     shiftsDay: 'משמרות ביום זה',
+    shiftCount: '{{count}} משמרות',
+    shortBy: 'חסרים {{count}}',
     prevWeek: 'שבוע קודם',
     nextWeek: 'שבוע הבא',
     glanceNoShifts: 'אין משמרות מתוכננות',

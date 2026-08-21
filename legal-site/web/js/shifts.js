@@ -41,11 +41,11 @@ import {
 // Re-export so external files (modals.js, etc.) can keep importing from
 // shifts.js — their public surface doesn't change when we split internals.
 export { updateActionBar }
-import { renderShiftsForDay, syncFilterRow } from './shiftsListView.js'
+import { syncFilterRow } from './shiftsFilterBar.js'
 import { renderTableView, assignInTable } from './shiftsTableView.js'
 import { renderWeekView, assignInWeekView } from './shiftsWeekView.js'
 
-let shiftsView = 'list'
+let shiftsView = 'table'   // 'table' (day roster) | 'week' (week roster)
 let _activeFilters = new Set()
 
 // Exposed for feature modules (shiftsActions, the views) so they can read the
@@ -139,8 +139,8 @@ export function renderDayTabs() {
     tab.onclick = () => {
       state.selectedDay = day
       renderDayTabs()
-      if (shiftsView === 'table') renderTableView()
-      else renderShiftsForDay()
+      if (shiftsView === 'week') renderWeekView()
+      else renderTableView()
     }
     container.appendChild(tab)
   }
@@ -151,7 +151,6 @@ export function renderDayTabs() {
 export function setShiftsView(view) {
   shiftsView = view
   _activeFilters = new Set()
-  document.getElementById('view-list-btn')?.classList.toggle('active',  view === 'list')
   document.getElementById('view-table-btn')?.classList.toggle('active', view === 'table')
   document.getElementById('view-week-btn')?.classList.toggle('active',  view === 'week')
   document.getElementById('day-tabs').style.display = view === 'week' ? 'none' : ''
@@ -163,16 +162,13 @@ export function setShiftsView(view) {
   syncFilterRow()
   if (view !== 'table') exitTableFocus()
 
+  // Both remaining views are full-bleed matrices, so the content area is
+  // always flush now.
   const contentArea = document.getElementById('shifts-content').parentElement
-  if (view === 'list') {
-    contentArea.classList.remove('content-area-flush')
-    renderShiftsForDay()
-  } else {
-    contentArea.classList.add('content-area-flush')
-    if (view === 'table') renderTableView()
-    else renderWeekView()
-    updateActionBar()
-  }
+  contentArea.classList.add('content-area-flush')
+  if (view === 'week') renderWeekView()
+  else renderTableView()
+  updateActionBar()
 }
 
 // ── Week navigation ───────────────────────────────────────────────────────────
@@ -201,15 +197,14 @@ export async function loadShifts() {
       if (!res) return
       state.shiftsCache[key] = await res.json()
     }
-    if (shiftsView === 'table') renderTableView()
-    else if (shiftsView === 'week') renderWeekView()
-    else renderShiftsForDay()
+    if (shiftsView === 'week') renderWeekView()
+    else renderTableView()
   } catch {
     document.getElementById('shifts-content').innerHTML = `<div class="empty-state"><p>${t('shifts.failedLoad')}</p></div>`
   }
 }
 
-// ── Filters & view dispatch (list view body is in shiftsListView.js) ──────────
+// ── Filters & view dispatch ────────────────────────────────────────────────
 
 export function applyShiftFilters(shifts) {
   if (_activeFilters.size === 0) return shifts
@@ -240,9 +235,8 @@ export function clearShiftFilters() {
 }
 
 function _rerenderCurrentView() {
-  if (shiftsView === 'table') renderTableView()
-  else if (shiftsView === 'week') renderWeekView()
-  else renderShiftsForDay()
+  if (shiftsView === 'week') renderWeekView()
+  else renderTableView()
 }
 
 // ── Window bindings (single source of truth for inline onclick handlers) ──────

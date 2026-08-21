@@ -76,6 +76,8 @@ export default {
     openSwap: 'Open swap — volunteers welcome',
     shifts: 'shifts',
     shiftsDay: 'Shifts this day',
+    shiftCount: '{{count}} shifts',
+    shortBy: '{{count}} short',
     prevWeek: 'Previous week',
     nextWeek: 'Next week',
     glanceNoShifts: 'No shifts scheduled',

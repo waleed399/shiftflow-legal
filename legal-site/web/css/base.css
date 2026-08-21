@@ -4,28 +4,48 @@
   --navy-mid: #223660;
   --navy-deep: #0d1b35;
   --red: #bf1f3a;          /* garnet accent */
+  --red-light: #e8253f;
   --accent: var(--red);
-  --gold: #b08433;         /* warm brass — premium highlight, used sparingly */
+  --gold: #d97706;
+  --gold-light: #f59e0b;
+  --gold-pale: rgba(245,158,11,0.15);
 
-  /* ── Warm neutral surfaces ── */
-  --bg: #f4f1ec;           /* warm paper, replaces cold blue-grey */
-  --white: #fffdfa;        /* warm card surface (consumed app-wide via var) */
+  /* ── Surfaces ──
+     Slate, matching the signed-out site (legal-site/style.css). The app briefly
+     ran a warm paper palette, but almost every hardcoded colour in this
+     codebase is already slate (#f8fafc, #cbd5e1, #64748b, #e2e8f0), so the warm
+     tokens were fighting their own components. Sharing the marketing site's
+     palette also means signing in does not look like changing product. */
+  --bg: #f0f4f8;
+  --white: #ffffff;
   --surface: var(--white);
-  --surface-sunken: #efeae1;
-  --text: #1f1c18;         /* warm near-black */
-  --muted: #6f6a61;        /* warm grey */
-  --border: #e8e2d8;       /* warm hairline */
-  --border-strong: #d9d2c5;
+  --surface-sunken: #f1f5f9;
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
   --primary: var(--navy);
+
+  /* ── Operational state ──
+     The only colours in the app that carry meaning rather than decoration.
+     One three-stop scale for coverage, reused everywhere it is shown, so a
+     manager learns it once: covered, thin, short. Anything that needs the
+     manager's attention borrows from here; everything else stays neutral. */
+  --ok: #059669;
+  --ok-soft: #ecfdf5;
+  --thin: #d97706;
+  --thin-soft: #fffbeb;
+  --short: #dc2626;
+  --short-soft: #fef2f2;
 
   /* ── Typography ── */
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Roboto, sans-serif;
   --font-display: "Hoefler Text", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
 
   /* ── Elevation — soft, warm-tinted ── */
-  --shadow-sm: 0 1px 2px rgba(31,28,24,0.04), 0 1px 3px rgba(31,28,24,0.05);
-  --shadow-md: 0 2px 6px rgba(31,28,24,0.05), 0 8px 20px rgba(31,28,24,0.07);
-  --shadow-lg: 0 14px 40px rgba(31,28,24,0.13);
+  --shadow-sm: 0 1px 2px rgba(15,23,42,0.04), 0 1px 3px rgba(15,23,42,0.05);
+  --shadow-md: 0 2px 6px rgba(15,23,42,0.05), 0 8px 20px rgba(15,23,42,0.07);
+  --shadow-lg: 0 14px 40px rgba(15,23,42,0.13);
 
   --sidebar: 272px;
   --radius-card: 16px;

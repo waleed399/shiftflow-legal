@@ -21,7 +21,7 @@ import {
   shiftDuration,
   getAvailRosterCache,
 } from './shifts.js'
-import { renderFilterBar } from './shiftsListView.js'
+import { renderFilterBar } from './shiftsFilterBar.js'
 import { applyColumnStretch } from './shiftsTableFit.js'
 
 export async function renderTableView() {

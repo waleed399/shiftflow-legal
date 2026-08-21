@@ -7,7 +7,7 @@
 
 import { state } from './state.js'
 import { apiFetch } from './api.js'
-import { toYMD, esc, showToast, fmtDate } from './utils.js'
+import { toYMD, esc, showToast, DAYS, MONTHS } from './utils.js'
 import { t } from './i18n.js'
 import { requireWebManage } from './profile.js'
 import { loadShifts } from './shifts.js'
@@ -50,6 +50,18 @@ export async function openGenerateModal() {
   }
 }
 
+// preview.date is an ISO string ("2026-08-17"), not a Date. utils.fmtDate takes
+// a Date and calls getDay() on it, so passing the string straight through threw
+// a TypeError that surfaced to the manager as "Network error" — the modal's
+// catch cannot tell a render fault from a failed fetch.
+function fmtPreviewDate(iso) {
+  if (!iso) return '?'
+  const [y, m, d] = String(iso).slice(0, 10).split('-')
+  const date = new Date(Number(y), Number(m) - 1, Number(d))
+  if (Number.isNaN(date.getTime())) return String(iso)
+  return `${DAYS[date.getDay()]} ${Number(d)} ${MONTHS[Number(m) - 1]}`
+}
+
 // A line per understaffed shift is unreadable once a week has a few dozen of
 // them, and the manager cannot act on any single line anyway — the response is
 // always the same: chase availability. So lead with the totals and keep the
@@ -74,9 +86,8 @@ function renderWarnings(selected) {
 
   const rows = short.map(s => {
     const when = `${esc(s.departmentName || '')} ${esc(s.startTime)}\u2013${esc(s.endTime)}`
-    const day  = fmtDate(s.date)
     const got  = `${s.assignedWorkers?.length || 0}/${s.requiredWorkers || 0}`
-    return `<li>${when} · ${esc(day)} — ${esc(got)}</li>`
+    return `<li>${when} · ${esc(fmtPreviewDate(s.date))} — ${esc(got)}</li>`
   }).join('')
 
   return `

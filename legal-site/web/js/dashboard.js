@@ -73,7 +73,7 @@ function _buildHTML() {
   const coverage     = required > 0 ? Math.round(assigned / required * 100) : (selShifts.length ? 100 : 0)
   const pendingTotal = _pendingSwaps.length + _pendingTimeoff.length
   const isToday      = isSameDay(_selectedDay, today)
-  const coverColor   = coverage >= 100 ? '#059669' : coverage >= 60 ? '#d97706' : '#dc2626'
+  const coverColor   = coverage >= 100 ? 'var(--ok)' : coverage >= 60 ? 'var(--thin)' : 'var(--short)'
   const firstName    = state.currentUser?.name?.split(' ')[0] || ''
   const hour         = today.getHours()
 
@@ -196,8 +196,8 @@ function _buildHero(firstName, hour, glance) {
 function _buildKPIs(shiftsCount, assigned, required, coverage, coverColor, pendingTotal, isToday) {
   return `
     <div class="dash-kpis">
-      <div class="dash-kpi dash-kpi-accent-blue">
-        <div class="dash-kpi-icon dash-kpi-icon-blue">
+      <div class="dash-kpi">
+        <div class="dash-kpi-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         </div>
         <div class="dash-kpi-body">
@@ -205,8 +205,8 @@ function _buildKPIs(shiftsCount, assigned, required, coverage, coverColor, pendi
           <div class="dash-kpi-label">${isToday ? t('dashboard.shiftsToday') : t('dashboard.shiftsDay')}</div>
         </div>
       </div>
-      <div class="dash-kpi dash-kpi-accent-green">
-        <div class="dash-kpi-icon dash-kpi-icon-green">
+      <div class="dash-kpi">
+        <div class="dash-kpi-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </div>
         <div class="dash-kpi-body">
@@ -223,7 +223,7 @@ function _buildKPIs(shiftsCount, assigned, required, coverage, coverColor, pendi
           <div class="dash-kpi-label">${t('dashboard.coverage')}</div>
         </div>
       </div>
-      <div class="dash-kpi dash-kpi-accent-red${pendingTotal > 0 ? ' dash-kpi-alert' : ''}" ${pendingTotal > 0 ? "onclick=\"window.showView('requests')\" style=\"cursor:pointer\" role=\"button\" tabindex=\"0\"" : ''}>
+      <div class="dash-kpi${pendingTotal > 0 ? ' dash-kpi-alert' : ''}" ${pendingTotal > 0 ? "onclick=\"window.showView('requests')\" style=\"cursor:pointer\" role=\"button\" tabindex=\"0\"" : ''}>
         <div class="dash-kpi-icon${pendingTotal > 0 ? ' dash-kpi-icon-red' : ' dash-kpi-icon-muted'}">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         </div>
@@ -287,10 +287,6 @@ function _buildWeekStrip(allShifts) {
 
 // ── Department-grouped shift sections ────────────────────────────────────────
 
-const _STATUS_COLORS = {
-  DRAFT: '#94a3b8', PUBLISHED: '#1a2d4f', ACTIVE: '#f59e0b',
-  COMPLETED: '#22c55e', CANCELLED: '#ef4444',
-}
 
 function _getDeptColor(deptId) {
   if (!deptId) return DEPT_COLORS[0]
@@ -306,64 +302,45 @@ function _buildDeptSections(shifts) {
     if (!groupMap.has(deptId)) groupMap.set(deptId, { dept: s.department, shifts: [] })
     groupMap.get(deptId).shifts.push(s)
   })
-  return [...groupMap.entries()].map(([deptId, g]) => _deptSection(g, _getDeptColor(deptId))).join('')
+  // Short-staffed departments first: the panel's job is to surface what needs
+  // the manager, not to preserve an arbitrary order.
+  return [...groupMap.entries()]
+    .map(([deptId, g]) => ({ g, color: _getDeptColor(deptId) }))
+    .sort((a, b) => _shortfall(b.g.shifts) - _shortfall(a.g.shifts))
+    .map(({ g, color }) => _deptRow(g, color))
+    .join('')
 }
 
-function _deptSection(group, color) {
-  const totalAssigned = group.shifts.reduce((sum, s) => sum + (s.assignments?.length || 0), 0)
-  const totalRequired = group.shifts.reduce((sum, s) => sum + (s.requiredWorkers || 0), 0)
-  const badgeColor = totalAssigned === 0 ? '#dc2626' : totalAssigned < totalRequired ? '#d97706' : color
+function _shortfall(shifts) {
+  return shifts.reduce(
+    (n, s) => n + Math.max(0, (s.requiredWorkers || 0) - (s.assignments?.length || 0)), 0
+  )
+}
+
+// One line per department, not one per shift. A manager opening the dashboard
+// is asking "is today covered?" — a dozen shift rows answer that slower than
+// three department meters do, and the roster is one click away for the detail.
+function _deptRow(group, color) {
+  const assigned = group.shifts.reduce((n, s) => n + (s.assignments?.length || 0), 0)
+  const required = group.shifts.reduce((n, s) => n + (s.requiredWorkers || 0), 0)
+  const short    = Math.max(0, required - assigned)
+  const pct      = required > 0 ? Math.min(100, Math.round(assigned / required * 100)) : 100
+  const state    = assigned === 0 && required > 0 ? 'short' : short > 0 ? 'thin' : 'ok'
+  const shiftsLabel = t('dashboard.shiftCount', { count: group.shifts.length })
+
   return `
-    <div>
-      <div class="dept-header" style="background:${color}10">
-        <div class="dept-stripe" style="background:${color}"></div>
-        <span class="dept-name" style="color:${color}">${esc(group.dept?.name || t('common.unknown'))}</span>
-        <span class="dept-worker-badge" style="background:${badgeColor}22;color:${badgeColor}">${totalAssigned}/${totalRequired}</span>
-      </div>
-      ${group.shifts.map(s => _dashShiftRow(s)).join('')}
-    </div>`
+    <button class="dash-dept-row dash-state-${state}" style="--dept:${color}"
+            onclick="window.showView('shifts')">
+      <span class="dash-dept-stripe"></span>
+      <span class="dash-dept-name">${esc(group.dept?.name || t('common.unknown'))}</span>
+      <span class="dash-dept-meter"><i style="width:${pct}%"></i></span>
+      <span class="dash-dept-count">${assigned}/${required}</span>
+      <span class="dash-dept-shifts">${shiftsLabel}</span>
+      ${short > 0 ? `<span class="dash-dept-gap">${t('dashboard.shortBy', { count: short })}</span>` : ''}
+    </button>`
 }
 
-function _dashShiftRow(shift) {
-  const assigned    = shift.assignments?.length || 0
-  const required    = shift.requiredWorkers || 0
-  const pct         = Math.min(100, required > 0 ? Math.round(assigned / required * 100) : 100)
-  const workerColor = assigned === 0 ? '#dc2626' : assigned < required ? '#d97706' : '#059669'
-  const borderColor = _STATUS_COLORS[shift.status] || '#94a3b8'
-  const start       = shift.startTime?.substring(0, 5) || '—'
-  const end         = shift.endTime?.substring(0, 5) || '—'
-  const dur         = _duration(shift.startTime, shift.endTime)
-  return `
-    <div class="dept-shift-row" style="border-left:3px solid ${borderColor}" onclick="window.showView('shifts')" role="button" tabindex="0">
-      <div class="shift-time-col">
-        <span class="shift-time">${start}</span>
-        <div class="shift-time-sep"></div>
-        <span class="shift-time">${end}</span>
-      </div>
-      <div class="shift-row-body">
-        <div class="shift-row-top">
-          <span class="status-pill status-${shift.status}">${t(`shifts.status.${shift.status}`)}</span>
-          ${dur ? `<span style="font-size:0.65rem;color:var(--muted)">${dur}</span>` : ''}
-        </div>
-        <div class="shift-coverage">
-          <div class="coverage-bar">
-            <div class="coverage-fill" style="width:${pct}%;background:${workerColor}"></div>
-          </div>
-          <span class="coverage-text" style="color:${workerColor}">${assigned}/${required}</span>
-        </div>
-      </div>
-    </div>`
-}
 
-function _duration(start, end) {
-  if (!start || !end) return ''
-  const [sh, sm] = start.substring(0, 5).split(':').map(Number)
-  const [eh, em] = end.substring(0, 5).split(':').map(Number)
-  let mins = (eh * 60 + em) - (sh * 60 + sm)
-  if (mins <= 0) mins += 1440
-  const h = Math.floor(mins / 60), m = mins % 60
-  return m === 0 ? `${h}h` : `${h}h ${m}m`
-}
 
 // ── Pending requests ──────────────────────────────────────────────────────────
 

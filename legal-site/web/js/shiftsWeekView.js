@@ -21,7 +21,7 @@ import {
   normEnd,
   getAvailRosterCache,
 } from './shifts.js'
-import { renderFilterBar } from './shiftsListView.js'
+import { renderFilterBar } from './shiftsFilterBar.js'
 
 export async function renderWeekView() {
   const key = toYMD(state.currentWeek)
