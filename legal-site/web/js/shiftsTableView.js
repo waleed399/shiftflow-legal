@@ -175,6 +175,7 @@ export async function renderTableView() {
       <tr class="dt-dept-band" style="--dept:${getDeptColor(deptId)}">
         <td class="dt-info-cell dt-dept-label">${esc(dept.name)}</td>
         ${workers.map(() => '<td class="dt-dept-spacer"></td>').join('')}
+        <td class="dt-dept-spacer"></td>
       </tr>`
 
     const shiftRows = dept.shifts.map((s, idx) => {
@@ -248,7 +249,7 @@ export async function renderTableView() {
         return `<td class="dt-worker-cell${idx > 0 ? ' dt-row-border' : ''}${bgCls}" data-cell="${cellKey}" style="${bgStyle};cursor:${isAssigned || canAssign ? 'pointer' : 'default'}" ${clickAttr}>${content}</td>`
       }).join('')
 
-      return `<tr style="--dept:${dColor};--tint:${dColor}14;--tint-hover:${dColor}2b;--tint-open:${dColor}1c;--tint-open-hover:${dColor}33;--tint-ring:${dColor}3d">${infoCell}${workerCells}</tr>`
+      return `<tr style="--dept:${dColor};--tint:${dColor}14;--tint-hover:${dColor}2b;--tint-open:${dColor}1c;--tint-open-hover:${dColor}33;--tint-ring:${dColor}3d">${infoCell}${workerCells}<td class="dt-filler"></td></tr>`
     }).join('')
 
     return bandRow + shiftRows
@@ -268,6 +269,7 @@ export async function renderTableView() {
                 </div>
               </th>
               ${workerCols}
+              <th class="dt-filler"></th>
             </tr>
           </thead>
           <tbody>${bodyRows}</tbody>

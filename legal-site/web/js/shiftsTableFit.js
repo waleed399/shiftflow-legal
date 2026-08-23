@@ -24,9 +24,10 @@ export function applyColumnStretch() {
 
   const clear = () => outer.style.removeProperty('--dt-col-w')
 
-  // Inline, the table sits in a scrolling page next to other content, where
-  // columns that resize with the window read as jitter rather than as fit.
-  if (!document.body.classList.contains('dt-focus')) { clear(); return }
+  // Runs in both views. This used to be focus-mode only, on the reasoning that
+  // the inline table sat in a scrolling page where resizing columns read as
+  // jitter — but the table is a card filling the workspace now, so fixed
+  // columns just left bare card to the right of the last worker.
 
   const wrap = outer.querySelector('.dt-scroll-wrap')
   const cols = outer.querySelectorAll('.dt-worker-th').length
