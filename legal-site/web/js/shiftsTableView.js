@@ -13,6 +13,7 @@ import { requireWebManage } from './profile.js'
 import {
   loadShifts,
   STATUS_COLORS,
+  getDeptColor,
   availPref,
   applyShiftFilters,
   getActiveFilters,
@@ -145,7 +146,7 @@ export async function renderTableView() {
   // ── Body rows ──
   const bodyRows = [...byDept.entries()].map(([deptId, dept]) => {
     const bandRow = `
-      <tr class="dt-dept-band">
+      <tr class="dt-dept-band" style="--dept:${getDeptColor(deptId)}">
         <td class="dt-info-cell dt-dept-label">${esc(dept.name)}</td>
         ${workers.map(() => '<td class="dt-dept-spacer"></td>').join('')}
       </tr>`
@@ -157,13 +158,18 @@ export async function renderTableView() {
       const isEmpty  = assigned === 0
       const staffColor = isFull ? '#22c55e' : isEmpty ? '#ef4444' : '#f59e0b'
       const sColor     = STATUS_COLORS[s.status] || '#94a3b8'
+      // The box is striped by DEPARTMENT, not status. A generated draft should
+      // look like the department it belongs to, which is how a manager scans
+      // the roster; the status pill beside it still says draft or published, so
+      // nothing is lost by giving the stripe to the more useful signal.
+      const dColor     = getDeptColor(s.department?.id)
       const dur        = shiftDuration(s.startTime, s.endTime)
       const sStart     = toMins(s.startTime)
       const sEnd       = normEnd(sStart, toMins(s.endTime))
       const shiftMins  = sEnd - sStart
 
       const infoCell = `
-        <td class="dt-info-cell" style="border-left:3px solid ${sColor}" onclick="openShiftModal('${s.id}')">
+        <td class="dt-info-cell" style="border-left:3px solid ${dColor}" onclick="openShiftModal('${s.id}')">
           <div class="dt-shift-time">${s.startTime.substring(0,5)} → ${s.endTime.substring(0,5)}</div>
           <div class="dt-shift-dur">${dur}</div>
           <div class="dt-shift-meta">

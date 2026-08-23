@@ -158,6 +158,15 @@ function renderPage() {
 
         <div class="workers-panel-scroll">
           ${managersHtml()}
+          <section class="people-group people-group-workers">
+          <header class="people-group-head">
+            <span class="people-group-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+            <div class="people-group-text">
+              <span class="people-group-title">${t('workers.workersTitle')}</span>
+              <span class="people-group-sub">${t('workers.workersSubtitle')}</span>
+            </div>
+            <span class="people-group-count">${_allWorkers.length}</span>
+          </header>
           ${_allWorkers.length === 0 ? `
             <div class="empty-state">
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -167,6 +176,7 @@ function renderPage() {
             <div class="workers-grid" id="workers-grid">
               ${_allWorkers.map(w => workerCard(w, counts.get(w.id) || 0)).join('')}
             </div>`}
+          </section>
           <div id="invitations-section">${invitationsHtml(_allInvitations)}</div>
         </div>
       </div>
@@ -181,7 +191,15 @@ function renderPage() {
 function managersHtml() {
   if (!isOwner(state.currentUser) || _allManagers.length === 0) return ''
   return `
-    <div class="workers-section-divider"><span>${t('workers.managersTitle')}</span></div>
+    <section class="people-group people-group-managers">
+      <header class="people-group-head">
+        <span class="people-group-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+        <div class="people-group-text">
+          <span class="people-group-title">${t('workers.managersTitle')}</span>
+          <span class="people-group-sub">${t('workers.managersSubtitle')}</span>
+        </div>
+        <span class="people-group-count">${_allManagers.length}</span>
+      </header>
     <div class="managers-list" id="managers-list">
       ${_allManagers.map(m => `
         <div class="manager-row">
@@ -197,7 +215,8 @@ function managersHtml() {
           <button class="btn btn-ghost btn-sm" onclick="editManagerDepts('${esc(m.id)}')">${t('workers.managerEdit')}</button>
           <button class="btn btn-ghost btn-sm manager-demote" onclick="demoteManagerPrompt('${esc(m.id)}')">${t('workers.managerRemove')}</button>
         </div>`).join('')}
-    </div>`
+    </div>
+    </section>`
 }
 
 // Owner edits which departments a manager runs. Saved as a complete set, and

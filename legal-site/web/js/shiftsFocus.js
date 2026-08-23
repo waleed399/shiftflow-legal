@@ -60,6 +60,8 @@ export function enterTableFocus() {
     exit.setAttribute('aria-label', t('shifts.exitExpand'))
     exit.setAttribute('title', t('shifts.exitExpand'))
   }
+  const bar = document.getElementById('focus-daybar')
+  if (bar) bar.style.display = ''
   applyColumnStretch()
   requestFullscreen()
 }
@@ -70,6 +72,8 @@ export function exitTableFocus() {
   document.body.classList.remove('dt-focus')
   const exit = chrome()
   if (exit) exit.style.display = 'none'
+  const bar = document.getElementById('focus-daybar')
+  if (bar) bar.style.display = 'none'
   applyColumnStretch()
   exitFullscreen()
 }

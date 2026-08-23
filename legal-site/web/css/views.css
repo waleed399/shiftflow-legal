@@ -281,7 +281,9 @@ body.web-locked #btn-create-shifts { display: none !important; }
    exists — let it use whatever the column gives it. */
 .dt-avail-label { font-size: 0.58rem; font-weight: 700; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .dt-avail-off { opacity: 0.35; }
-.dt-dept-band td { height: 26px; background: var(--navy); border-top: 1px solid var(--navy); }
+/* Band takes the department colour, falling back to navy for shifts with no
+   department, so a group header and the shift stripes beneath it agree. */
+.dt-dept-band td { height: 26px; background: var(--dept, var(--navy)); border-top: 1px solid var(--dept, var(--navy)); }
 .dt-dept-label { font-size: 0.72rem; font-weight: 700; color: white; padding: 0 10px; position: sticky; left: 0; z-index: 2; border-right: 2px solid rgba(255,255,255,0.2) !important; }
 .dt-dept-spacer { border-left: 1px solid rgba(255,255,255,0.12) !important; }
 .dt-info-cell { width: 108px; min-width: 108px; padding: 8px 10px; background: var(--surface-sunken); position: sticky; left: 0; z-index: 1; border-right: 2px solid var(--border); border-top: 1px solid var(--border); cursor: pointer; transition: background 0.12s; vertical-align: top; }
@@ -1436,3 +1438,64 @@ body.dt-focus #shifts-content { height: 100%; }
 [dir="rtl"] .wv-slot-cell { left: auto; right: 0; box-shadow: -4px 0 6px -4px rgba(15,23,42,0.07); }
 [dir="rtl"] .wv-cell.wv-state-short { box-shadow: inset -3px 0 0 var(--short); }
 [dir="rtl"] .wv-cell.wv-state-thin  { box-shadow: inset -3px 0 0 var(--thin); }
+
+/* Focus-mode day bar. Top-centre, opposite the exit button, so the two focus
+   controls do not crowd each other. */
+.focus-daybar {
+  position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 60;
+  display: flex; align-items: center; gap: 4px;
+  padding: 4px 6px; border-radius: 22px;
+  background: var(--white); border: 1px solid var(--border);
+  box-shadow: 0 2px 10px rgba(15,23,42,0.12);
+}
+.focus-day-btn {
+  width: 32px; height: 32px; border-radius: 50%; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  background: none; color: var(--navy); transition: background 0.12s, opacity 0.12s;
+}
+.focus-day-btn:hover:not(:disabled) { background: var(--surface-sunken); }
+.focus-day-btn:disabled { opacity: 0.25; cursor: default; }
+.focus-day-label {
+  min-width: 148px; text-align: center;
+  font-size: 0.86rem; font-weight: 800; color: var(--text); white-space: nowrap;
+}
+
+/* ── People groups (Workers screen) ──────────────────────────────────────────
+   Managers and workers used to be two stacks separated by a hairline, which
+   said nothing about how they differ. Each is now a labelled group with a
+   one-line description of what that role actually does, so an owner can see
+   the distinction rather than infer it from the card shape. */
+.people-group { max-width: 860px; margin-bottom: 22px; }
+.people-group-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; margin-bottom: 10px;
+  border-radius: 12px; border: 1px solid var(--border);
+  background: var(--surface-sunken);
+}
+.people-group-icon {
+  width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--group); color: #fff;
+}
+.people-group-text { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.people-group-title {
+  font-size: 0.82rem; font-weight: 800; color: var(--text);
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.people-group-sub { font-size: 0.72rem; color: var(--muted); }
+.people-group-count {
+  font-size: 0.78rem; font-weight: 800; color: var(--group);
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 999px; padding: 2px 10px; flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Managers carry the brand navy; workers a quieter slate. The difference is
+   the point — one group runs the place, the other staffs it. */
+.people-group-managers { --group: var(--navy); }
+.people-group-workers  { --group: #64748b; }
+/* A left rule ties each group's rows to its header. */
+.people-group-managers .managers-list {
+  border-inline-start: 3px solid var(--navy);
+  padding-inline-start: 11px;
+}

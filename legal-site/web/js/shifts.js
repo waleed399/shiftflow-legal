@@ -172,6 +172,7 @@ export function syncViewChrome() {
   if (expandBtn) expandBtn.style.display = (shiftsView === 'table' && hasTable) ? '' : 'none'
 
   syncFilterRow()
+  renderFocusDayNav()
 }
 
 export function setShiftsView(view) {
@@ -190,6 +191,51 @@ export function setShiftsView(view) {
   if (view === 'week') renderWeekView()
   else renderTableView()
   updateActionBar()
+}
+
+// ── Focus-mode day navigation ─────────────────────────────────────────────────
+// Focus mode hides the topbar and the day tabs, which is the whole point — but
+// it also removed the only way to change day, so a manager had to collapse,
+// switch, and expand again for every day of the week. This is that control,
+// scoped to the current week: it steps through the org's work days only and
+// stops at both ends rather than rolling into the next week, because changing
+// week from inside focus mode would silently move the ground under them.
+
+function focusWeekDays() {
+  return getWeekViewDays().map(d => d.date)
+}
+
+export function renderFocusDayNav() {
+  const label = document.getElementById('focus-day-label')
+  if (!label) return
+  const d = state.selectedDay
+  // Day AND date: with the topbar hidden there is nothing else on screen
+  // saying which day is being assigned.
+  label.textContent = `${DAY_FULL_LABEL(d)} ${d.getDate()} ${MONTHS[d.getMonth()]}`
+
+  const days = focusWeekDays()
+  const idx  = days.findIndex(x => isSameDay(x, d))
+  const prev = document.getElementById('focus-day-prev')
+  const next = document.getElementById('focus-day-next')
+  if (prev) prev.disabled = idx <= 0
+  if (next) next.disabled = idx === -1 || idx >= days.length - 1
+}
+
+// days.full keys are upper-case (SUNDAY, MONDAY, ...) and t() has no
+// defaultValue — an unknown key renders as the key string, so the case matters.
+function DAY_FULL_LABEL(d) {
+  return t(`days.full.${DAY_FULL[d.getDay()]}`)
+}
+
+export function focusStepDay(delta) {
+  const days = focusWeekDays()
+  const idx  = days.findIndex(x => isSameDay(x, state.selectedDay))
+  const next = idx === -1 ? 0 : idx + delta
+  if (next < 0 || next >= days.length) return
+  state.selectedDay = days[next]
+  renderDayTabs()          // hidden in focus mode, but keeps the collapsed view honest
+  renderTableView()        // re-renders in place; focus mode is untouched
+  renderFocusDayNav()
 }
 
 // ── Week navigation ───────────────────────────────────────────────────────────
@@ -269,6 +315,7 @@ window.unpublishDay     = unpublishDay
 window.publishWeek      = publishWeek
 window.unpublishWeek    = unpublishWeek
 window.setShiftsView    = setShiftsView
+window.focusStepDay     = focusStepDay
 window.assignInTable    = assignInTable
 window.openCreateShiftsModal     = openCreateShiftsModal
 window.closeCreateShiftsModal    = closeCreateShiftsModal
