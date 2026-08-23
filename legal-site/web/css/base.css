@@ -26,7 +26,11 @@
      --white made the app read as a big white slab on a blue field. Tinted into
      the family and kept lighter than the page but never as light as a card, so
      content stays the brightest thing on screen. */
-  --chrome: #d8e1ee;
+  --chrome: #b8c8de;
+  /* Secondary text ON the chrome band. --muted is sized for the card surface
+     and only reaches 2.8:1 against a band this deep; slate-600 clears 4.5:1
+     without making a label look like body copy. */
+  --chrome-muted: #475569;
   --white: #fbfcfe;        /* not pure white: #fff against the ground reads clinical */
   --surface: var(--white);
   --surface-sunken: #e9eff8;

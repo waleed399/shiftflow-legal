@@ -77,7 +77,7 @@ body.web-locked #btn-create-shifts { display: none !important; }
 .day-tabs { background: var(--chrome); border-bottom: 1px solid var(--border); padding: 0 20px; display: flex; gap: 2px; flex-shrink: 0; }
 .day-tab {
   padding: 10px 10px 8px; font-size: 0.68rem; font-weight: 600;
-  cursor: pointer; color: var(--muted); text-transform: uppercase;
+  cursor: pointer; color: var(--chrome-muted); text-transform: uppercase;
   letter-spacing: 0.05em; transition: color 0.15s;
   display: flex; flex-direction: column; align-items: center; gap: 4px;
   position: relative;
@@ -100,7 +100,7 @@ body.web-locked #btn-create-shifts { display: none !important; }
 
 /* ── Action bar ── */
 .action-bar { background: var(--chrome); border-bottom: 1px solid var(--border); padding: 8px 28px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.action-bar-label { font-size: 0.78rem; color: var(--muted); font-weight: 500; margin-right: 4px; }
+.action-bar-label { font-size: 0.78rem; color: var(--chrome-muted); font-weight: 600; margin-right: 4px; }
 /* These sit on the chrome band with a pale fill and, previously, no border at
    all — so they had no shape and the publish label came in at 3.15:1, under
    the readable threshold. A semantic edge gives them a button silhouette and
@@ -139,10 +139,12 @@ body.web-locked #btn-create-shifts { display: none !important; }
 
 /* ── Shift filter bar ── */
 /* The filter row carries the rule and ground now, because it holds both the
-   scrolling chips and the Expand button on one line. */
+   scrolling chips and the Expand button on one line. It is also the LAST band
+   in the header stack, so it carries the hard edge that separates the header
+   from the canvas below. */
 .filter-row {
   display: flex; align-items: center;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid var(--border-strong);
   background: var(--chrome);
 }
 /* The chips scroll; the button beside them must not scroll away, hence
