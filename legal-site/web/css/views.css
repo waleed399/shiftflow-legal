@@ -46,7 +46,7 @@ body.web-locked #btn-create-shifts { display: none !important; }
 
 /* ── Topbar ── */
 .topbar {
-  background: var(--chrome-1); border-bottom: 1px solid var(--border);
+  background: var(--chrome); border-bottom: 1px solid var(--border);
   padding: 0 30px; height: 64px; display: flex; align-items: center;
   justify-content: space-between; flex-shrink: 0;
   box-shadow: 0 1px 0 rgba(15,23,42,0.03); position: relative; z-index: 10;
@@ -74,7 +74,7 @@ body.web-locked #btn-create-shifts { display: none !important; }
 .week-btn:hover { border-color: var(--navy); color: var(--navy); background: var(--surface-sunken); }
 
 /* ── Day tabs ── */
-.day-tabs { background: var(--chrome-2); border-bottom: 1px solid var(--border); padding: 0 20px; display: flex; gap: 2px; flex-shrink: 0; }
+.day-tabs { background: var(--chrome); border-bottom: 1px solid var(--border); padding: 0 20px; display: flex; gap: 2px; flex-shrink: 0; }
 .day-tab {
   padding: 10px 10px 8px; font-size: 0.68rem; font-weight: 600;
   cursor: pointer; color: var(--chrome-muted); text-transform: uppercase;
@@ -99,7 +99,7 @@ body.web-locked #btn-create-shifts { display: none !important; }
 .day-tab.today:not(.active) .day-num { color: var(--red); font-weight: 800; }
 
 /* ── Action bar ── */
-.action-bar { background: var(--chrome-3); border-bottom: 1px solid var(--border); padding: 8px 28px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.action-bar { background: var(--chrome); border-bottom: 1px solid var(--border); padding: 8px 28px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .action-bar-label { font-size: 0.78rem; color: var(--chrome-muted); font-weight: 600; margin-right: 4px; }
 /* These sit on the chrome band with a pale fill and, previously, no border at
    all — so they had no shape and the publish label came in at 3.15:1, under
@@ -145,7 +145,7 @@ body.web-locked #btn-create-shifts { display: none !important; }
 .filter-row {
   display: flex; align-items: center;
   border-bottom: 2px solid var(--border-strong);
-  background: var(--chrome-4);
+  background: var(--chrome);
 }
 /* The chips scroll; the button beside them must not scroll away, hence
    min-width:0 here and flex-shrink:0 on the button. */
@@ -279,8 +279,23 @@ body.web-locked #btn-create-shifts { display: none !important; }
 .view-toggle-btn.active { background: var(--surface); color: var(--navy); box-shadow: var(--shadow-sm); }
 
 /* ── Table (roster) view ── */
-.content-area-flush { padding: 0; }
-.dt-outer { display: flex; flex-direction: column; height: 100%; }
+/* The table is a card floating on the canvas, so the content area keeps a
+   margin around it instead of running the table edge to edge. Flex so the card
+   fills the remaining height rather than overflowing by the padding. */
+.content-area-flush {
+  padding: 16px 20px 20px; overflow: hidden;
+  display: flex; flex-direction: column; min-height: 0;
+}
+.content-area-flush #shifts-content { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+/* The schedule table is the workspace: its own surface, edge and elevation, so
+   it reads as a component sitting on the page rather than as more page. */
+.dt-outer {
+  display: flex; flex-direction: column; flex: 1; min-height: 0;
+  background: var(--white);
+  border: 1px solid var(--border-strong); border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(15,23,42,0.06), 0 6px 18px rgba(15,23,42,0.07);
+  overflow: hidden;
+}
 .dt-scroll-wrap { flex: 1; overflow: auto; }
 .dt-table { border-collapse: collapse; font-size: 0.82rem; white-space: nowrap; }
 .dt-corner { width: 108px; min-width: 108px; position: sticky; left: 0; z-index: 3; background: var(--surface-sunken); border-right: 2px solid var(--border); border-bottom: 2px solid var(--border); padding: 0; overflow: hidden; }
@@ -351,9 +366,15 @@ body.web-locked #btn-create-shifts { display: none !important; }
 
 /* ── Week roster view ── */
 #view-shifts:has(.wv-outer) { display: flex; }
-.content-area:has(.wv-outer) { padding: 0; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+.content-area:has(.wv-outer) { padding: 16px 20px 20px; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
 .content-area:has(.wv-outer) #shifts-content { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-.wv-outer { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.wv-outer {
+  display: flex; flex-direction: column; flex: 1; min-height: 0;
+  background: var(--white);
+  border: 1px solid var(--border-strong); border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(15,23,42,0.06), 0 6px 18px rgba(15,23,42,0.07);
+  overflow: hidden;
+}
 .wv-scroll { overflow: auto; flex: 1; min-height: 0; overscroll-behavior: contain; }
 
 /* ── Profile view ── */
@@ -552,7 +573,7 @@ body.web-locked #btn-create-shifts { display: none !important; }
 .billing-current-desc { font-size: 0.875rem; color: var(--muted); line-height: 1.5; }
 
 /* ── Request tabs ── */
-.req-tabs { background: var(--chrome-2); border-bottom: 1px solid var(--border); padding: 0 28px; display: flex; gap: 4px; flex-shrink: 0; }
+.req-tabs { background: var(--chrome); border-bottom: 1px solid var(--border); padding: 0 28px; display: flex; gap: 4px; flex-shrink: 0; }
 .req-tab { padding: 14px 18px; font-size: 0.875rem; font-weight: 600; color: var(--muted); background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: color 0.15s; margin-bottom: -1px; font-family: inherit; }
 .req-tab:hover { color: var(--navy); }
 .req-tab.active { color: var(--navy); border-bottom-color: var(--navy); }
@@ -1320,7 +1341,11 @@ body.dt-focus #view-shifts > .day-tabs,
 body.dt-focus .fab,
 body.dt-focus #view-expand-btn { display: none !important; }
 
-body.dt-focus .content-area { padding: 0; }
+/* Focus mode is the table and nothing else, so the card drops its margin,
+   corners and shadow and takes the whole viewport. */
+body.dt-focus .content-area,
+body.dt-focus .content-area-flush { padding: 0; }
+body.dt-focus .dt-outer { border: none; border-radius: 0; box-shadow: none; }
 body.dt-focus #shifts-content { height: 100%; }
 
 /* Floating exit. Fixed to the viewport rather than the topbar, because the
@@ -1487,7 +1512,7 @@ body.dt-focus #shifts-content { height: 100%; }
 
 .wb-head {
   position: sticky; top: 0; z-index: 2;
-  background: var(--chrome-1); border-bottom: 2px solid var(--border);
+  background: var(--chrome); border-bottom: 2px solid var(--border);
   padding: 9px 11px 8px;
 }
 .wb-today { box-shadow: inset 0 3px 0 var(--navy); }
