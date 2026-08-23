@@ -1316,21 +1316,28 @@ body.dt-focus #shifts-content { height: 100%; }
 
 /* Focus-mode day bar. Sits inside the filter row as its leading item, so it
    never covers the chips — it used to be position:fixed over the content. */
+/* Filled navy pill, the same gradient the selected day tab and the department
+   bands use — in focus mode this IS the selected day, so it borrows that
+   language. It also has the row to itself there: the Expand button is hidden
+   in focus mode, so nothing else competes for the strong treatment. */
 .focus-daybar {
   display: flex; align-items: center; gap: 2px; flex-shrink: 0;
-  padding-inline-end: 10px; margin-inline-end: 10px;
-  border-inline-end: 1px solid var(--border);
+  margin-inline-end: 10px; padding: 3px 4px; border-radius: 999px;
+  background: linear-gradient(160deg, var(--navy-mid), var(--navy-deep));
+  box-shadow: 0 1px 4px rgba(13,27,53,0.28);
 }
 .focus-day-btn {
-  width: 28px; height: 28px; border-radius: 50%; border: none; cursor: pointer;
+  width: 26px; height: 26px; border-radius: 50%; border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  background: none; color: var(--navy); transition: background 0.12s, opacity 0.12s;
+  background: none; color: rgba(255,255,255,0.88);
+  transition: background 0.12s, opacity 0.12s;
 }
-.focus-day-btn:hover:not(:disabled) { background: var(--white); }
-.focus-day-btn:disabled { opacity: 0.25; cursor: default; }
+.focus-day-btn:hover:not(:disabled) { background: rgba(255,255,255,0.16); color: #fff; }
+.focus-day-btn:focus-visible { outline: 2px solid #fff; outline-offset: -2px; }
+.focus-day-btn:disabled { opacity: 0.3; cursor: default; }
 .focus-day-label {
-  min-width: 132px; text-align: center;
-  font-size: 0.8rem; font-weight: 800; color: var(--text); white-space: nowrap;
+  min-width: 128px; text-align: center; padding: 0 2px;
+  font-size: 0.79rem; font-weight: 800; color: #fff; white-space: nowrap;
 }
 
 /* ── People groups (Workers screen) ──────────────────────────────────────────
