@@ -327,8 +327,12 @@
 [data-theme="dark"] .theme-icon-moon { display: none; }
 
 /* Filter bar */
-[data-theme="dark"] #shift-filter-bar { background: var(--white); border-color: var(--border); }
-[data-theme="dark"] .filter-chip { border-color: #334155; color: #94a3b8; }
+/* The row supplies the ground in both themes now (--chrome), so the bar itself
+   stays transparent here as it does in light. */
+[data-theme="dark"] #shift-filter-bar { border-color: var(--border); }
+/* Match the light theme: a filled chip with legible text, not muted-on-muted. */
+[data-theme="dark"] .filter-chip { border-color: var(--border-strong); color: var(--text); }
+[data-theme="dark"] .filter-chip:hover { background: var(--surface-sunken); }
 [data-theme="dark"] .filter-chip.active { color: white; }
 
 /* ─────────────────────────────────────────────────────────────
