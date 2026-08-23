@@ -1449,25 +1449,23 @@ body.dt-focus #shifts-content { height: 100%; }
 [dir="rtl"] .wv-cell.wv-state-short { box-shadow: inset -3px 0 0 var(--short); }
 [dir="rtl"] .wv-cell.wv-state-thin  { box-shadow: inset -3px 0 0 var(--thin); }
 
-/* Focus-mode day bar. Top-centre, opposite the exit button, so the two focus
-   controls do not crowd each other. */
+/* Focus-mode day bar. Sits inside the filter row as its leading item, so it
+   never covers the chips — it used to be position:fixed over the content. */
 .focus-daybar {
-  position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 60;
-  display: flex; align-items: center; gap: 4px;
-  padding: 4px 6px; border-radius: 22px;
-  background: var(--white); border: 1px solid var(--border);
-  box-shadow: 0 2px 10px rgba(15,23,42,0.12);
+  display: flex; align-items: center; gap: 2px; flex-shrink: 0;
+  padding-inline-end: 10px; margin-inline-end: 10px;
+  border-inline-end: 1px solid var(--border);
 }
 .focus-day-btn {
-  width: 32px; height: 32px; border-radius: 50%; border: none; cursor: pointer;
+  width: 28px; height: 28px; border-radius: 50%; border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   background: none; color: var(--navy); transition: background 0.12s, opacity 0.12s;
 }
-.focus-day-btn:hover:not(:disabled) { background: var(--surface-sunken); }
+.focus-day-btn:hover:not(:disabled) { background: var(--white); }
 .focus-day-btn:disabled { opacity: 0.25; cursor: default; }
 .focus-day-label {
-  min-width: 148px; text-align: center;
-  font-size: 0.86rem; font-weight: 800; color: var(--text); white-space: nowrap;
+  min-width: 132px; text-align: center;
+  font-size: 0.8rem; font-weight: 800; color: var(--text); white-space: nowrap;
 }
 
 /* ── People groups (Workers screen) ──────────────────────────────────────────

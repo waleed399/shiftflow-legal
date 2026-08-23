@@ -60,6 +60,9 @@ export function enterTableFocus() {
     exit.setAttribute('aria-label', t('shifts.exitExpand'))
     exit.setAttribute('title', t('shifts.exitExpand'))
   }
+  // The day bar lives inside the filter row. No syncFilterRow call is needed
+  // here: focus mode can only be entered when a table rendered, which means
+  // renderFilterBar painted chips, which means the row is already visible.
   const bar = document.getElementById('focus-daybar')
   if (bar) bar.style.display = ''
   applyColumnStretch()

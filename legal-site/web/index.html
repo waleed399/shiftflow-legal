@@ -208,6 +208,18 @@
       </div>
 
       <div class="filter-row" id="filter-row" style="display:none">
+        <!-- Focus-mode day bar. It lives in the filter row rather than floating
+             over the content, because focus mode hides the topbar and day tabs
+             and a fixed bar covered the filter chips underneath it. -->
+        <div class="focus-daybar" id="focus-daybar" style="display:none">
+          <button class="focus-day-btn" id="focus-day-prev" onclick="focusStepDay(-1)" data-i18n-aria="a11y.prevDay" aria-label="Previous day">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <span class="focus-day-label" id="focus-day-label"></span>
+          <button class="focus-day-btn" id="focus-day-next" onclick="focusStepDay(1)" data-i18n-aria="a11y.nextDay" aria-label="Next day">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
         <div id="shift-filter-bar" style="display:none"></div>
         <button class="btn-expand" id="view-expand-btn" style="display:none" onclick="toggleTableFocus()" data-i18n-title="shifts.expand" title="Expand" data-i18n-aria="shifts.expand" aria-label="Expand">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
@@ -221,17 +233,6 @@
         </div>
       </div>
 
-      <!-- Focus-mode day bar. Fixed to the viewport because focus mode hides the
-           topbar and day tabs; carries the day + date and steps within the week. -->
-      <div class="focus-daybar" id="focus-daybar" style="display:none">
-        <button class="focus-day-btn" id="focus-day-prev" onclick="focusStepDay(-1)" data-i18n-aria="a11y.prevDay" aria-label="Previous day">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-        </button>
-        <span class="focus-day-label" id="focus-day-label"></span>
-        <button class="focus-day-btn" id="focus-day-next" onclick="focusStepDay(1)" data-i18n-aria="a11y.nextDay" aria-label="Next day">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
-      </div>
 
       <!-- Focus mode exit. Fixed to the viewport because focus mode hides the topbar. -->
       <button class="shifts-focus-exit" id="shifts-focus-exit" style="display:none" onclick="exitTableFocus()" data-i18n-title="shifts.exitExpand" title="Exit full screen" data-i18n-aria="shifts.exitExpand" aria-label="Exit full screen">

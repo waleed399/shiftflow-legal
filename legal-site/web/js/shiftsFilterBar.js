@@ -14,8 +14,8 @@ import { t } from './i18n.js'
 import { esc } from './utils.js'
 import { getDeptColor, getActiveFilters } from './shifts.js'
 
-// The filter row holds two independent things — the scrolling chips and the
-// Expand button — and either can be hidden on its own. Show the row (and the
+// The filter row holds three independent things — the focus-mode day nav, the
+// scrolling chips and the Expand button — and any of them can be hidden alone. Show the row (and the
 // dividing rule it carries) only when at least one of them is actually there.
 export function syncFilterRow() {
   const row = document.getElementById('filter-row')
@@ -24,7 +24,7 @@ export function syncFilterRow() {
     const el = document.getElementById(id)
     return !!el && el.style.display !== 'none'
   }
-  row.style.display = (shown('shift-filter-bar') || shown('view-expand-btn')) ? 'flex' : 'none'
+  row.style.display = (shown('shift-filter-bar') || shown('view-expand-btn') || shown('focus-daybar')) ? 'flex' : 'none'
 }
 
 export function renderFilterBar(dayShifts) {
