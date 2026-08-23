@@ -106,14 +106,17 @@ function renderRoster() {
     ? t('availability.submittedAll')
     : t('availability.submittedOf', { submitted: submitted.length, total })
 
-  const cols = `grid-template-columns: repeat(${workDays.length}, 1fr)`
+  const colCount = workDays.length + 2   // worker + days + nudge
 
-  const dayHeaders = workDays.map((code, i) => {
-    const date = addDays(state.currentWeek, ALL_DAYS_ORDERED.indexOf(code) - ALL_DAYS_ORDERED.indexOf(state.currentOrg?.weekStartsOn === 'SUNDAY' ? 'SUN' : 'MON'))
-    return `<div class="avail-day-header">
-      <span class="avail-day-name">${DAY_META[code].label}</span>
-    </div>`
-  }).join('')
+  const dayHeaders = workDays.map(code =>
+    `<th class="av-day-th">${DAY_META[code].label}</th>`).join('')
+
+  const band = (color, label, extra = '') => `
+    <tr class="av-band${extra}">
+      <td class="av-band-cell" colspan="${colCount}">
+        <span class="av-band-dot" style="background:${color}"></span>${label}
+      </td>
+    </tr>`
 
   el.innerHTML = `
     <div class="avail-progress-wrap">
@@ -121,28 +124,24 @@ function renderRoster() {
       <span class="avail-progress-label">${esc(progressLabel)}</span>
     </div>
 
-    <div class="avail-table">
-      <div class="avail-header-row">
-        <div class="avail-worker-col"></div>
-        <div class="avail-days-strip" style="${cols}">${dayHeaders}</div>
-        <div class="avail-nudge-col"></div>
+    <div class="av-outer">
+      <div class="av-scroll">
+        <table class="av-table">
+          <thead>
+            <tr>
+              <th class="av-corner">${t('shifts.cell.workers')}</th>
+              ${dayHeaders}
+              <th class="av-nudge-th"></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${submitted.length ? band('#10b981', t('availability.submittedLabel', { n: submitted.length }))
+              + submitted.map(r => submittedRow(r, workDays)).join('') : ''}
+            ${pending.length ? band('#f59e0b', t('availability.waitingLabel', { n: pending.length }))
+              + pending.map(r => pendingRow(r, workDays)).join('') : ''}
+          </tbody>
+        </table>
       </div>
-
-      ${submitted.length ? `
-        <div class="avail-section-label">
-          <span class="avail-section-dot" style="background:#10b981"></span>
-          ${t('availability.submittedLabel', { n: submitted.length })}
-        </div>
-        ${submitted.map(r => submittedRow(r, workDays, cols)).join('')}
-      ` : ''}
-
-      ${pending.length ? `
-        <div class="avail-section-label" style="${submitted.length ? 'margin-top:20px' : ''}">
-          <span class="avail-section-dot" style="background:#f59e0b"></span>
-          ${t('availability.waitingLabel', { n: pending.length })}
-        </div>
-        ${pending.map(r => pendingRow(r, workDays, cols)).join('')}
-      ` : ''}
     </div>`
 
   applyAvatars(el)
@@ -150,7 +149,7 @@ function renderRoster() {
 
 // ── Row renderers ─────────────────────────────────────────────────────────────
 
-function submittedRow(r, workDays, cols) {
+function submittedRow(r, workDays) {
   const { worker, availability, timeOff } = r
   const initials    = esc(getInitials(worker.name))
   const slotByDay   = new Map((availability?.slots || []).map(s => [s.day, s]))
@@ -169,8 +168,8 @@ function submittedRow(r, workDays, cols) {
   const cells = workDays.map(code => dayCell(slotByDay.get(DAY_META[code].full))).join('')
 
   return `
-    <div class="avail-row">
-      <div class="avail-worker-col">
+    <tr class="av-row">
+      <td class="av-worker-cell">
         <div class="worker-row-avatar" data-avatar="${esc(avatarUrl(worker.id))}">${initials}</div>
         <div class="avail-worker-info">
           <div class="avail-worker-name">${esc(worker.name)}</div>
@@ -178,33 +177,33 @@ function submittedRow(r, workDays, cols) {
           ${notes}
           <div class="avail-days-count">${t('availability.daysAvailable', { active: activeDays.length, total: workDays.length })}</div>
         </div>
-      </div>
-      <div class="avail-days-strip" style="${cols}">${cells}</div>
-      <div class="avail-nudge-col"></div>
-    </div>`
+      </td>
+      ${cells}
+      <td class="av-nudge-cell"></td>
+    </tr>`
 }
 
-function pendingRow(r, workDays, cols) {
+function pendingRow(r, workDays) {
   const { worker, timeOff } = r
   const initials   = esc(getInitials(worker.name))
   const isNudged   = _nudgedIds.has(worker.id)
-  const emptyCells = workDays.map(() => `<div class="avail-cell avail-cell-empty"><span class="avail-dash">—</span></div>`).join('')
+  const emptyCells = workDays.map(() => `<td class="av-cell av-cell-nil"><span class="avail-dash">—</span></td>`).join('')
 
   const sub = timeOff
     ? `<span class="avail-timeoff-badge">${t('availability.onLeave', { start: timeOff.startDate.slice(0, 10), end: timeOff.endDate.slice(0, 10) })}</span>`
     : `<span class="avail-waiting">${t('availability.waitingForAvailability')}</span>`
 
   return `
-    <div class="avail-row avail-row-pending">
-      <div class="avail-worker-col">
+    <tr class="av-row av-row-pending">
+      <td class="av-worker-cell">
         <div class="worker-row-avatar avail-avatar-muted" data-avatar="${esc(avatarUrl(worker.id))}">${initials}</div>
         <div class="avail-worker-info">
           <div class="avail-worker-name avail-name-muted">${esc(worker.name)}</div>
           ${sub}
         </div>
-      </div>
-      <div class="avail-days-strip" style="${cols}">${emptyCells}</div>
-      <div class="avail-nudge-col">
+      </td>
+      ${emptyCells}
+      <td class="av-nudge-cell">
         <button class="avail-nudge-btn${isNudged ? ' avail-nudge-sent' : ''}"
                 id="nudge-${esc(worker.id)}"
                 onclick="nudgeWorker('${esc(worker.id)}')"
@@ -212,30 +211,35 @@ function pendingRow(r, workDays, cols) {
                 title="${isNudged ? t('availability.nudgeSentTooltip') : t('availability.nudgeTooltip')}">
           ${isNudged ? ICON_BELL_RING : ICON_BELL}
         </button>
-      </div>
-    </div>`
+      </td>
+    </tr>`
 }
 
+// The cell is a <td> now; the preference chip inside it is unchanged, so all
+// the existing .avail-pref-* styling still applies.
 function dayCell(slot) {
-  if (!slot) return `<div class="avail-cell avail-cell-empty"><span class="avail-dash">—</span></div>`
+  const nil = `<td class="av-cell av-cell-nil"><span class="avail-dash">—</span></td>`
+  if (!slot) return nil
 
   // Slots come back two shapes: preference-tagged (morning/night/any/off) or
   // raw time-range (startTime/endTime with no preference). For the raw shape,
   // fall through to a custom-style cell that shows the hours.
   const pref = slot.preference || (slot.startTime && slot.endTime ? 'custom' : null)
-  if (!pref) return `<div class="avail-cell avail-cell-empty"><span class="avail-dash">—</span></div>`
+  if (!pref) return nil
 
   const p = PREF[pref]
-  if (!p) return `<div class="avail-cell avail-cell-empty"><span class="avail-dash">—</span></div>`
+  if (!p) return nil
 
   if (pref === 'custom') {
     return `
-      <div class="avail-cell avail-pref-custom">
-        ${AVAIL_ICONS.custom}
-        <span class="avail-cell-time">${esc(slot.startTime)}</span>
-        <span class="avail-cell-time-sep">–</span>
-        <span class="avail-cell-time">${esc(slot.endTime)}</span>
-      </div>`
+      <td class="av-cell">
+        <div class="avail-cell avail-pref-custom">
+          ${AVAIL_ICONS.custom}
+          <span class="avail-cell-time">${esc(slot.startTime)}</span>
+          <span class="avail-cell-time-sep">–</span>
+          <span class="avail-cell-time">${esc(slot.endTime)}</span>
+        </div>
+      </td>`
   }
 
   const sub = pref === 'morning' && slot.until
@@ -243,11 +247,13 @@ function dayCell(slot) {
     : ''
 
   return `
-    <div class="avail-cell avail-pref-${pref}">
-      ${AVAIL_ICONS[pref]}
-      <span class="avail-cell-label">${p.label}</span>
-      ${sub}
-    </div>`
+    <td class="av-cell">
+      <div class="avail-cell avail-pref-${pref}">
+        ${AVAIL_ICONS[pref]}
+        <span class="avail-cell-label">${p.label}</span>
+        ${sub}
+      </div>
+    </td>`
 }
 
 // ── Nudge ─────────────────────────────────────────────────────────────────────

@@ -1503,3 +1503,69 @@ body.dt-focus #shifts-content { height: 100%; }
   border-inline-start: 3px solid var(--navy);
   padding-inline-start: 11px;
 }
+
+/* ── Availability as a table ─────────────────────────────────────────────────
+   Same shape and metrics as the day roster: sticky worker column, day columns
+   across the top, one bordered cell per worker x day. It was a CSS-grid
+   pseudo-table before, which read as a list of rows rather than something you
+   scan down a column. The preference chips inside the cells are unchanged. */
+.av-outer { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); background: var(--white); }
+.av-scroll { overflow: auto; max-height: calc(100vh - 260px); }
+.av-table { border-collapse: collapse; width: 100%; }
+
+.av-corner {
+  position: sticky; top: 0; left: 0; z-index: 4; background: var(--surface-sunken);
+  min-width: 190px; width: 190px; padding: 10px 14px; text-align: start;
+  font-size: 0.7rem; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.05em;
+  border-bottom: 2px solid var(--border); border-right: 2px solid var(--border);
+}
+.av-day-th {
+  position: sticky; top: 0; z-index: 2; background: var(--surface-sunken);
+  min-width: 104px; padding: 9px 8px; text-align: center;
+  font-size: 0.72rem; font-weight: 800; color: var(--text);
+  border-bottom: 2px solid var(--border); border-left: 1px solid var(--border);
+}
+.av-nudge-th {
+  position: sticky; top: 0; z-index: 2; background: var(--surface-sunken);
+  width: 52px; border-bottom: 2px solid var(--border); border-left: 1px solid var(--border);
+}
+
+/* Section bands take the same navy as the roster's department bands. */
+.av-band td {
+  background: linear-gradient(160deg, var(--navy-mid), var(--navy-deep));
+  border-top: 1px solid var(--navy-deep); border-bottom: 1px solid var(--navy-deep);
+}
+.av-band-cell {
+  padding: 6px 12px; font-size: 0.72rem; font-weight: 800; color: #fff;
+  text-transform: uppercase; letter-spacing: 0.04em;
+  position: sticky; left: 0;
+}
+.av-band-dot {
+  display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+  margin-inline-end: 8px; vertical-align: middle;
+}
+
+.av-worker-cell {
+  position: sticky; left: 0; z-index: 1; background: var(--white);
+  min-width: 190px; width: 190px; padding: 9px 12px; vertical-align: top;
+  display: flex; gap: 10px;
+  border-right: 2px solid var(--border); border-top: 1px solid var(--border);
+  box-shadow: 4px 0 6px -4px rgba(15,23,42,0.07);
+}
+.av-cell {
+  min-width: 104px; padding: 6px; text-align: center; vertical-align: middle;
+  border-left: 1px solid var(--border); border-top: 1px solid var(--border);
+}
+.av-cell-nil { background: var(--surface-sunken); color: var(--muted); }
+.av-nudge-cell {
+  width: 52px; text-align: center; vertical-align: middle;
+  border-left: 1px solid var(--border); border-top: 1px solid var(--border);
+}
+.av-row:hover .av-worker-cell { background: var(--surface-sunken); }
+.av-row-pending .av-worker-cell { background: var(--white); }
+
+[dir="rtl"] .av-worker-cell,
+[dir="rtl"] .av-corner,
+[dir="rtl"] .av-band-cell { left: auto; right: 0; }
+[dir="rtl"] .av-worker-cell { box-shadow: -4px 0 6px -4px rgba(15,23,42,0.07); }
