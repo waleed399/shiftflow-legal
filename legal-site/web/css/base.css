@@ -26,10 +26,19 @@
      --white made the app read as a big white slab on a blue field. Tinted into
      the family and kept lighter than the page but never as light as a card, so
      content stays the brightest thing on screen. */
-  --chrome: #b8c8de;
-  /* Secondary text ON the chrome band. --muted is sized for the card surface
-     and only reaches 2.8:1 against a band this deep; slate-600 clears 4.5:1
-     without making a label look like body copy. */
+  /* The header is four stacked bands — topbar, day tabs, action bar, filter
+     row — and one flat colour for all of them made them read as a single slab.
+     Each gets its own step, descending toward the canvas, so the rows separate
+     from each other and the stack as a whole still resolves into the page.
+     The last band lands just below the canvas, which reads as the header
+     settling onto the work surface rather than stopping abruptly. */
+  --chrome-1: #d5dfee;   /* topbar      */
+  --chrome-2: #cfdaea;   /* day tabs    */
+  --chrome-3: #c9d5e6;   /* action bar  */
+  --chrome-4: #c3d0e2;   /* filter row  */
+  --chrome: var(--chrome-1);   /* anything else that sits on header chrome */
+  /* Secondary text on those bands. --muted is sized for the card surface and
+     goes weak against them; slate-600 clears 4.5:1 on every step. */
   --chrome-muted: #475569;
   --white: #fbfcfe;        /* not pure white: #fff against the ground reads clinical */
   --surface: var(--white);
