@@ -287,6 +287,12 @@ body.web-locked #btn-create-shifts { display: none !important; }
 .dt-dept-band td { height: 26px; background: linear-gradient(160deg, var(--navy-mid), var(--navy-deep)); border-top: 1px solid var(--navy-deep); border-bottom: 1px solid var(--navy-deep); }
 .dt-dept-label { font-size: 0.72rem; font-weight: 800; color: #fff; padding: 0 10px; position: sticky; left: 0; z-index: 2; text-transform: uppercase; letter-spacing: 0.04em; border-right: 2px solid rgba(255,255,255,0.2) !important; }  /* stripe comes from .dt-info-cell border-left */
 .dt-dept-spacer { border-left: 1px solid rgba(255,255,255,0.12) !important; }
+/* The band label reuses .dt-info-cell for its sticky geometry, which also
+   brings that cell's hover and pointer cursor. A department name is not
+   clickable, so both are cancelled here. Specificity (0,2,1) beats
+   .dt-info-cell:hover (0,2,0). */
+.dt-dept-band td:hover { background: linear-gradient(160deg, var(--navy-mid), var(--navy-deep)); }
+.dt-dept-label { cursor: default; }
 /* The shift box is tinted with its department. Tints arrive as custom
    properties rather than an inline background, because an inline background
    would outrank the :hover rule below and kill the hover entirely. */
@@ -1562,6 +1568,9 @@ body.dt-focus #shifts-content { height: 100%; }
   width: 52px; text-align: center; vertical-align: middle;
   border-left: 1px solid var(--border); border-top: 1px solid var(--border);
 }
+/* The button is display:flex, so it is block-level and text-align on the cell
+   does nothing to it — auto margins are what centre a fixed-width block. */
+.av-nudge-cell .avail-nudge-btn { margin: 0 auto; }
 .av-row:hover .av-worker-cell { background: var(--surface-sunken); }
 .av-row-pending .av-worker-cell { background: var(--white); }
 
