@@ -169,7 +169,7 @@ export async function renderTableView() {
       const shiftMins  = sEnd - sStart
 
       const infoCell = `
-        <td class="dt-info-cell" style="border-left:3px solid ${dColor}" onclick="openShiftModal('${s.id}')">
+        <td class="dt-info-cell" style="--dept:${dColor};--tint:${dColor}14;--tint-hover:${dColor}2b" onclick="openShiftModal('${s.id}')">
           <div class="dt-shift-time">${s.startTime.substring(0,5)} → ${s.endTime.substring(0,5)}</div>
           <div class="dt-shift-dur">${dur}</div>
           <div class="dt-shift-meta">

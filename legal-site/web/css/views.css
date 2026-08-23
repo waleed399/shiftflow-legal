@@ -281,13 +281,17 @@ body.web-locked #btn-create-shifts { display: none !important; }
    exists — let it use whatever the column gives it. */
 .dt-avail-label { font-size: 0.58rem; font-weight: 700; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .dt-avail-off { opacity: 0.35; }
-/* Band takes the department colour, falling back to navy for shifts with no
-   department, so a group header and the shift stripes beneath it agree. */
-.dt-dept-band td { height: 26px; background: var(--dept, var(--navy)); border-top: 1px solid var(--dept, var(--navy)); }
-.dt-dept-label { font-size: 0.72rem; font-weight: 700; color: white; padding: 0 10px; position: sticky; left: 0; z-index: 2; border-right: 2px solid rgba(255,255,255,0.2) !important; }
-.dt-dept-spacer { border-left: 1px solid rgba(255,255,255,0.12) !important; }
-.dt-info-cell { width: 108px; min-width: 108px; padding: 8px 10px; background: var(--surface-sunken); position: sticky; left: 0; z-index: 1; border-right: 2px solid var(--border); border-top: 1px solid var(--border); cursor: pointer; transition: background 0.12s; vertical-align: top; }
-.dt-info-cell:hover { background: var(--border); }
+/* Band is a quiet label now — the shift cells beneath it carry the department
+   colour, and a solid coloured bar on top of tinted rows was two things
+   competing to say the same thing. */
+.dt-dept-band td { height: 26px; background: var(--surface-sunken); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.dt-dept-label { font-size: 0.72rem; font-weight: 800; color: var(--dept, var(--navy)); padding: 0 10px; position: sticky; left: 0; z-index: 2; text-transform: uppercase; letter-spacing: 0.04em; box-shadow: inset 3px 0 0 var(--dept, var(--navy)); border-right: 2px solid var(--border) !important; }
+.dt-dept-spacer { border-left: 1px solid var(--border) !important; }
+/* The shift box is tinted with its department. Tints arrive as custom
+   properties rather than an inline background, because an inline background
+   would outrank the :hover rule below and kill the hover entirely. */
+.dt-info-cell { width: 108px; min-width: 108px; padding: 8px 10px; background: var(--tint, var(--surface-sunken)); position: sticky; left: 0; z-index: 1; border-left: 3px solid var(--dept, transparent); border-right: 2px solid var(--border); border-top: 1px solid var(--border); cursor: pointer; transition: background 0.12s; vertical-align: top; }
+.dt-info-cell:hover { background: var(--tint-hover, var(--border)); }
 .dt-shift-time { font-size: 0.72rem; font-weight: 700; color: var(--navy); margin-bottom: 1px; }
 .dt-shift-dur  { font-size: 0.65rem; color: var(--muted); margin-bottom: 4px; }
 .dt-shift-meta { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
