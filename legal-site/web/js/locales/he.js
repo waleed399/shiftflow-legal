@@ -203,6 +203,7 @@ export default {
     filterClear: 'נקה ({{count}})',
     filterNoMatch: 'אין משמרות התואמות את הסינון.',
     filterClearLink: 'נקה סינון',
+    noWorkersInDepts: 'אין עובדים המשויכים למחלקות שנבחרו',
     exportLabel: 'ייצוא',
     exportDay: 'ייצוא יום',
     exportWeek: 'ייצוא שבוע',

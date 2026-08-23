@@ -203,6 +203,7 @@ export default {
     filterClear: 'Clear ({{count}})',
     filterNoMatch: 'No shifts match the active filters.',
     filterClearLink: 'Clear filters',
+    noWorkersInDepts: 'No workers belong to the selected departments',
     exportLabel: 'Export',
     exportDay: 'Export day',
     exportWeek: 'Export week',

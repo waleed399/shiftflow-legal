@@ -65,8 +65,8 @@ export async function renderTableView() {
     ].filter(Boolean))
   }
 
-  const workers = state.orgWorkers || []
-  if (workers.length === 0) {
+  const allWorkers = state.orgWorkers || []
+  if (allWorkers.length === 0) {
     el.innerHTML = `<div class="empty-state"><p>${t('shifts.noWorkersFound')}</p></div>`
     syncViewChrome()
     return
@@ -104,6 +104,22 @@ export async function renderTableView() {
 
   // Group by department (apply active filters)
   const filteredDayShifts = applyShiftFilters(dayShifts)
+
+  // Columns follow the shifts on screen. Filtering to a department used to
+  // narrow the rows but leave every worker in the org as a column, so most of
+  // the table was padlocked wrong-department cells the manager cannot use.
+  //
+  // Same rule the server applies when assigning: a worker with no memberships
+  // is unrestricted, otherwise they must belong to one of the departments
+  // shown. A shift with no department is open to everyone, so if any such
+  // shift is visible the narrowing is skipped entirely.
+  const visibleDeptIds = new Set(filteredDayShifts.map(s => s.department?.id).filter(Boolean))
+  const anyDeptless    = filteredDayShifts.some(s => !s.department?.id)
+  const workers = anyDeptless ? allWorkers : allWorkers.filter(w => {
+    const ids = w.departmentIds || []
+    return ids.length === 0 || ids.some(id => visibleDeptIds.has(id))
+  })
+
   if (filteredDayShifts.length === 0 && getActiveFilters().size > 0) {
     el.innerHTML = `
       <div class="empty-state" style="padding-top:40px">
@@ -113,6 +129,16 @@ export async function renderTableView() {
     syncViewChrome()
     return
   }
+  if (workers.length === 0) {
+    el.innerHTML = `
+      <div class="empty-state" style="padding-top:40px">
+        <p style="color:var(--muted)">${t('shifts.noWorkersInDepts')}</p>
+        <button class="btn-link" style="margin-top:8px" onclick="clearShiftFilters()">${t('shifts.filterClearLink')}</button>
+      </div>`
+    syncViewChrome()
+    return
+  }
+
   const byDept = new Map()
   filteredDayShifts.forEach(s => {
     const deptId = s.department?.id || 'unknown'
