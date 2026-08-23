@@ -245,7 +245,13 @@ export function changeWeek(dir) {
   const candidate = addDays(state.currentWeek, dir * 7)
   state.currentWeek = getWeekStartOf(candidate, state.currentOrg?.weekStartsOn)
   clearAvailRosterCache()
+  // Compare at day granularity. getWeekStartOf zeroes the time, so weekEnd is
+  // MIDNIGHT of the last day — an un-normalised `new Date()` is later than that
+  // for all but the first instant of that day, so on the last day of the week
+  // the range check failed and the selection fell back to the week start.
+  // Navigating away and back on a Sunday landed you on Monday.
   const today = new Date()
+  today.setHours(0, 0, 0, 0)
   const weekEnd = addDays(state.currentWeek, 6)
   state.selectedDay = (today >= state.currentWeek && today <= weekEnd) ? today : new Date(state.currentWeek)
   renderWeekLabel()
