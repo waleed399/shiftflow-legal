@@ -184,12 +184,10 @@
    overridden the tint entirely. */
 [data-theme="dark"] .dt-info-cell   { background: var(--tint, #162032); border-color: var(--border); }
 [data-theme="dark"] .dt-info-cell:hover { background: var(--tint-hover, #1e293b); }
-[data-theme="dark"] .dt-dept-band td { background: var(--surface-sunken); border-color: var(--border); }
-/* Neutral label rather than the department colour: one of the palette entries
-   is navy, which would vanish against a dark ground. The inset stripe still
-   carries the colour. */
-[data-theme="dark"] .dt-dept-label   { color: #cbd5e1; border-color: var(--border) !important; }
-[data-theme="dark"] .dt-dept-spacer  { border-color: #334155 !important; }
+/* Band keeps the navy gradient from the light theme (--navy-* are remapped for
+   dark), so no background override here — only the label border. */
+[data-theme="dark"] .dt-dept-label   { color: #fff; border-color: rgba(255,255,255,0.2) !important; }
+[data-theme="dark"] .dt-dept-spacer  { border-color: rgba(255,255,255,0.12) !important; }
 [data-theme="dark"] .dt-worker-cell  { border-color: var(--border); }
 [data-theme="dark"] .dt-row-border   { border-color: var(--border); }
 [data-theme="dark"] .dt-cell-plus    { border-color: #475569; color: #475569; }

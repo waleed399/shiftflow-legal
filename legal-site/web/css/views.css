@@ -281,12 +281,12 @@ body.web-locked #btn-create-shifts { display: none !important; }
    exists — let it use whatever the column gives it. */
 .dt-avail-label { font-size: 0.58rem; font-weight: 700; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .dt-avail-off { opacity: 0.35; }
-/* Band is a quiet label now — the shift cells beneath it carry the department
-   colour, and a solid coloured bar on top of tinted rows was two things
-   competing to say the same thing. */
-.dt-dept-band td { height: 26px; background: var(--surface-sunken); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-.dt-dept-label { font-size: 0.72rem; font-weight: 800; color: var(--dept, var(--navy)); padding: 0 10px; position: sticky; left: 0; z-index: 2; text-transform: uppercase; letter-spacing: 0.04em; box-shadow: inset 3px 0 0 var(--dept, var(--navy)); border-right: 2px solid var(--border) !important; }
-.dt-dept-spacer { border-left: 1px solid var(--border) !important; }
+/* Band uses the same navy as the selected day tab, so the two strongest
+   markers in the roster agree. The department keeps an edge stripe on the
+   label, since the band is one colour for every group. */
+.dt-dept-band td { height: 26px; background: linear-gradient(160deg, var(--navy-mid), var(--navy-deep)); border-top: 1px solid var(--navy-deep); border-bottom: 1px solid var(--navy-deep); }
+.dt-dept-label { font-size: 0.72rem; font-weight: 800; color: #fff; padding: 0 10px; position: sticky; left: 0; z-index: 2; text-transform: uppercase; letter-spacing: 0.04em; border-right: 2px solid rgba(255,255,255,0.2) !important; }  /* stripe comes from .dt-info-cell border-left */
+.dt-dept-spacer { border-left: 1px solid rgba(255,255,255,0.12) !important; }
 /* The shift box is tinted with its department. Tints arrive as custom
    properties rather than an inline background, because an inline background
    would outrank the :hover rule below and kill the hover entirely. */
@@ -303,10 +303,10 @@ body.web-locked #btn-create-shifts { display: none !important; }
    + used to be a small dashed ring drawn in --border-strong, which is the same
    token as the grid lines, so it read as part of the table rather than as
    something to click. */
-.dt-cell-open  { background: rgba(26,45,79,0.055); box-shadow: inset 0 0 0 1px rgba(26,45,79,0.07); }
-.dt-cell-open:hover { background: rgba(26,45,79,0.13); box-shadow: inset 0 0 0 1px rgba(26,45,79,0.22); }
-.dt-cell-plus  { font-size: 1.15rem; font-weight: 600; line-height: 1; color: rgba(26,45,79,0.5); transition: color 0.12s; }
-.dt-cell-open:hover .dt-cell-plus { color: var(--navy); }
+.dt-cell-open  { background: var(--tint-open, rgba(26,45,79,0.055)); box-shadow: inset 0 0 0 1px var(--tint-ring, rgba(26,45,79,0.07)); }
+.dt-cell-open:hover { background: var(--tint-open-hover, rgba(26,45,79,0.13)); box-shadow: inset 0 0 0 1px var(--dept, rgba(26,45,79,0.22)); }
+.dt-cell-plus  { font-size: 1.15rem; font-weight: 700; line-height: 1; color: var(--dept, #1a2d4f); opacity: 0.55; transition: opacity 0.12s; }
+.dt-cell-open:hover .dt-cell-plus { opacity: 1; }
 .dt-cell-dash  { font-size: 0.875rem; color: var(--border-strong); }
 .dt-cell-blocked { display: flex; flex-direction: column; align-items: center; gap: 1px; opacity: 0.8; }
 .dt-blocked-icon  { font-size: 0.75rem; }
