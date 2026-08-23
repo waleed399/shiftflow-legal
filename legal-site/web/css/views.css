@@ -101,16 +101,27 @@ body.web-locked #btn-create-shifts { display: none !important; }
 /* ── Action bar ── */
 .action-bar { background: var(--chrome); border-bottom: 1px solid var(--border); padding: 8px 28px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .action-bar-label { font-size: 0.78rem; color: var(--muted); font-weight: 500; margin-right: 4px; }
-.action-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; font-family: inherit; }
-.action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.btn-publish-day   { background: #f0fdf4; color: #16a34a; }
+/* These sit on the chrome band with a pale fill and, previously, no border at
+   all — so they had no shape and the publish label came in at 3.15:1, under
+   the readable threshold. A semantic edge gives them a button silhouette and
+   the label drops one shade to clear 4.5:1, without losing the soft fill that
+   keeps a destructive action from shouting. */
+.action-btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;
+  border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer;
+  border: 1.5px solid transparent; transition: all 0.15s; font-family: inherit;
+  box-shadow: 0 1px 1px rgba(15,23,42,0.05);
+}
+.action-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+.action-btn:focus-visible { outline: 2px solid var(--navy); outline-offset: 1px; }
+.btn-publish-day   { background: #f0fdf4; color: #15803d; border-color: #16a34a; }
 .btn-publish-day:hover:not(:disabled)   { background: #16a34a; color: white; }
-.btn-unpublish-day { background: #fef2f2; color: #dc2626; }
+.btn-unpublish-day { background: #fef2f2; color: #b91c1c; border-color: #dc2626; }
 .btn-unpublish-day:hover:not(:disabled) { background: #dc2626; color: white; }
 .action-bar-sep { width: 1px; height: 20px; background: var(--border); margin: 0 6px; flex-shrink: 0; }
-.btn-publish-week   { background: #f0fdf4; color: #16a34a; }
+.btn-publish-week   { background: #f0fdf4; color: #15803d; border-color: #16a34a; }
 .btn-publish-week:hover:not(:disabled)   { background: #16a34a; color: white; }
-.btn-unpublish-week { background: #fef2f2; color: #dc2626; }
+.btn-unpublish-week { background: #fef2f2; color: #b91c1c; border-color: #dc2626; }
 .btn-unpublish-week:hover:not(:disabled) { background: #dc2626; color: white; }
 
 /* ── Content area ── */
