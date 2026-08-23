@@ -272,6 +272,12 @@ export async function loadShifts() {
     }
     if (shiftsView === 'week') renderWeekView()
     else renderTableView()
+    // The action bar carries publish/unpublish and their counts. It was only
+    // refreshed by setShiftsView, so on first load — boot goes straight to
+    // loadShifts — it kept the display:none it carries in the markup and the
+    // publish buttons simply were not there until you toggled views. It also
+    // needs recomputing after a week change, or the counts go stale.
+    updateActionBar()
   } catch {
     document.getElementById('shifts-content').innerHTML = `<div class="empty-state"><p>${t('shifts.failedLoad')}</p></div>`
   }
