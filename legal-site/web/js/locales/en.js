@@ -159,6 +159,7 @@ export default {
     unassignedThisWeek: 'Unassigned this week',
     deptNoWorkers: 'No workers assigned to this department yet',
     noShiftsWeek: 'No shifts scheduled this week',
+    dayEmpty: 'No shifts',
     noDepartment: 'No department',
     weekSlotHeader: 'Shift',
     createShiftsTitle: 'Create shifts',

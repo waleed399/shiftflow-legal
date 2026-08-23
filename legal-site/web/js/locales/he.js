@@ -159,6 +159,7 @@ export default {
     unassignedThisWeek: 'לא משובצים השבוע',
     deptNoWorkers: 'עדיין לא שובצו עובדים למחלקה זו',
     noShiftsWeek: 'אין משמרות מתוכננות השבוע',
+    dayEmpty: 'אין משמרות',
     noDepartment: 'ללא מחלקה',
     weekSlotHeader: 'משמרת',
     createShiftsTitle: 'יצירת משמרות',
