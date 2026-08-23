@@ -1501,10 +1501,6 @@ body.dt-focus #shifts-content { height: 100%; }
 
 .wb-card-top { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; }
 .wb-time { font-size: 0.8rem; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.wb-dept {
-  font-size: 0.65rem; font-weight: 700; color: var(--dept, var(--navy));
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
-}
 .wb-card-bot { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
 
 .wb-faces { display: flex; }
@@ -1526,3 +1522,21 @@ body.dt-focus #shifts-content { height: 100%; }
 .wb-empty { padding: 14px 8px; text-align: center; font-size: 0.72rem; color: var(--muted); opacity: 0.75; }
 
 @media (prefers-reduced-motion: reduce) { .wb-card { transition: none; } }
+/* One department = one block inside the day column. Three things separate the
+   blocks, because a bare label was too easy to read past: a rule and a gap
+   between them, and a heading that sits on a tint of its own department colour
+   rather than floating as grey text. The cards keep their stripe but drop the
+   department name — the heading says it. */
+.wb-group { display: flex; flex-direction: column; gap: 7px; }
+.wb-group + .wb-group {
+  margin-top: 13px; padding-top: 13px;
+  border-top: 1px solid var(--border);
+}
+.wb-dept-head {
+  font-size: 0.63rem; font-weight: 800; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--dept, var(--navy));
+  background: var(--dept-tint, var(--surface-sunken));
+  border-inline-start: 3px solid var(--dept, var(--navy));
+  border-radius: 0 5px 5px 0; padding: 4px 8px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}

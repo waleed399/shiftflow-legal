@@ -1,5 +1,6 @@
-// Week roster — a board of day columns, each holding that day's shifts in
-// time order. Click a card to open the shift.
+// Week roster — a board of day columns. Each column holds that day's shifts
+// grouped by department, in time order within each group. Click a card to
+// open the shift.
 //
 // ── Why a board and not a matrix ────────────────────────────────────────────
 // Two earlier shapes failed for the same underlying reason. Workers × days put
@@ -74,7 +75,20 @@ export async function renderWeekView() {
           : '<div class="wb-day-cov wb-day-cov-none">—</div>'}
       </div>`
 
-    const cards = dayShifts.map(s => {
+    // Group the day's shifts by department. Departments are ordered by name so
+    // the same one sits in the same place in every column, which is what makes
+    // the board scannable across days as well as down a single day.
+    const groups = new Map()
+    for (const s of dayShifts) {
+      const id = s.department?.id || '__none'
+      if (!groups.has(id)) {
+        groups.set(id, { name: s.department?.name || t('shifts.noDepartment'), color: getDeptColor(s.department?.id), shifts: [] })
+      }
+      groups.get(id).shifts.push(s)
+    }
+    const ordered = [...groups.values()].sort((a, b) => a.name.localeCompare(b.name))
+
+    const card = (s) => {
       const list  = s.assignments || []
       const need  = s.requiredWorkers || 0
       const cs    = coverageState(list.length, need)
@@ -94,14 +108,19 @@ export async function renderWeekView() {
                 style="--dept:${color}" onclick="openShiftModal('${s.id}')">
           <span class="wb-card-top">
             <span class="wb-time">${esc(s.startTime.substring(0, 5))}–${esc(s.endTime.substring(0, 5))}</span>
-            <span class="wb-dept">${esc(s.department?.name || '')}</span>
           </span>
           <span class="wb-card-bot">
             <span class="wb-faces">${faces}${more}${none}</span>
             <span class="wb-cov">${list.length}/${need}</span>
           </span>
         </button>`
-    }).join('')
+    }
+
+    const cards = ordered.map(g => `
+      <div class="wb-group" style="--dept:${g.color};--dept-tint:${g.color}1c">
+        <div class="wb-dept-head">${esc(g.name)}</div>
+        ${g.shifts.map(card).join('')}
+      </div>`).join('')
 
     return `
       <div class="wb-col">
