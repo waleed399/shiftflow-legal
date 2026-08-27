@@ -73,6 +73,23 @@
 .pick-row-name { font-size: 0.875rem; color: var(--text); font-weight: 500; }
 .pick-row-dept { font-size: 0.75rem; color: var(--muted); }
 .pick-row.already-assigned { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+/* Blocked, not absent. A worker the manager cannot use is still worth seeing —
+   "everyone in Bar is already on something" is an answer — so the row stays
+   readable and says why, rather than being dimmed to the edge of legibility
+   like an already-assigned one. */
+.pick-row-blocked { cursor: not-allowed; pointer-events: none; }
+.pick-row-blocked .pick-row-name { color: var(--muted); }
+.pick-row-blocked .pick-row-dept { color: var(--short, #ef4444); font-weight: 600; }
+.pick-row-main { flex: 1; min-width: 0; }
+/* The worker's stated availability, in the same colours the day roster puts
+   over its columns. */
+.pick-avail {
+  display: inline-flex; align-items: center; gap: 4px; flex: none;
+  padding: 2px 7px 2px 5px; border-radius: 999px;
+  border: 1px solid currentColor; font-size: 0.68rem; font-weight: 700;
+  white-space: nowrap;
+}
+.pick-avail svg { width: 11px; height: 11px; flex: none; }
 
 /* ── Forms ── */
 #create-shift-form { display: flex; flex-direction: column; gap: 14px; }

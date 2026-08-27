@@ -17,12 +17,11 @@ import {
   availPref,
   applyShiftFilters,
   getActiveFilters,
-  toMins,
-  normEnd,
   shiftDuration,
   getAvailRosterCache,
 } from './shifts.js'
 import { renderFilterBar } from './shiftsFilterBar.js'
+import { buildDayLoad, buildDayPrefs, prefKeyOf, evaluateAssignment } from './shiftEligibility.js'
 import { syncViewChrome } from './shifts.js'
 import { applyColumnStretch } from './shiftsTableFit.js'
 
@@ -72,35 +71,11 @@ export async function renderTableView() {
     return
   }
 
-  // Build per-worker availability prefs for the selected day
-  const selectedDayFull = DAY_FULL[state.selectedDay.getDay()]
-  const workerDayPrefs = new Map(
-    (availCache[key] || []).map(r => {
-      if (!r.availability) return [r.worker.id, null]
-      const slot = (r.availability.slots || []).find(s => s.day === selectedDayFull)
-      return [r.worker.id, slot
-        ? { preference: slot.preference, startTime: slot.startTime, endTime: slot.endTime }
-        : { preference: 'off' }
-      ]
-    })
-  )
-
-  // Pre-compute each worker's time ranges for conflict detection
-  const workerMinsMap  = new Map() // workerId → total assigned minutes today
-  const workerRangeMap = new Map() // workerId → [{startMins, endMins, shiftId}]
-  dayShifts.forEach(s => {
-    const sStart = toMins(s.startTime)
-    const sEnd   = normEnd(sStart, toMins(s.endTime))
-    ;(s.assignments || []).forEach(a => {
-      const wid    = a.worker?.id || a.id
-      const aStart = a.blockStart ? toMins(a.blockStart) : sStart
-      const aEnd   = a.blockEnd   ? normEnd(aStart, toMins(a.blockEnd)) : sEnd
-      workerMinsMap.set(wid, (workerMinsMap.get(wid) || 0) + (aEnd - aStart))
-      const ranges = workerRangeMap.get(wid) || []
-      ranges.push({ startMins: aStart, endMins: aEnd, shiftId: s.id })
-      workerRangeMap.set(wid, ranges)
-    })
-  })
+  // Availability and existing commitments, both from the shared rules the
+  // assign picker uses — written twice, the two screens would drift and
+  // disagree about who is assignable.
+  const workerDayPrefs = buildDayPrefs(availCache[key], DAY_FULL[state.selectedDay.getDay()])
+  const dayLoad        = buildDayLoad(dayShifts)
 
   // Group by department (apply active filters)
   const filteredDayShifts = applyShiftFilters(dayShifts)
@@ -150,8 +125,7 @@ export async function renderTableView() {
   const workerCols = workers.map(w => {
     const initials = esc(getInitials(w.name))
     const pref     = workerDayPrefs.get(w.id)
-    // Slots may have an explicit preference, or just startTime/endTime (treat as custom).
-    const prefKey  = pref?.preference || (pref?.startTime && pref?.endTime ? 'custom' : null)
+    const prefKey  = prefKeyOf(pref)
     const cfg      = prefKey ? availPref(prefKey) : null
     const isOff    = prefKey === 'off'
     const badge    = cfg ? `<span class="dt-avail-badge" style="background:${cfg.color}22;border-color:${cfg.color};color:${cfg.color}">${AVAIL_ICONS[prefKey]}</span>` : ''
@@ -191,9 +165,6 @@ export async function renderTableView() {
       // nothing is lost by giving the stripe to the more useful signal.
       const dColor     = getDeptColor(s.department?.id)
       const dur        = shiftDuration(s.startTime, s.endTime)
-      const sStart     = toMins(s.startTime)
-      const sEnd       = normEnd(sStart, toMins(s.endTime))
-      const shiftMins  = sEnd - sStart
 
       const infoCell = `
         <td class="dt-info-cell" onclick="openShiftModal('${s.id}')">
@@ -206,15 +177,12 @@ export async function renderTableView() {
         </td>`
 
       const workerCells = workers.map(w => {
-        const isAssigned   = (s.assignments || []).some(a => (a.worker?.id || a.id) === w.id)
-        const wMins        = workerMinsMap.get(w.id) || 0
-        const isAtLimit    = !isAssigned && (wMins + shiftMins > 720)
-        const ranges       = workerRangeMap.get(w.id) || []
-        const hasConflict  = !isAssigned && ranges.some(r => r.shiftId !== s.id && r.startMins < sEnd && r.endMins > sStart)
-        const deptIds      = w.departmentIds || []
-        const isWrongDept  = !isAssigned && s.department?.id && deptIds.length > 0 && !deptIds.includes(s.department.id)
-        const isBlocked    = isAtLimit || hasConflict || isWrongDept
-        const canAssign    = !isAssigned && !isFull && !isBlocked
+        const { code }     = evaluateAssignment(w, s, dayLoad)
+        const isAssigned   = code === 'assigned'
+        const isWrongDept  = code === 'wrongDept'
+        const isAtLimit    = code === 'limit'
+        const hasConflict  = code === 'conflict'
+        const canAssign    = code === 'open'
         const cellKey      = `${s.id}::${w.id}`
 
         let bgCls = '', bgStyle = '', clickAttr, content

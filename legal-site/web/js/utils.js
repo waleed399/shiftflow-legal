@@ -80,3 +80,16 @@ export function applyAvatars(container) {
     img.src = url
   })
 }
+
+// Time helpers. They live here rather than in shifts.js so modules that must
+// stay clear of the shifts.js import graph — shiftEligibility.js — can use them.
+export function toMins(t) {
+  if (!t) return 0
+  const [h, m] = t.substring(0, 5).split(':').map(Number)
+  return h * 60 + m
+}
+
+/** An end time at or before the start belongs to the next day (22:00 → 06:00). */
+export function normEnd(startMins, endMins) {
+  return endMins <= startMins ? endMins + 1440 : endMins
+}

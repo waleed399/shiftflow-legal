@@ -1,7 +1,8 @@
 import { state, ensureOrgWorkers } from './state.js'
 import { apiFetch } from './api.js'
-import { toYMD, esc, getInitials, applyAvatars, showToast } from './utils.js'
-import { loadShifts, updateActionBar, toMins, normEnd } from './shifts.js'
+import { toYMD, esc, getInitials, applyAvatars, showToast, DAY_FULL, AVAIL_ICONS } from './utils.js'
+import { loadShifts, updateActionBar, toMins, normEnd, availPref, getAvailRosterCache } from './shifts.js'
+import { buildDayLoad, buildDayPrefs, prefKeyOf, evaluateAssignment, isBlocked } from './shiftEligibility.js'
 import { t } from './i18n.js'
 import { requireWebManage } from './profile.js'
 
@@ -389,8 +390,25 @@ export async function openAssignPicker() {
   if (startEl) delete startEl.dataset.touched
   document.getElementById('assign-block-error').textContent = ''
   setAssignMode('full')
-  const workers = await ensureOrgWorkers()
+  const [workers] = await Promise.all([ensureOrgWorkers(), ensureAvailRoster()])
   renderPickerList(workers, '')
+}
+
+/**
+ * The week's stated availability, which the day roster loads for the same
+ * reason: a name alone does not tell a manager who SHOULD take the shift.
+ * Best-effort — the picker still works without it, just less helpfully.
+ */
+async function ensureAvailRoster() {
+  const key = toYMD(state.currentWeek)
+  const cache = getAvailRosterCache()
+  if (cache[key]) return
+  try {
+    const res = await apiFetch(`/availability/week-roster/${key}`)
+    if (res?.ok) cache[key] = await res.json()
+  } catch {
+    // Offline or refused. renderPickerList degrades to names only.
+  }
 }
 
 // Toggle between assigning the whole shift and a sub-range. Switching to "part"
@@ -425,9 +443,17 @@ export function filterPicker(query) {
   ensureOrgWorkers().then(workers => renderPickerList(workers, query))
 }
 
+// Reasons a worker cannot take the shift, in the wording the day roster's cells
+// already use — the manager meets the same four words in both places.
+const BLOCK_LABEL = {
+  wrongDept: () => t('modals.pickerBlockedDept'),
+  limit:     () => t('modals.pickerBlockedLimit'),
+  conflict:  () => t('modals.pickerBlockedBusy'),
+}
+
 function renderPickerList(workers, query) {
   const q = query.toLowerCase()
-  const assignedIds = new Set((state.activeShiftData?.assignments || []).map(a => a.worker?.id))
+  const shift = state.activeShiftData
   const filtered = workers.filter(w => !q || (w.name || '').toLowerCase().includes(q) || (w.email || '').toLowerCase().includes(q))
 
   if (filtered.length === 0) {
@@ -435,17 +461,53 @@ function renderPickerList(workers, query) {
     return
   }
 
+  // The shift's own day, not the week: the twelve-hour cap and the overlap
+  // check are both about one day, and the picker can be opened from the week
+  // rota on a shift that is not the day the roster happens to have selected.
+  const weekKey   = toYMD(state.currentWeek)
+  const shiftYMD  = (shift?.date || '').substring(0, 10)
+  const dayShifts = (state.shiftsCache[weekKey] || [])
+    .filter(s => s.date.substring(0, 10) === shiftYMD && s.status !== 'CANCELLED')
+  const load  = buildDayLoad(dayShifts)
+  const prefs = shiftYMD
+    ? buildDayPrefs(getAvailRosterCache()[weekKey], DAY_FULL[new Date(shiftYMD).getUTCDay()])
+    : new Map()
+
+  // Whoever can actually be assigned comes first. Sorting on the verdict is the
+  // point of showing it: without it the manager reads the whole list to find
+  // the two names that are not struck through.
+  const rank = { open: 0, full: 1, conflict: 2, limit: 2, wrongDept: 3, assigned: 4 }
+  const rows = filtered
+    .map(w => ({ w, code: shift ? evaluateAssignment(w, shift, load).code : 'open' }))
+    .sort((a, b) => (rank[a.code] ?? 9) - (rank[b.code] ?? 9) || a.w.name.localeCompare(b.w.name))
+
   const list = document.getElementById('picker-list')
-  list.innerHTML = filtered.map(w => {
-    const initials = esc(getInitials(w.name))
-    const already = assignedIds.has(w.id)
+  list.innerHTML = rows.map(({ w, code }) => {
+    const already = code === 'assigned'
+    const blocked = isBlocked(code)
+    const prefKey = prefKeyOf(prefs.get(w.id))
+    const cfg     = prefKey ? availPref(prefKey) : null
+    const badge   = cfg
+      ? `<span class="pick-avail" style="background:${cfg.color}1c;border-color:${cfg.color};color:${cfg.color}"
+               title="${esc(cfg.label)}">${AVAIL_ICONS[prefKey] || ''}<span>${esc(
+          prefKey === 'custom' && prefs.get(w.id)?.startTime
+            ? `${prefs.get(w.id).startTime}–${prefs.get(w.id).endTime}`
+            : cfg.label)}</span></span>`
+      : ''
+    const note = already ? t('modals.alreadyAssigned')
+      : blocked ? BLOCK_LABEL[code]()
+      : code === 'full' ? t('modals.pickerShiftFull')
+      : ''
+    const inert = already || blocked
     return `
-      <div class="pick-row ${already ? 'already-assigned' : ''}" onclick="${already ? '' : `assignWorker('${w.id}')`}" ${already ? '' : 'role="button" tabindex="0"'}>
-        <div class="worker-row-avatar" style="width:28px;height:28px;font-size:0.65rem" data-avatar="${esc(w.avatarUrl || '')}">${initials}</div>
-        <div>
+      <div class="pick-row ${already ? 'already-assigned' : ''}${blocked ? ' pick-row-blocked' : ''}"
+           onclick="${inert ? '' : `assignWorker('${w.id}')`}" ${inert ? '' : 'role="button" tabindex="0"'}>
+        <div class="worker-row-avatar" style="width:28px;height:28px;font-size:0.65rem" data-avatar="${esc(w.avatarUrl || '')}">${esc(getInitials(w.name))}</div>
+        <div class="pick-row-main">
           <div class="pick-row-name">${esc(w.name || t('common.dash'))}</div>
-          ${already ? `<div class="pick-row-dept">${t('modals.alreadyAssigned')}</div>` : ''}
+          ${note ? `<div class="pick-row-dept">${esc(note)}</div>` : ''}
         </div>
+        ${badge}
       </div>`
   }).join('')
   applyAvatars(list)

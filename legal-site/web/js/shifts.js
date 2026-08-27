@@ -1,6 +1,6 @@
 import { state, ensureOrgWorkers } from './state.js'
 import { apiFetch } from './api.js'
-import { DAYS, MONTHS, DEPT_COLORS, DAY_FULL, AVAIL_ICONS, addDays, isSameDay, toYMD, fmtDate, getWeekStartOf, esc, getInitials, applyAvatars, showToast } from './utils.js'
+import { DAYS, MONTHS, DEPT_COLORS, DAY_FULL, AVAIL_ICONS, addDays, isSameDay, toYMD, fmtDate, getWeekStartOf, esc, getInitials, applyAvatars, showToast, toMins, normEnd } from './utils.js'
 import { t } from './i18n.js'
 import { requireWebManage } from './profile.js'
 import { exitTableFocus, syncFocusBars } from './shiftsFocus.js'
@@ -78,15 +78,10 @@ export function getDeptColor(deptId) {
   return DEPT_COLORS[Math.abs(hash) % DEPT_COLORS.length]
 }
 
-export function toMins(t) {
-  if (!t) return 0
-  const [h, m] = t.substring(0, 5).split(':').map(Number)
-  return h * 60 + m
-}
-
-export function normEnd(startMins, endMins) {
-  return endMins <= startMins ? endMins + 1440 : endMins
-}
+// Moved to utils.js; re-exported so existing importers are unaffected. Imported
+// above as well, because a bare re-export creates no local binding and
+// shiftDuration below calls them.
+export { toMins, normEnd }
 
 export function shiftDuration(start, end) {
   const s = toMins(start)
