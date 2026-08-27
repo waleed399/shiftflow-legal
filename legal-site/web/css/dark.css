@@ -400,11 +400,12 @@
 [data-theme="dark"] .prof-dept-add-btn { background: var(--navy); }
 [data-theme="dark"] .prof-dept-add-btn:hover { opacity: 0.9; }
 
-/* Rota axes. In dark, --chrome (#16203a) and --surface-sunken (#162032) differ
-   by one channel by eight, so reusing --chrome here would make the worker
-   column and the rest-day cells the same colour — exactly the distinction the
-   axis tint exists to draw. This sits between --bg and --chrome so the three
-   grounds stay apart: axis, worked day (--white #1b2740), rest day. */
+/* Rota axes. Light mode takes var(--navy) straight from the Expand button, but
+   in dark --navy is #3b82f6 — a vivid blue that is right for a small button and
+   far too loud for a whole column plus header row. This is the same navy the
+   light theme uses for --navy-deep: still unmistakably the axis against the
+   #1b2740 body cells, and white text sits on it just as well. */
 [data-theme="dark"] .rt-worker,
 [data-theme="dark"] .rt-corner,
-[data-theme="dark"] .rt-day { background: #101a30; }
+[data-theme="dark"] .rt-day { background: #0d1b35; border-color: #060f22; }
+[data-theme="dark"] .rt-avatar { color: #0d1b35; }
