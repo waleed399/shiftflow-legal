@@ -1503,101 +1503,143 @@ body.dt-focus #shifts-content { height: 100%; }
 [dir="rtl"] .av-band-cell { left: auto; right: 0; }
 [dir="rtl"] .av-worker-cell { box-shadow: -4px 0 6px -4px rgba(15,23,42,0.07); }
 
-/* ── Week roster: a board of day columns ─────────────────────────────────────
-   One column per work day, each holding that day's shifts in time order. The
-   card carries what the day roster already taught the manager to read: a
-   department stripe, the time, who is on it, and assigned/required tinted by
-   the shared coverage scale. See the note at the top of shiftsWeekView.js for
-   why this replaced the matrix. */
-.wb-board { display: flex; align-items: stretch; min-width: min-content; }
-.wb-col {
-  flex: 1 1 0; min-width: 158px;
-  border-inline-end: 1px solid var(--border);
-}
-.wb-col:last-child { border-inline-end: none; }
+/* ── Week roster: a rota grid of workers × work days ─────────────────────────
+   One row per worker, one column per work day, and each cell holds the hours
+   that worker is assigned that day. A blank cell is a rest day — the grid is
+   read down a row ("what is Adem doing this week"), which is the question the
+   old board of day columns could not answer without reassembling seven columns
+   by eye. See the note at the top of shiftsWeekView.js. */
+.rt-table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: max-content; }
 
-.wb-head {
-  position: sticky; top: 0; z-index: 2;
+/* The header and the worker column both pin, so a long roster stays legible
+   while scrolling in either direction. The corner pins on both axes and must
+   therefore outrank both. */
+.rt-corner, .rt-day, .rt-total-head {
+  position: sticky; top: 0; z-index: 3;
   background: var(--chrome); border-bottom: 2px solid var(--border);
-  padding: 9px 11px 8px;
+  padding: 8px 11px 7px; text-align: start; vertical-align: bottom;
 }
-.wb-today { box-shadow: inset 0 3px 0 var(--navy); }
-.wb-day-name {
+.rt-corner {
+  inset-inline-start: 0; z-index: 4; min-width: 168px;
+  font-size: 0.72rem; font-weight: 800; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.05em;
+  border-inline-end: 1px solid var(--border-strong);
+}
+.rt-day { min-width: 136px; border-inline-end: 1px solid var(--border); }
+.rt-today { box-shadow: inset 0 3px 0 var(--navy); }
+.rt-day-name {
   font-size: 0.72rem; font-weight: 800; color: var(--muted);
   text-transform: uppercase; letter-spacing: 0.05em;
 }
-.wb-day-num { font-size: 1.05rem; font-weight: 800; color: var(--text); line-height: 1.2; }
+.rt-day-num { font-size: 1.05rem; font-weight: 800; color: var(--text); line-height: 1.2; }
+.rt-day-cov {
+  font-size: 0.68rem; font-weight: 800; color: var(--cov);
+  font-variant-numeric: tabular-nums;
+}
+.rt-day-cov-none { color: var(--muted); opacity: 0.55; font-weight: 600; }
+.rt-total-head {
+  min-width: 74px; text-align: end;
+  font-size: 0.72rem; font-weight: 800; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.05em;
+  border-inline-start: 1px solid var(--border-strong);
+}
+
+/* The one coverage scale, bound on the day header and inherited by its meter
+   and count. Shared with the open-shift chips, which bind it themselves. */
+.wb-state-ok    { --cov: var(--ok);    --cov-soft: var(--ok-soft); }
+.wb-state-thin  { --cov: var(--thin);  --cov-soft: var(--thin-soft); }
+.wb-state-short { --cov: var(--short); --cov-soft: var(--short-soft); }
 .wb-meter {
   height: 4px; border-radius: 2px; margin: 6px 0 3px;
   background: var(--border-strong); overflow: hidden;
 }
 .wb-meter > i { display: block; height: 100%; border-radius: 2px; background: var(--cov); }
-.wb-day-cov {
-  font-size: 0.68rem; font-weight: 800; color: var(--cov);
-  font-variant-numeric: tabular-nums;
+
+.rt-worker {
+  position: sticky; inset-inline-start: 0; z-index: 2;
+  background: var(--white); text-align: start; font-weight: 700;
+  padding: 7px 11px; min-width: 168px;
+  border-inline-end: 1px solid var(--border-strong);
+  border-bottom: 1px solid var(--border);
 }
-.wb-day-cov-none { color: var(--muted); opacity: 0.55; font-weight: 600; }
-
-/* The one coverage scale, bound once and inherited by the meter, the counts
-   and the short-card tint. */
-.wb-state-ok    { --cov: var(--ok);    --cov-soft: var(--ok-soft); }
-.wb-state-thin  { --cov: var(--thin);  --cov-soft: var(--thin-soft); }
-.wb-state-short { --cov: var(--short); --cov-soft: var(--short-soft); }
-
-.wb-stack { display: flex; flex-direction: column; gap: 7px; padding: 9px; }
-
-.wb-card {
-  display: flex; flex-direction: column; gap: 7px;
-  width: 100%; text-align: start; cursor: pointer; font: inherit; color: inherit;
-  background: var(--white);
-  border: 1px solid var(--border); border-inline-start: 3px solid var(--dept, var(--navy));
-  border-radius: 9px; padding: 8px 9px;
-  transition: box-shadow 0.12s, transform 0.12s;
+.rt-worker-inner { display: flex; align-items: center; gap: 8px; }
+.rt-avatar {
+  width: 26px; height: 26px; border-radius: 50%; flex: none; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.6rem; font-weight: 800; color: #fff; background: var(--navy);
 }
-.wb-card:hover { box-shadow: 0 2px 10px rgba(15,23,42,0.13); transform: translateY(-1px); }
-.wb-card:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
-/* Only a shift with nobody on it gets a tinted ground — a partly-filled shift
-   is normal mid-week and should not shout. */
-.wb-card-short { background: var(--cov-soft); }
-
-.wb-card-top { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; }
-.wb-time { font-size: 0.8rem; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.wb-card-bot { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
-
-.wb-faces { display: flex; }
-.wb-face {
-  width: 21px; height: 21px; border-radius: 50%; flex: none;
-  display: flex; align-items: center; justify-content: center; overflow: hidden;
-  font-size: 0.53rem; font-weight: 800; color: #fff; background: var(--navy);
-  border: 1.5px solid var(--white); margin-inline-start: -6px;
-}
-.wb-faces > .wb-face:first-child { margin-inline-start: 0; }
-.wb-face img { width: 100%; height: 100%; object-fit: cover; }
-.wb-face-more { background: var(--border-strong); color: var(--text); }
-.wb-face-empty {
-  background: transparent; color: var(--short);
-  border: 1.5px dashed var(--short); font-size: 0.8rem; font-weight: 700;
-}
-.wb-cov { font-size: 0.72rem; font-weight: 800; color: var(--cov); font-variant-numeric: tabular-nums; }
-
-.wb-empty { padding: 14px 8px; text-align: center; font-size: 0.72rem; color: var(--muted); opacity: 0.75; }
-
-@media (prefers-reduced-motion: reduce) { .wb-card { transition: none; } }
-/* One department = one block inside the day column. Three things separate the
-   blocks, because a bare label was too easy to read past: a rule and a gap
-   between them, and a heading that sits on a tint of its own department colour
-   rather than floating as grey text. The cards keep their stripe but drop the
-   department name — the heading says it. */
-.wb-group { display: flex; flex-direction: column; gap: 7px; }
-.wb-group + .wb-group {
-  margin-top: 13px; padding-top: 13px;
-  border-top: 1px solid var(--border);
-}
-.wb-dept-head {
-  font-size: 0.63rem; font-weight: 800; letter-spacing: 0.05em;
-  text-transform: uppercase; color: var(--dept, var(--navy));
-  background: var(--dept-tint, var(--surface-sunken));
-  border-inline-start: 3px solid var(--dept, var(--navy));
-  border-radius: 0 5px 5px 0; padding: 4px 8px;
+.rt-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.rt-worker-name {
+  font-size: 0.82rem; font-weight: 700; color: var(--text);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+
+.rt-cell {
+  vertical-align: top; padding: 5px; background: var(--white);
+  border-inline-end: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+/* A rest day. Tinting the empty cells rather than the working ones means the
+   assigned hours are what stands out white against the week. */
+.rt-cell-off { background: var(--surface-sunken); }
+
+.rt-row:hover .rt-worker,
+.rt-row:hover .rt-cell,
+.rt-row:hover .rt-total { background: var(--surface); }
+
+.rt-chip {
+  position: relative; display: flex; flex-direction: column; gap: 1px;
+  width: 100%; text-align: start; font: inherit; color: inherit; cursor: pointer;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-inline-start: 3px solid var(--dept, var(--navy));
+  border-radius: 8px; padding: 5px 16px 5px 7px;
+  transition: box-shadow 0.12s;
+}
+.rt-chip:hover { box-shadow: 0 2px 8px rgba(15,23,42,0.13); }
+.rt-chip:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+.rt-chip + .rt-chip { margin-top: 5px; }
+/* Status is a dot rather than a colour on the chip itself: the stripe already
+   belongs to the department, which is the more useful thing to scan for. */
+.rt-chip::after {
+  content: ''; position: absolute; top: 7px; inset-inline-end: 6px;
+  width: 6px; height: 6px; border-radius: 50%; background: var(--status, var(--navy));
+}
+.rt-chip-draft { border-style: dashed; background: var(--surface-sunken); }
+.rt-chip-time {
+  font-size: 0.76rem; font-weight: 800; white-space: nowrap;
+  font-variant-numeric: tabular-nums; color: var(--text);
+}
+.rt-chip-dept {
+  font-size: 0.62rem; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.04em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.rt-total {
+  text-align: end; padding: 7px 11px; background: var(--white);
+  font-size: 0.8rem; font-weight: 800; color: var(--text);
+  font-variant-numeric: tabular-nums;
+  border-inline-start: 1px solid var(--border-strong);
+  border-bottom: 1px solid var(--border);
+}
+.rt-total-zero { color: var(--muted); opacity: 0.5; font-weight: 600; }
+
+/* Shifts nobody is on belong to no worker row and would otherwise vanish from
+   the week entirely. */
+.rt-open-row .rt-worker,
+.rt-open-row .rt-cell,
+.rt-open-row .rt-total { border-top: 2px solid var(--border-strong); }
+.rt-open-label {
+  font-size: 0.7rem; font-weight: 800; color: var(--short);
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.rt-chip-open {
+  background: var(--cov-soft); border-style: dashed; border-color: var(--cov);
+  flex-direction: row; align-items: center; justify-content: space-between;
+  gap: 8px; padding-inline-end: 7px;
+}
+.rt-chip-open::after { display: none; }
+.rt-chip-need { font-size: 0.68rem; font-weight: 800; color: var(--cov); font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: reduce) { .rt-chip { transition: none; } }

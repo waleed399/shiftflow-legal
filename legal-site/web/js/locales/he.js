@@ -149,6 +149,11 @@ export default {
       wrongDept: '🔒 מח׳ = מחלקה לא נכונה',
       shiftFull: '— = המשמרת מלאה',
     },
+    rota: {
+      total: 'סה״כ',
+      openShifts: 'משמרות פתוחות',
+      legendBlank: 'תא ריק = לא עובד',
+    },
     cell: {
       dept: 'מח׳',
       twelveH: '12ש',

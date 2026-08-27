@@ -149,6 +149,11 @@ export default {
       wrongDept: '🔒 dept = wrong department',
       shiftFull: '— = shift full',
     },
+    rota: {
+      total: 'Total',
+      openShifts: 'Open shifts',
+      legendBlank: 'A blank cell = not working',
+    },
     cell: {
       dept: 'dept',
       twelveH: '12h',
