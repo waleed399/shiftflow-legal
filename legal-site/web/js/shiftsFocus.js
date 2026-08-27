@@ -84,8 +84,23 @@ export function exitTableFocus() {
   exitFullscreen()
 }
 
+// Which grid focus mode is serving. Told to us by shifts.js, which owns the
+// view state, rather than inferred from the DOM.
+//
+// It WAS inferred, by looking for `.wv-outer` — and that was wrong on exactly
+// the case that matters: an empty week renders an empty state and no grid, so
+// the sniff concluded "not the week view" and offered the DAY bar. Paging back
+// to a week with no shifts left the arrows stepping a day at a time.
+let isWeekView = false
+
+/** Called by syncViewChrome on every render, including the empty-state exits. */
+export function setFocusContext(week) {
+  isWeekView = week
+  syncFocusBars()
+}
+
 /**
- * Show the nav bar that matches the grid on screen, and none when not focused.
+ * Show the nav bar matching the current view, and neither when not focused.
  * The week label is copied from the topbar's rather than recomputed — that
  * element is already correct for the week being viewed, and reading it keeps
  * this module free of imports from shifts.js.
@@ -93,9 +108,8 @@ export function exitTableFocus() {
 export function syncFocusBars() {
   const dayBar  = document.getElementById('focus-daybar')
   const weekBar = document.getElementById('focus-weekbar')
-  const isWeek  = !!document.querySelector('#shifts-content .wv-outer')
-  if (dayBar)  dayBar.style.display  = (active && !isWeek) ? '' : 'none'
-  if (weekBar) weekBar.style.display = (active && isWeek)  ? '' : 'none'
+  if (dayBar)  dayBar.style.display  = (active && !isWeekView) ? '' : 'none'
+  if (weekBar) weekBar.style.display = (active && isWeekView)  ? '' : 'none'
 
   const label = document.getElementById('focus-week-label')
   const src   = document.getElementById('week-label')

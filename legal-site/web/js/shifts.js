@@ -3,7 +3,7 @@ import { apiFetch } from './api.js'
 import { DAYS, MONTHS, DEPT_COLORS, DAY_FULL, AVAIL_ICONS, addDays, isSameDay, toYMD, fmtDate, getWeekStartOf, esc, getInitials, applyAvatars, showToast, toMins, normEnd } from './utils.js'
 import { t } from './i18n.js'
 import { requireWebManage } from './profile.js'
-import { exitTableFocus, syncFocusBars } from './shiftsFocus.js'
+import { exitTableFocus, setFocusContext } from './shiftsFocus.js'
 import {
   exportDay,
   exportWeek,
@@ -168,7 +168,7 @@ export function syncViewChrome() {
 
   // Before syncFilterRow, which decides whether the row exists at all by
   // looking at what is shown inside it.
-  syncFocusBars()
+  setFocusContext(shiftsView === 'week')
   syncFilterRow()
   renderFocusDayNav()
 }
