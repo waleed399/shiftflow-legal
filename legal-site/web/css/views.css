@@ -1351,7 +1351,8 @@ body.dt-focus #view-expand-btn { display: none !important; }
    corners and shadow and takes the whole viewport. */
 body.dt-focus .content-area,
 body.dt-focus .content-area-flush { padding: 0; }
-body.dt-focus .dt-outer { border: none; border-radius: 0; box-shadow: none; }
+body.dt-focus .dt-outer,
+body.dt-focus .wv-outer { border: none; border-radius: 0; box-shadow: none; }
 body.dt-focus #shifts-content { height: 100%; }
 
 /* Floating exit. Fixed to the viewport rather than the topbar, because the

@@ -32,6 +32,7 @@ import {
   STATUS_COLORS, toMins, normEnd,
 } from './shifts.js'
 import { renderFilterBar } from './shiftsFilterBar.js'
+import { syncViewChrome } from './shifts.js'
 
 const coverageState = (assigned, required) =>
   required === 0 ? 'ok' : assigned === 0 ? 'short' : assigned < required ? 'thin' : 'ok'
@@ -66,6 +67,7 @@ export async function renderWeekView() {
 
   if (allActive.length === 0) {
     el.innerHTML = `<div class="empty-state"><p>${t('shifts.noShiftsWeek')}</p></div>`
+    syncViewChrome()
     return
   }
   if (shifts.length === 0) {
@@ -74,6 +76,7 @@ export async function renderWeekView() {
         <p style="color:var(--muted)">${t('shifts.filterNoMatch')}</p>
         <button class="btn-link" style="margin-top:8px" onclick="clearShiftFilters()">${t('shifts.filterClearLink')}</button>
       </div>`
+    syncViewChrome()
     return
   }
 
@@ -86,6 +89,7 @@ export async function renderWeekView() {
   const allWorkers = state.orgWorkers || []
   if (allWorkers.length === 0) {
     el.innerHTML = `<div class="empty-state"><p>${t('shifts.noWorkersFound')}</p></div>`
+    syncViewChrome()
     return
   }
 
@@ -106,6 +110,7 @@ export async function renderWeekView() {
         <p style="color:var(--muted)">${t('shifts.noWorkersInDepts')}</p>
         <button class="btn-link" style="margin-top:8px" onclick="clearShiftFilters()">${t('shifts.filterClearLink')}</button>
       </div>`
+    syncViewChrome()
     return
   }
 
@@ -294,4 +299,5 @@ export async function renderWeekView() {
       </div>
     </div>`
   applyAvatars(el)
+  syncViewChrome()
 }

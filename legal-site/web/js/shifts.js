@@ -3,7 +3,7 @@ import { apiFetch } from './api.js'
 import { DAYS, MONTHS, DEPT_COLORS, DAY_FULL, AVAIL_ICONS, addDays, isSameDay, toYMD, fmtDate, getWeekStartOf, esc, getInitials, applyAvatars, showToast } from './utils.js'
 import { t } from './i18n.js'
 import { requireWebManage } from './profile.js'
-import { exitTableFocus } from './shiftsFocus.js'
+import { exitTableFocus, syncFocusBars } from './shiftsFocus.js'
 import {
   exportDay,
   exportWeek,
@@ -162,15 +162,18 @@ export function syncViewChrome() {
   const dayTabs = document.getElementById('day-tabs')
   if (dayTabs) dayTabs.style.display = shiftsView === 'week' ? 'none' : ''
 
-  // Focus mode belongs to the day roster matrix only, and only when there is a
-  // matrix to expand. renderTableView has three exits — no shifts, no workers,
-  // and the real table — and only the last one draws .dt-outer, so its presence
-  // is the honest test. Without this the button sat alone on an otherwise empty
-  // filter row on days with nothing scheduled.
+  // Both grids can be expanded, but only when there is actually a grid: each
+  // renderer has several exits — no shifts, no workers, filtered to nothing —
+  // and only the real one draws its outer element, so its presence is the
+  // honest test. Without this the button sat alone on an otherwise empty filter
+  // row on days with nothing scheduled.
   const expandBtn = document.getElementById('view-expand-btn')
-  const hasTable  = !!document.querySelector('#shifts-content .dt-outer')
-  if (expandBtn) expandBtn.style.display = (shiftsView === 'table' && hasTable) ? '' : 'none'
+  const hasGrid   = !!document.querySelector('#shifts-content .dt-outer, #shifts-content .wv-outer')
+  if (expandBtn) expandBtn.style.display = hasGrid ? '' : 'none'
 
+  // Before syncFilterRow, which decides whether the row exists at all by
+  // looking at what is shown inside it.
+  syncFocusBars()
   syncFilterRow()
   renderFocusDayNav()
 }
@@ -180,9 +183,10 @@ export function setShiftsView(view) {
   _activeFilters = new Set()
   syncViewChrome()
 
-  // Leaving the day roster has to drop out of focus mode too, or the page
-  // chrome would stay hidden on a view that needs it.
-  if (view !== 'table') exitTableFocus()
+  // Switching view drops focus mode. Unreachable while focused — the toggle
+  // lives in the topbar, which focus mode hides — but a stale expanded state
+  // on a freshly rendered view would be unrecoverable, so it stays.
+  exitTableFocus()
 
   // Both remaining views are full-bleed matrices, so the content area is
   // always flush now.

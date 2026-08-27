@@ -24,7 +24,7 @@ export function syncFilterRow() {
     const el = document.getElementById(id)
     return !!el && el.style.display !== 'none'
   }
-  row.style.display = (shown('shift-filter-bar') || shown('view-expand-btn') || shown('focus-daybar')) ? 'flex' : 'none'
+  row.style.display = (shown('shift-filter-bar') || shown('view-expand-btn') || shown('focus-daybar') || shown('focus-weekbar')) ? 'flex' : 'none'
 }
 
 export function renderFilterBar(dayShifts) {
