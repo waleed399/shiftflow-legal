@@ -164,7 +164,7 @@ export async function renderWeekView() {
     const dept   = shift.department?.name || t('shifts.noDepartment')
     return `
       <button class="rt-chip${shift.status === 'DRAFT' ? ' rt-chip-draft' : ''}"
-              style="--dept:${color};--status:${sColor}"
+              style="--dept:${color};--dept-tint:${color}24;--status:${sColor}"
               title="${esc(dept)} · ${t(`shifts.status.${shift.status}`)}"
               onclick="openShiftModal('${shift.id}')">
         <span class="rt-chip-time">${esc(hhmm(block.start))} – ${esc(hhmm(block.end))}</span>
@@ -254,7 +254,7 @@ export async function renderWeekView() {
     }).join('')
 
     return `
-      <tr class="rt-row rt-gap-row" style="--dept:${g.color}">
+      <tr class="rt-row rt-gap-row" style="--dept:${g.color};--dept-tint:${g.color}1c">
         <th class="rt-worker rt-gap-dept" scope="row">
           <span class="rt-worker-inner">
             <span class="rt-dept-swatch"></span>

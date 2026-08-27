@@ -1590,7 +1590,7 @@ body.dt-focus #shifts-content { height: 100%; }
 .rt-chip {
   position: relative; display: flex; flex-direction: column; gap: 1px;
   width: 100%; text-align: start; font: inherit; color: inherit; cursor: pointer;
-  background: var(--white);
+  background: var(--dept-tint, var(--white));
   border: 1px solid var(--border);
   border-inline-start: 3px solid var(--dept, var(--navy));
   border-radius: 8px; padding: 5px 7px; padding-inline-end: 16px;
@@ -1605,12 +1605,15 @@ body.dt-focus #shifts-content { height: 100%; }
   content: ''; position: absolute; top: 7px; inset-inline-end: 6px;
   width: 6px; height: 6px; border-radius: 50%; background: var(--status, var(--navy));
 }
-.rt-chip-draft { border-style: dashed; background: var(--surface-sunken); }
+.rt-chip-draft { border-style: dashed; }
 .rt-chip-time {
   font-size: 0.76rem; font-weight: 800; white-space: nowrap;
   font-variant-numeric: tabular-nums; color: var(--text);
 }
 .rt-chip-dept {
+  /* Deliberately NOT var(--dept): DEPT_COLORS carries amber and green, which
+     at this size on a pale tint of themselves fall to about 2:1. The ground and
+     the stripe carry the department; the label only has to be readable. */
   font-size: 0.62rem; font-weight: 700; color: var(--muted);
   text-transform: uppercase; letter-spacing: 0.04em;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -1644,10 +1647,10 @@ body.dt-focus #shifts-content { height: 100%; }
 
 .rt-gap-row .rt-cell,
 .rt-gap-row .rt-worker,
-.rt-gap-row .rt-total { background: var(--short-soft); }
+.rt-gap-row .rt-total { background: var(--dept-tint, var(--short-soft)); }
 .rt-gap-row:hover .rt-cell,
 .rt-gap-row:hover .rt-worker,
-.rt-gap-row:hover .rt-total { background: var(--short-soft); filter: brightness(0.98); }
+.rt-gap-row:hover .rt-total { background: var(--dept-tint, var(--short-soft)); filter: brightness(0.97); }
 .rt-gap-row .rt-cell-off { opacity: 0.55; }
 /* The department is the row's identity here, so it gets the stripe the chips
    carry in the roster half. */
