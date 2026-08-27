@@ -725,7 +725,8 @@ body.web-locked #btn-create-shifts { display: none !important; }
 
 /* ── Availability view ── */
 .avail-progress-wrap {
-  display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+  flex: none;  /* a flex child of the workspace column — never let it be squeezed */
 }
 .avail-progress-bar {
   flex: 1; max-width: 320px; height: 8px; border-radius: 99px;
@@ -1440,8 +1441,26 @@ body.dt-focus #shifts-content { height: 100%; }
    across the top, one bordered cell per worker x day. It was a CSS-grid
    pseudo-table before, which read as a list of rows rather than something you
    scan down a column. The preference chips inside the cells are unchanged. */
-.av-outer { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); background: var(--white); }
-.av-scroll { overflow: auto; max-height: calc(100vh - 260px); }
+/* Fills the workspace, the way the shift grids do. It used to be a
+   natural-height card in a padded, page-scrolling area with a
+   `max-height: calc(100vh - 260px)` cap — a magic number that could not know
+   the real height of the topbar and the progress row above it, so it stopped
+   short and left the bottom of the screen empty while ALSO nesting its own
+   scroller inside the page's. Now the area is the flex column, the card is the
+   flex child, and there is exactly one scroller: .av-scroll. */
+.content-area:has(.av-outer) {
+  padding: 16px 20px 20px; overflow: hidden;
+  display: flex; flex-direction: column; min-height: 0;
+}
+.content-area:has(.av-outer) #avail-content {
+  flex: 1; min-height: 0; display: flex; flex-direction: column;
+}
+.av-outer {
+  display: flex; flex-direction: column; flex: 1; min-height: 0;
+  border-radius: 12px; overflow: hidden;
+  border: 1px solid var(--border); background: var(--white);
+}
+.av-scroll { overflow: auto; flex: 1; min-height: 0; overscroll-behavior: contain; }
 .av-table { border-collapse: collapse; width: 100%; }
 
 .av-corner {
