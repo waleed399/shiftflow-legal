@@ -151,7 +151,10 @@ export default {
     },
     rota: {
       total: 'סה״כ',
-      openShifts: 'משמרות פתוחות',
+      needsStaff: 'חסרים עובדים',
+      scheduled: 'משובצים',
+      needs: 'חסרים {{n}}',
+      legendNeeds: 'חסרים N = מקומות שנותרו לאייש',
       legendBlank: 'תא ריק = לא עובד',
     },
     cell: {

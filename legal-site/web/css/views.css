@@ -1593,7 +1593,7 @@ body.dt-focus #shifts-content { height: 100%; }
   background: var(--white);
   border: 1px solid var(--border);
   border-inline-start: 3px solid var(--dept, var(--navy));
-  border-radius: 8px; padding: 5px 16px 5px 7px;
+  border-radius: 8px; padding: 5px 7px; padding-inline-end: 16px;
   transition: box-shadow 0.12s;
 }
 .rt-chip:hover { box-shadow: 0 2px 8px rgba(15,23,42,0.13); }
@@ -1625,21 +1625,48 @@ body.dt-focus #shifts-content { height: 100%; }
 }
 .rt-total-zero { color: var(--muted); opacity: 0.5; font-weight: 600; }
 
-/* Shifts nobody is on belong to no worker row and would otherwise vanish from
-   the week entirely. */
-.rt-open-row .rt-worker,
-.rt-open-row .rt-cell,
-.rt-open-row .rt-total { border-top: 2px solid var(--border-strong); }
-.rt-open-label {
-  font-size: 0.7rem; font-weight: 800; color: var(--short);
-  text-transform: uppercase; letter-spacing: 0.05em;
+/* ── The gap block ───────────────────────────────────────────────────────────
+   Shifts nobody has filled belong to no worker row, so they need a home of
+   their own. It sits above the roster because it is a to-do list, and it is
+   split into one row per department because "who is missing" is only useful as
+   "who is missing, where". */
+.rt-band > * { background: var(--surface-sunken); border-bottom: 1px solid var(--border); }
+.rt-band-label {
+  font-size: 0.68rem; font-weight: 800; letter-spacing: 0.06em;
+  text-transform: uppercase; padding: 6px 11px;
 }
-.rt-chip-open {
-  background: var(--cov-soft); border-style: dashed; border-color: var(--cov);
-  flex-direction: row; align-items: center; justify-content: space-between;
-  gap: 8px; padding-inline-end: 7px;
+.rt-band-gap > * { background: var(--short-soft); }
+.rt-band-gap .rt-band-label { color: var(--short); }
+/* Closes the block and opens the roster in one rule, so the two halves of the
+   grid never look like one long list of rows. */
+.rt-band-scheduled > * { border-top: 2px solid var(--border-strong); }
+.rt-band-scheduled .rt-band-label { color: var(--muted); }
+
+.rt-gap-row .rt-cell,
+.rt-gap-row .rt-worker,
+.rt-gap-row .rt-total { background: var(--short-soft); }
+.rt-gap-row:hover .rt-cell,
+.rt-gap-row:hover .rt-worker,
+.rt-gap-row:hover .rt-total { background: var(--short-soft); filter: brightness(0.98); }
+.rt-gap-row .rt-cell-off { opacity: 0.55; }
+/* The department is the row's identity here, so it gets the stripe the chips
+   carry in the roster half. */
+.rt-gap-dept { border-inline-start: 3px solid var(--dept, var(--navy)); }
+.rt-dept-swatch {
+  width: 10px; height: 10px; border-radius: 3px; flex: none;
+  background: var(--dept, var(--navy));
 }
-.rt-chip-open::after { display: none; }
-.rt-chip-need { font-size: 0.68rem; font-weight: 800; color: var(--cov); font-variant-numeric: tabular-nums; }
+.rt-gap-total { color: var(--short); }
+
+.rt-chip-gap {
+  background: var(--white); border-color: var(--cov); border-style: dashed;
+  padding-inline-end: 7px;
+}
+.rt-chip-gap::after { display: none; }
+.rt-chip-gap .rt-chip-time { color: var(--text); }
+.rt-chip-need {
+  font-size: 0.66rem; font-weight: 800; color: var(--cov);
+  text-transform: uppercase; letter-spacing: 0.03em;
+}
 
 @media (prefers-reduced-motion: reduce) { .rt-chip { transition: none; } }

@@ -193,35 +193,82 @@ export async function renderWeekView() {
       </tr>`
   }).join('')
 
-  // ── Open-shift row ──
-  // Everything the worker rows structurally cannot show: a shift with fewer
-  // people on it than it needs belongs to no one, so without this row an
-  // unstaffed day looks identical to a quiet one.
-  let anyOpen = false
-  const openCells = days.map(({ ymd }) => {
-    const short = (byDay.get(ymd) || []).filter(s => (s.assignments?.length || 0) < (s.requiredWorkers || 0))
-    if (short.length === 0) return '<td class="rt-cell rt-cell-off"></td>'
-    anyOpen = true
-    return `<td class="rt-cell">${short.map(s => {
-      const assigned = s.assignments?.length || 0
-      const required = s.requiredWorkers || 0
-      return `
-        <button class="rt-chip rt-chip-open wb-state-${coverageState(assigned, required)}"
-                style="--dept:${getDeptColor(s.department?.id)}"
-                title="${esc(s.department?.name || t('shifts.noDepartment'))}"
-                onclick="openShiftModal('${s.id}')">
-          <span class="rt-chip-time">${esc(hhmm(s.startTime))} – ${esc(hhmm(s.endTime))}</span>
-          <span class="rt-chip-need">${assigned}/${required}</span>
-        </button>`
-    }).join('')}</td>`
+  // ── Gap block ──
+  // Shifts nobody has filled belong to no worker row, so without this block
+  // they vanish from the week entirely. It sits ABOVE the roster because it is
+  // the manager's to-do list, and it splits by DEPARTMENT because "who is
+  // missing" is only answerable as "who is missing, where" — a colour on a chip
+  // made that a lookup rather than something you can read.
+  const visibleDays = new Set(days.map(d => d.ymd))
+  const gapsByDept = new Map()
+  for (const s of shifts) {
+    const ymd = s.date.substring(0, 10)
+    if (!visibleDays.has(ymd)) continue
+    const assigned = s.assignments?.length || 0
+    const required = s.requiredWorkers || 0
+    const missing  = required - assigned
+    if (missing <= 0) continue
+
+    const id = s.department?.id || '__none'
+    if (!gapsByDept.has(id)) {
+      gapsByDept.set(id, {
+        name:  s.department?.name || t('shifts.noDepartment'),
+        color: getDeptColor(s.department?.id),
+        days:  new Map(),
+        total: 0,
+      })
+    }
+    const g = gapsByDept.get(id)
+    if (!g.days.has(ymd)) g.days.set(ymd, [])
+    g.days.get(ymd).push({ shift: s, assigned, required, missing })
+    g.total += missing
+  }
+  const gapDepts = [...gapsByDept.values()].sort((a, b) => a.name.localeCompare(b.name))
+  for (const g of gapDepts) {
+    // Emptiest first within a day: a 0/2 is a different problem from a 2/3.
+    for (const list of g.days.values()) {
+      list.sort((a, b) => a.assigned - b.assigned || a.shift.startTime.localeCompare(b.shift.startTime))
+    }
+  }
+
+  const spacerCells = days.map(() => '<td class="rt-band-cell"></td>').join('')
+  const bandRow = (cls, label) => `
+    <tr class="rt-band ${cls}">
+      <th class="rt-worker rt-band-label" scope="row">${label}</th>
+      ${spacerCells}
+      <td class="rt-band-cell"></td>
+    </tr>`
+
+  const gapRows = gapDepts.map(g => {
+    const dayCells = days.map(({ ymd }) => {
+      const list = g.days.get(ymd) || []
+      if (list.length === 0) return '<td class="rt-cell rt-cell-off"></td>'
+      return `<td class="rt-cell">${list.map(({ shift, assigned, required, missing }) => `
+        <button class="rt-chip rt-chip-gap wb-state-${coverageState(assigned, required)}"
+                style="--dept:${g.color}"
+                title="${esc(g.name)} · ${assigned}/${required}"
+                onclick="openShiftModal('${shift.id}')">
+          <span class="rt-chip-time">${esc(hhmm(shift.startTime))} – ${esc(hhmm(shift.endTime))}</span>
+          <span class="rt-chip-need">${t('shifts.rota.needs', { n: missing })}</span>
+        </button>`).join('')}</td>`
+    }).join('')
+
+    return `
+      <tr class="rt-row rt-gap-row" style="--dept:${g.color}">
+        <th class="rt-worker rt-gap-dept" scope="row">
+          <span class="rt-worker-inner">
+            <span class="rt-dept-swatch"></span>
+            <span class="rt-worker-name">${esc(g.name)}</span>
+          </span>
+        </th>
+        ${dayCells}
+        <td class="rt-total rt-gap-total">${g.total}</td>
+      </tr>`
   }).join('')
 
-  const openRow = anyOpen ? `
-    <tr class="rt-row rt-open-row">
-      <th class="rt-worker rt-open-label" scope="row">${t('shifts.rota.openShifts')}</th>
-      ${openCells}
-      <td class="rt-total rt-total-zero"></td>
-    </tr>` : ''
+  const gapBlock = gapDepts.length === 0 ? '' :
+    bandRow('rt-band-gap', `⚠ ${t('shifts.rota.needsStaff')}`) + gapRows +
+    bandRow('rt-band-scheduled', t('shifts.rota.scheduled'))
 
   el.innerHTML = `
     <div class="wv-outer">
@@ -234,7 +281,7 @@ export async function renderWeekView() {
               <th class="rt-total-head">${t('shifts.rota.total')}</th>
             </tr>
           </thead>
-          <tbody>${workerRows}${openRow}</tbody>
+          <tbody>${gapBlock}${workerRows}</tbody>
         </table>
       </div>
       <div class="dt-legend">
@@ -242,6 +289,7 @@ export async function renderWeekView() {
         <span class="dt-legend-item"><span class="dt-legend-dot" style="background:#94a3b8"></span>${t('shifts.legend.draft')}</span>
         <span class="dt-legend-item"><span class="dt-legend-dot" style="background:#f59e0b"></span>${t('shifts.legend.active')}</span>
         <span class="dt-legend-sep">·</span>
+        <span class="dt-legend-item" style="color:#d97706">${t('shifts.rota.legendNeeds')}</span>
         <span class="dt-legend-item">${t('shifts.rota.legendBlank')}</span>
       </div>
     </div>`

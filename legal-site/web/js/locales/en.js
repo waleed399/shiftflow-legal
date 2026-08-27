@@ -151,7 +151,10 @@ export default {
     },
     rota: {
       total: 'Total',
-      openShifts: 'Open shifts',
+      needsStaff: 'Needs staff',
+      scheduled: 'Scheduled',
+      needs: 'needs {{n}}',
+      legendNeeds: 'needs N = places still to fill',
       legendBlank: 'A blank cell = not working',
     },
     cell: {
