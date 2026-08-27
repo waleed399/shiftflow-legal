@@ -18,7 +18,7 @@
 // modal. The day roster matrix is where a manager assigns.
 //
 // The cost of the shape is that a shift nobody is on belongs to no row and
-// would simply vanish. The "open shifts" row at the foot carries them, so an
+// would simply vanish. The gap block beneath the roster carries them, so an
 // unstaffed Tuesday morning is still visible from the week view.
 //
 // Public surface:
@@ -184,10 +184,11 @@ export async function renderWeekView() {
 
   // ── Gap block ──
   // Shifts nobody has filled belong to no worker row, so without this block
-  // they vanish from the week entirely. It sits ABOVE the roster because it is
-  // the manager's to-do list, and it splits by DEPARTMENT because "who is
-  // missing" is only answerable as "who is missing, where" — a colour on a chip
-  // made that a lookup rather than something you can read.
+  // they vanish from the week entirely. It sits BELOW the roster — the roster
+  // is what the week IS, the gaps are what is left to do about it — and it
+  // splits by DEPARTMENT because "who is missing" is only answerable as "who is
+  // missing, where"; a colour on a chip made that a lookup rather than
+  // something you can read.
   const visibleDays = new Set(days.map(d => d.ymd))
   const gapsByDept = new Map()
   for (const s of shifts) {
@@ -251,9 +252,13 @@ export async function renderWeekView() {
       </tr>`
   }).join('')
 
-  const gapBlock = gapDepts.length === 0 ? '' :
-    bandRow('rt-band-gap', `⚠ ${t('shifts.rota.needsStaff')}`) + gapRows +
-    bandRow('rt-band-scheduled', t('shifts.rota.scheduled'))
+  // The roster leads and the gaps follow. The two band rows only appear when
+  // there ARE gaps: with nothing below it, a "scheduled" label is a header for
+  // the one thing on screen, and the whole point of the pair is to divide.
+  const gapBlock = gapDepts.length === 0 ? ''
+    : bandRow('rt-band-gap', `⚠ ${t('shifts.rota.needsStaff')}`) + gapRows
+  const scheduledBand = gapDepts.length === 0 ? ''
+    : bandRow('rt-band-scheduled', t('shifts.rota.scheduled'))
 
   el.innerHTML = `
     <div class="wv-outer">
@@ -265,7 +270,7 @@ export async function renderWeekView() {
               ${dayHeads}
             </tr>
           </thead>
-          <tbody>${gapBlock}${workerRows}</tbody>
+          <tbody>${scheduledBand}${workerRows}${gapBlock}</tbody>
         </table>
       </div>
       <div class="dt-legend">

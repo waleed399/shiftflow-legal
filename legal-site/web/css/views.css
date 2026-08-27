@@ -1623,11 +1623,13 @@ body.dt-focus #shifts-content { height: 100%; }
   font-size: 0.68rem; font-weight: 800; letter-spacing: 0.06em;
   text-transform: uppercase; padding: 6px 11px;
 }
-.rt-band-gap > * { background: var(--short-soft); }
-.rt-band-gap .rt-band-label { color: var(--short); }
-/* Closes the block and opens the roster in one rule, so the two halves of the
+/* Closes the roster and opens the gaps in one rule, so the two halves of the
    grid never look like one long list of rows. */
-.rt-band-scheduled > * { border-top: 2px solid var(--border-strong); }
+.rt-band-gap > * {
+  background: var(--short-soft);
+  border-top: 2px solid var(--border-strong);
+}
+.rt-band-gap .rt-band-label { color: var(--short); }
 .rt-band-scheduled .rt-band-label { color: var(--muted); }
 
 .rt-gap-row .rt-cell,
