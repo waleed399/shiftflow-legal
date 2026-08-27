@@ -1515,7 +1515,7 @@ body.dt-focus #shifts-content { height: 100%; }
 /* The header and the worker column both pin, so a long roster stays legible
    while scrolling in either direction. The corner pins on both axes and must
    therefore outrank both. */
-.rt-corner, .rt-day, .rt-total-head {
+.rt-corner, .rt-day {
   position: sticky; top: 0; z-index: 3;
   background: var(--chrome); border-bottom: 2px solid var(--border);
   padding: 8px 11px 7px; text-align: start; vertical-align: bottom;
@@ -1538,12 +1538,6 @@ body.dt-focus #shifts-content { height: 100%; }
   font-variant-numeric: tabular-nums;
 }
 .rt-day-cov-none { color: var(--muted); opacity: 0.55; font-weight: 600; }
-.rt-total-head {
-  min-width: 74px; text-align: end;
-  font-size: 0.72rem; font-weight: 800; color: var(--muted);
-  text-transform: uppercase; letter-spacing: 0.05em;
-  border-inline-start: 1px solid var(--border-strong);
-}
 
 /* The one coverage scale, bound on the day header and inherited by its meter
    and count. Shared with the open-shift chips, which bind it themselves. */
@@ -1585,8 +1579,7 @@ body.dt-focus #shifts-content { height: 100%; }
 .rt-cell-off { background: var(--surface-sunken); }
 
 .rt-row:hover .rt-worker,
-.rt-row:hover .rt-cell,
-.rt-row:hover .rt-total { background: var(--surface); }
+.rt-row:hover .rt-cell { background: var(--surface); }
 
 .rt-chip {
   position: relative; display: flex; flex-direction: column; gap: 1px;
@@ -1620,15 +1613,6 @@ body.dt-focus #shifts-content { height: 100%; }
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-.rt-total {
-  text-align: end; padding: 7px 11px; background: var(--white);
-  font-size: 0.8rem; font-weight: 800; color: var(--text);
-  font-variant-numeric: tabular-nums;
-  border-inline-start: 1px solid var(--border-strong);
-  border-bottom: 1px solid var(--border);
-}
-.rt-total-zero { color: var(--muted); opacity: 0.5; font-weight: 600; }
-
 /* ── The gap block ───────────────────────────────────────────────────────────
    Shifts nobody has filled belong to no worker row, so they need a home of
    their own. It sits above the roster because it is a to-do list, and it is
@@ -1647,11 +1631,9 @@ body.dt-focus #shifts-content { height: 100%; }
 .rt-band-scheduled .rt-band-label { color: var(--muted); }
 
 .rt-gap-row .rt-cell,
-.rt-gap-row .rt-worker,
-.rt-gap-row .rt-total { background: var(--dept-tint, var(--short-soft)); }
+.rt-gap-row .rt-worker { background: var(--dept-tint, var(--short-soft)); }
 .rt-gap-row:hover .rt-cell,
-.rt-gap-row:hover .rt-worker,
-.rt-gap-row:hover .rt-total { background: var(--dept-tint, var(--short-soft)); filter: brightness(0.97); }
+.rt-gap-row:hover .rt-worker { background: var(--dept-tint, var(--short-soft)); filter: brightness(0.97); }
 .rt-gap-row .rt-cell-off { opacity: 0.55; }
 /* The department is the row's identity here, so it gets the stripe the chips
    carry in the roster half. */
@@ -1660,7 +1642,6 @@ body.dt-focus #shifts-content { height: 100%; }
   width: 10px; height: 10px; border-radius: 3px; flex: none;
   background: var(--dept, var(--navy));
 }
-.rt-gap-total { color: var(--short); }
 
 .rt-chip-gap {
   background: var(--white); border-color: var(--cov); border-style: dashed;

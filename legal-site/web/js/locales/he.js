@@ -150,7 +150,6 @@ export default {
       shiftFull: '— = המשמרת מלאה',
     },
     rota: {
-      total: 'סה״כ',
       needsStaff: 'חסרים עובדים',
       scheduled: 'משובצים',
       needs: 'חסרים {{n}}',

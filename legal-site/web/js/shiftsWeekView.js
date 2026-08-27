@@ -29,7 +29,7 @@ import { DAYS, isSameDay, toYMD, esc, getInitials, applyAvatars } from './utils.
 import { t } from './i18n.js'
 import {
   getDeptColor, getWeekViewDays, applyShiftFilters,
-  STATUS_COLORS, toMins, normEnd,
+  STATUS_COLORS,
 } from './shifts.js'
 import { renderFilterBar } from './shiftsFilterBar.js'
 import { syncViewChrome } from './shifts.js'
@@ -37,24 +37,14 @@ import { syncViewChrome } from './shifts.js'
 const coverageState = (assigned, required) =>
   required === 0 ? 'ok' : assigned === 0 ? 'short' : assigned < required ? 'thin' : 'ok'
 
-function fmtMins(mins) {
-  const h = Math.floor(mins / 60)
-  const m = mins % 60
-  return m === 0 ? `${h}h` : `${h}h ${m}m`
-}
-
 const hhmm = (s) => (s || '').substring(0, 5)
 
 // The hours a worker actually works, which is not always the shift's own span:
 // an assignment may carry a narrower block. Those are the hours the manager
 // assigned, so those are the hours the cell shows.
 function assignedBlock(shift, assignment) {
-  const sStart = toMins(shift.startTime)
-  const sEnd   = normEnd(sStart, toMins(shift.endTime))
-  if (!assignment.blockStart) return { start: shift.startTime, end: shift.endTime, mins: sEnd - sStart }
-  const aStart = toMins(assignment.blockStart)
-  const aEnd   = assignment.blockEnd ? normEnd(aStart, toMins(assignment.blockEnd)) : sEnd
-  return { start: assignment.blockStart, end: assignment.blockEnd || shift.endTime, mins: aEnd - aStart }
+  if (!assignment.blockStart) return { start: shift.startTime, end: shift.endTime }
+  return { start: assignment.blockStart, end: assignment.blockEnd || shift.endTime }
 }
 
 export async function renderWeekView() {
@@ -99,20 +89,18 @@ export async function renderWeekView() {
   // so the presence of one skips the narrowing entirely.
   const visibleDeptIds = new Set(shifts.map(s => s.department?.id).filter(Boolean))
   const anyDeptless    = shifts.some(s => !s.department?.id)
-  const workers = anyDeptless ? allWorkers : allWorkers.filter(w => {
+  const narrowed = anyDeptless ? allWorkers : allWorkers.filter(w => {
     const ids = w.departmentIds || []
     return ids.length === 0 || ids.some(id => visibleDeptIds.has(id))
   })
 
-  if (workers.length === 0) {
-    el.innerHTML = `
-      <div class="empty-state" style="padding-top:40px">
-        <p style="color:var(--muted)">${t('shifts.noWorkersInDepts')}</p>
-        <button class="btn-link" style="margin-top:8px" onclick="clearShiftFilters()">${t('shifts.filterClearLink')}</button>
-      </div>`
-    syncViewChrome()
-    return
-  }
+  // Fails open, and must: narrowing is here to spare the manager a wall of
+  // irrelevant empty rows, never to decide whether the week renders. A week
+  // whose departments happen to have no members would otherwise narrow to
+  // nobody and blank the whole schedule — which read as the shifts vanishing
+  // when you paged between weeks, since whether it happens depends on which
+  // departments that particular week uses.
+  const workers = narrowed.length > 0 ? narrowed : allWorkers
 
   const days = getWeekViewDays()
 
@@ -127,7 +115,6 @@ export async function renderWeekView() {
 
   // workerId|ymd → [{ shift, block }], the grid's cell contents.
   const cells = new Map()
-  const weekMins = new Map()
   for (const s of shifts) {
     const ymd = s.date.substring(0, 10)
     for (const a of s.assignments || []) {
@@ -137,7 +124,6 @@ export async function renderWeekView() {
       const k = `${wid}|${ymd}`
       if (!cells.has(k)) cells.set(k, [])
       cells.get(k).push({ shift: s, block })
-      weekMins.set(wid, (weekMins.get(wid) || 0) + block.mins)
     }
   }
   for (const list of cells.values()) list.sort((a, b) => a.block.start.localeCompare(b.block.start))
@@ -178,7 +164,6 @@ export async function renderWeekView() {
   }
 
   const workerRows = workers.map(w => {
-    const mins = weekMins.get(w.id) || 0
     const dayCells = days.map(({ ymd }) => {
       const list = cells.get(`${w.id}|${ymd}`) || []
       // A blank cell is the rest day. Nothing is drawn in it on purpose.
@@ -194,7 +179,6 @@ export async function renderWeekView() {
           </span>
         </th>
         ${dayCells}
-        <td class="rt-total${mins === 0 ? ' rt-total-zero' : ''}">${mins === 0 ? '—' : esc(fmtMins(mins))}</td>
       </tr>`
   }).join('')
 
@@ -220,13 +204,11 @@ export async function renderWeekView() {
         name:  s.department?.name || t('shifts.noDepartment'),
         color: getDeptColor(s.department?.id),
         days:  new Map(),
-        total: 0,
       })
     }
     const g = gapsByDept.get(id)
     if (!g.days.has(ymd)) g.days.set(ymd, [])
     g.days.get(ymd).push({ shift: s, assigned, required, missing })
-    g.total += missing
   }
   const gapDepts = [...gapsByDept.values()].sort((a, b) => a.name.localeCompare(b.name))
   for (const g of gapDepts) {
@@ -241,7 +223,6 @@ export async function renderWeekView() {
     <tr class="rt-band ${cls}">
       <th class="rt-worker rt-band-label" scope="row">${label}</th>
       ${spacerCells}
-      <td class="rt-band-cell"></td>
     </tr>`
 
   const gapRows = gapDepts.map(g => {
@@ -267,7 +248,6 @@ export async function renderWeekView() {
           </span>
         </th>
         ${dayCells}
-        <td class="rt-total rt-gap-total">${g.total}</td>
       </tr>`
   }).join('')
 
@@ -283,7 +263,6 @@ export async function renderWeekView() {
             <tr>
               <th class="rt-corner">${t('shifts.cell.workers')}</th>
               ${dayHeads}
-              <th class="rt-total-head">${t('shifts.rota.total')}</th>
             </tr>
           </thead>
           <tbody>${gapBlock}${workerRows}</tbody>

@@ -150,7 +150,6 @@ export default {
       shiftFull: '— = shift full',
     },
     rota: {
-      total: 'Total',
       needsStaff: 'Needs staff',
       scheduled: 'Scheduled',
       needs: 'needs {{n}}',
