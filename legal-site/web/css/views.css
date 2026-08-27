@@ -1569,9 +1569,14 @@ body.dt-focus #shifts-content { height: 100%; }
 }
 .wb-meter > i { display: block; height: 100%; border-radius: 2px; background: var(--cov); }
 
+/* The two axes share the header's --chrome so they read as the frame rather
+   than as data. Three grounds, three meanings: --chrome is an axis,
+   --white is a day someone works, --surface-sunken is a rest day. The worker
+   column used to be --white, which made it the same ground as the cells it was
+   supposed to be labelling. */
 .rt-worker {
   position: sticky; inset-inline-start: 0; z-index: 2;
-  background: var(--white); text-align: start; font-weight: 700;
+  background: var(--chrome); text-align: start; font-weight: 700;
   padding: 7px 11px; min-width: 168px;
   border-inline-end: 1px solid var(--border-strong);
   border-bottom: 1px solid var(--border);
@@ -1597,8 +1602,10 @@ body.dt-focus #shifts-content { height: 100%; }
    assigned hours are what stands out white against the week. */
 .rt-cell-off { background: var(--surface-sunken); }
 
-.rt-row:hover .rt-worker,
-.rt-row:hover .rt-cell { background: var(--surface); }
+.rt-row:hover .rt-cell { background: var(--surface-sunken); }
+/* Brightness rather than a background swap, so the axis stays in its own
+   colour family while still responding. */
+.rt-row:hover .rt-worker { filter: brightness(0.96); }
 
 .rt-chip {
   position: relative; display: flex; flex-direction: column; gap: 1px;

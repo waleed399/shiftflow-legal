@@ -399,3 +399,12 @@
 [data-theme="dark"] .prof-dept-chip { background: #162032; border-color: #334155; color: var(--text); }
 [data-theme="dark"] .prof-dept-add-btn { background: var(--navy); }
 [data-theme="dark"] .prof-dept-add-btn:hover { opacity: 0.9; }
+
+/* Rota axes. In dark, --chrome (#16203a) and --surface-sunken (#162032) differ
+   by one channel by eight, so reusing --chrome here would make the worker
+   column and the rest-day cells the same colour — exactly the distinction the
+   axis tint exists to draw. This sits between --bg and --chrome so the three
+   grounds stay apart: axis, worked day (--white #1b2740), rest day. */
+[data-theme="dark"] .rt-worker,
+[data-theme="dark"] .rt-corner,
+[data-theme="dark"] .rt-day { background: #101a30; }
