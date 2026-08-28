@@ -117,7 +117,37 @@ export function renderFilterBar(dayShifts) {
     : ''
 
   bar.innerHTML = `<div class="filter-bar-scroll">${clearBtn}${understaffedChip}${chips}${deptPicker}</div>`
+  positionDeptMenu()
   syncFilterRow()
+}
+
+/**
+ * Places the menu under its button.
+ *
+ * The menu is position:fixed to escape the chip row's overflow-x clipping,
+ * which means its coordinates are viewport-relative and CSS cannot derive them
+ * from the button. Runs after every render, because the bar is rebuilt whenever
+ * a filter changes and the button may have moved.
+ */
+function positionDeptMenu() {
+  const btn  = document.querySelector('.filter-dd-btn')
+  const menu = document.querySelector('.filter-dd-menu')
+  if (!btn || !menu || menu.hidden) return
+
+  const r = btn.getBoundingClientRect()
+  menu.style.top = `${Math.round(r.bottom + 6)}px`
+
+  // RTL anchors the menu's right edge to the button's, LTR its left.
+  const rtl = getComputedStyle(document.documentElement).direction === 'rtl'
+  if (rtl) {
+    menu.style.right = `${Math.round(window.innerWidth - r.right)}px`
+    menu.style.left = 'auto'
+  } else {
+    // Nudged back inside if the button sits near the right edge.
+    const width = menu.offsetWidth || 200
+    menu.style.left = `${Math.round(Math.min(r.left, window.innerWidth - width - 8))}px`
+    menu.style.right = 'auto'
+  }
 }
 
 // The bar is rebuilt on every filter change, so without remembering this the

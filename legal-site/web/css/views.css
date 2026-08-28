@@ -1539,37 +1539,40 @@ body.dt-focus #shifts-content { height: 100%; }
    day roster's department bands and the availability table's section bands.
    Everything nested inside had been coloured for a light ground, so each of
    those is restated below against the dark one. */
+/* Axes go back to a quiet ground. Navy suited the older, heavier cells; against
+   the pale stripe-and-fill chips it dominated the screen. --surface-sunken is
+   free again now that rest days are blank, so the axes can take the very tint
+   that used to mean "day off" without colliding with anything. */
 .rt-corner, .rt-day {
   position: sticky; top: 0; z-index: 3;
-  background: var(--navy); color: #fff;
-  border-bottom: 2px solid var(--navy-deep);
+  background: var(--surface-sunken);
+  border-bottom: 2px solid var(--border-strong);
   padding: 8px 11px 7px; text-align: start; vertical-align: bottom;
 }
 .rt-corner {
   inset-inline-start: 0; z-index: 4; min-width: 168px;
-  font-size: 0.72rem; font-weight: 800; color: rgba(255,255,255,0.72);
+  font-size: 0.72rem; font-weight: 800; color: var(--muted);
   text-transform: uppercase; letter-spacing: 0.05em;
-  border-inline-end: 1px solid var(--navy-deep);
+  border-inline-end: 1px solid var(--border-strong);
 }
-.rt-day { min-width: 136px; border-inline-end: 1px solid rgba(255,255,255,0.14); }
-/* Was an inset navy rule, invisible now the header IS navy. */
-.rt-today { box-shadow: inset 0 3px 0 #fff; }
+.rt-day { min-width: 136px; border-inline-end: 1px solid var(--border); }
+.rt-today { box-shadow: inset 0 3px 0 var(--navy); }
 .rt-day-name {
-  font-size: 0.72rem; font-weight: 800; color: rgba(255,255,255,0.66);
+  font-size: 0.72rem; font-weight: 800; color: var(--muted);
   text-transform: uppercase; letter-spacing: 0.05em;
 }
-.rt-day-num { font-size: 1.05rem; font-weight: 800; color: #fff; line-height: 1.2; }
+.rt-day-num { font-size: 1.05rem; font-weight: 800; color: var(--text); line-height: 1.2; }
 .rt-day-cov {
   display: flex; align-items: center; gap: 5px; margin-top: 5px;
   font-size: 0.68rem; font-weight: 700; color: var(--cov);
   font-variant-numeric: tabular-nums;
 }
-.rt-cov-num { font-weight: 800; color: #fff; }
+.rt-cov-num { font-weight: 800; color: var(--text); }
 .rt-cov-dot {
   width: 6px; height: 6px; border-radius: 50%; flex: none; background: var(--cov);
 }
 .rt-cov-word { white-space: nowrap; }
-.rt-day-cov-none { color: rgba(255,255,255,0.55); font-weight: 600; }
+.rt-day-cov-none { color: var(--muted); font-weight: 600; }
 
 /* The one coverage scale, bound on the day header and inherited by its meter
    and count. Shared with the open-shift chips, which bind it themselves. */
@@ -1582,27 +1585,25 @@ body.dt-focus #shifts-content { height: 100%; }
    which made it the same ground as the cells it was meant to be labelling. */
 .rt-worker {
   position: sticky; inset-inline-start: 0; z-index: 2;
-  background: var(--navy); color: #fff; text-align: start; font-weight: 700;
+  background: var(--surface-sunken); text-align: start; font-weight: 700;
   padding: 7px 11px; min-width: 168px;
-  border-inline-end: 1px solid var(--navy-deep);
-  border-bottom: 1px solid rgba(255,255,255,0.12);
+  border-inline-end: 1px solid var(--border-strong);
+  border-bottom: 1px solid var(--border);
 }
 .rt-worker-inner { display: flex; align-items: center; gap: 8px; }
-/* Inverted: a navy disc on a navy column would be a hole. */
 .rt-avatar {
   width: 26px; height: 26px; border-radius: 50%; flex: none; overflow: hidden;
   display: flex; align-items: center; justify-content: center;
-  font-size: 0.6rem; font-weight: 800;
-  color: var(--navy); background: rgba(255,255,255,0.92);
+  font-size: 0.6rem; font-weight: 800; color: #fff; background: var(--navy);
 }
 .rt-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .rt-worker-text { display: flex; flex-direction: column; min-width: 0; }
 .rt-worker-name {
-  font-size: 0.82rem; font-weight: 700; color: #fff;
+  font-size: 0.82rem; font-weight: 700; color: var(--text);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .rt-worker-hours {
-  font-size: 0.68rem; font-weight: 600; color: rgba(255,255,255,0.62);
+  font-size: 0.68rem; font-weight: 600; color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
 
@@ -1620,7 +1621,7 @@ body.dt-focus #shifts-content { height: 100%; }
    shadow on chips — so a single gesture produced four different reactions.
    The axis gets --navy-mid, a designed colour rather than a filter. */
 .rt-row:hover .rt-cell { background: var(--row-hover); }
-.rt-row:hover .rt-worker { background: var(--navy-mid); }
+.rt-row:hover .rt-worker { background: var(--chrome); }
 
 /* A soft field of the department's colour, and nothing else. It used to carry
    a fill AND a 1px border AND a 3px stripe AND a status dot — four pieces of
@@ -1691,8 +1692,6 @@ body.dt-focus #shifts-content { height: 100%; }
    has to be taken back off, or the name would be white on a pale tint. */
 .rt-gap-row .rt-cell,
 .rt-gap-row .rt-worker { background: var(--dept-tint, var(--short-soft)); }
-.rt-gap-row .rt-worker,
-.rt-gap-row .rt-worker-name { color: var(--text); }
 .rt-gap-row:hover .rt-cell,
 .rt-gap-row:hover .rt-worker { background: var(--dept-tint-strong, var(--short-soft)); }
 .rt-gap-row .rt-cell-off { opacity: 0.55; }
