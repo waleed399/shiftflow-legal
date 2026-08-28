@@ -128,8 +128,14 @@ export function renderFilterBar(dayShifts) {
     : ''
 
   bar.innerHTML = `<div class="filter-bar-scroll">${clearBtn}${understaffedChip}${chips}${deptPicker}</div>`
-  positionDeptMenu()
   syncFilterRow()
+  // Deferred a frame on purpose. Callers finish laying the page out AFTER this
+  // returns — renderTableView calls renderFilterBar near the top and
+  // syncViewChrome at the very bottom, and syncViewChrome is what reveals the
+  // day-tabs band. Measuring the button now would read a position the band is
+  // about to push down, which is exactly how the menu ended up too high in the
+  // day roster while looking right in the week view, where those tabs are hidden.
+  requestAnimationFrame(positionDeptMenu)
 }
 
 /**
@@ -140,12 +146,21 @@ export function renderFilterBar(dayShifts) {
  * from the button. Runs after every render, because the bar is rebuilt whenever
  * a filter changes and the button may have moved.
  */
+let _positionRetries = 0
+
 function positionDeptMenu() {
   const btn  = document.querySelector('.filter-dd-btn')
   const menu = document.querySelector('.filter-dd-menu')
   if (!btn || !menu || menu.hidden) return
 
   const r = btn.getBoundingClientRect()
+  // A hidden or not-yet-laid-out row measures 0x0, and positioning against that
+  // parks the menu in the top-left corner. Wait for a real box.
+  if (r.width === 0 && r.height === 0) {
+    if (_positionRetries++ < 5) requestAnimationFrame(positionDeptMenu)
+    return
+  }
+  _positionRetries = 0
 
   // Moved to <body> before positioning, and this is not optional.
   //
@@ -201,3 +216,10 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDeptM
 
 window.toggleDeptMenu = toggleDeptMenu
 window.closeDeptMenu  = closeDeptMenu
+
+window.addEventListener('resize', positionDeptMenu)
+// Scrolling moves the button but not a viewport-fixed menu, so follow it.
+// Deliberately NOT closeDeptMenu: re-rendering the view can reset the content
+// area's scroll, which fires a scroll event, which would shut the menu on every
+// department picked — the multi-select bug again by another route.
+window.addEventListener('scroll', positionDeptMenu, { capture: true, passive: true })
