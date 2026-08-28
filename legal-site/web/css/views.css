@@ -274,7 +274,23 @@ body.web-locked #btn-create-shifts { display: none !important; }
 
 /* ── View toggle ── */
 .view-toggle { display: flex; background: var(--bg); border-radius: 8px; padding: 2px; border: 1px solid var(--border); gap: 2px; }
-.view-toggle-btn { width: 30px; height: 30px; border-radius: 6px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); transition: all 0.12s; }
+/* Labelled, not icon-only. Two unlabelled 15px glyphs gave no way to tell a
+   day roster from a week roster without clicking one — the same failure the
+   phone app hit with its weekly-view entry point. */
+.view-toggle-btn {
+  height: 30px; padding: 0 11px; border-radius: 6px; border: none;
+  background: transparent; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  color: var(--muted); transition: all 0.12s;
+  font: inherit; font-size: 0.76rem; font-weight: 700; white-space: nowrap;
+}
+.view-toggle-btn svg { flex: none; }
+/* Below this the topbar has to carry the title, the week nav and three action
+   buttons, so the labels fold away and the icons + tooltips carry it again. */
+@media (max-width: 900px) {
+  .view-toggle-label { display: none; }
+  .view-toggle-btn { padding: 0; width: 30px; }
+}
 .view-toggle-btn:hover { color: var(--navy); }
 .view-toggle-btn.active { background: var(--surface); color: var(--navy); box-shadow: var(--shadow-sm); }
 
