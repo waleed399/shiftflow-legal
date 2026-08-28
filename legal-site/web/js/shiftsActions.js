@@ -10,13 +10,16 @@ import { toYMD, showToast } from './utils.js'
 import { t } from './i18n.js'
 import { requireWebManage } from './profile.js'
 import { loadShifts, getShiftsView } from './shifts.js'
+import { syncFilterRow } from './shiftsFilterBar.js'
 
 export function updateActionBar() {
   const key = toYMD(state.currentWeek)
   const all = state.shiftsCache[key] || []
   const weekActive = all.filter(s => s.status !== 'CANCELLED')
   const bar = document.getElementById('action-bar')
-  if (weekActive.length === 0) { bar.style.display = 'none'; return }
+  // The group shares the filter row now, so every exit has to re-ask that row
+  // whether it still has a reason to exist.
+  if (weekActive.length === 0) { bar.style.display = 'none'; syncFilterRow(); return }
   bar.style.display = 'flex'
 
   // The day roster is the day-scoped view, so that is where publishing a single
@@ -24,7 +27,7 @@ export function updateActionBar() {
   // the condition could never be true again and the day controls silently
   // disappeared. The week roster spans seven days, so it keeps week actions only.
   const showDay = getShiftsView() === 'table'
-  ;['action-label-day', 'btn-publish-day', 'btn-unpublish-day', 'action-bar-sep'].forEach(id => {
+  ;['btn-publish-day', 'btn-unpublish-day'].forEach(id => {
     document.getElementById(id).style.display = showDay ? '' : 'none'
   })
 
@@ -39,6 +42,7 @@ export function updateActionBar() {
   document.getElementById('publish-week-label').textContent = t('shifts.publishWeekCount', { count: weekDraftCount })
   document.getElementById('btn-publish-week').disabled  = weekDraftCount === 0
   document.getElementById('btn-unpublish-week').disabled = !weekActive.some(s => s.status === 'PUBLISHED')
+  syncFilterRow()
 }
 
 export async function publishDay() {

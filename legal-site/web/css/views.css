@@ -99,8 +99,15 @@ body.web-locked #btn-create-shifts { display: none !important; }
 .day-tab.today:not(.active) .day-num { color: var(--red); font-weight: 800; }
 
 /* ── Action bar ── */
-.action-bar { background: var(--chrome); border-bottom: 1px solid var(--border); padding: 8px 28px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.action-bar-label { font-size: 0.78rem; color: var(--chrome-muted); font-weight: 600; margin-right: 4px; }
+/* Was a band of its own — the third of four stacked above the grid. It is now a
+   group inside the filter row: publishing acts on the same thing the filters
+   are scoping, and the row was already there. flex:none so it holds its width
+   while the chips beside it scroll. */
+.action-group {
+  display: flex; align-items: center; gap: 6px;
+  flex: none; padding-inline-start: 10px;
+  border-inline-start: 1px solid var(--border);
+}
 /* These sit on the chrome band with a pale fill and, previously, no border at
    all — so they had no shape and the publish label came in at 3.15:1, under
    the readable threshold. A semantic edge gives them a button silhouette and
@@ -118,7 +125,6 @@ body.web-locked #btn-create-shifts { display: none !important; }
 .btn-publish-day:hover:not(:disabled)   { background: #16a34a; color: white; }
 .btn-unpublish-day { background: #fef2f2; color: #b91c1c; border-color: #dc2626; }
 .btn-unpublish-day:hover:not(:disabled) { background: #dc2626; color: white; }
-.action-bar-sep { width: 1px; height: 20px; background: var(--border); margin: 0 6px; flex-shrink: 0; }
 .btn-publish-week   { background: #f0fdf4; color: #15803d; border-color: #16a34a; }
 .btn-publish-week:hover:not(:disabled)   { background: #16a34a; color: white; }
 .btn-unpublish-week { background: #fef2f2; color: #b91c1c; border-color: #dc2626; }
@@ -1359,7 +1365,7 @@ body.web-locked #btn-create-shifts { display: none !important; }
    that makes the table smaller rather than larger. */
 body.dt-focus aside,
 body.dt-focus #view-shifts > .topbar,
-body.dt-focus #view-shifts > .action-bar,
+body.dt-focus .action-group,
 body.dt-focus #view-shifts > .day-tabs,
 body.dt-focus .fab,
 body.dt-focus #view-expand-btn { display: none !important; }

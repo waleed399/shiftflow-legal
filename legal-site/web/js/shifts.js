@@ -287,8 +287,28 @@ export async function loadShifts() {
 export function applyShiftFilters(shifts) {
   if (_activeFilters.size === 0) return shifts
   return shifts.filter(s => {
-    if (_activeFilters.has('needs_workers') && (s.assignments?.length || 0) >= (s.requiredWorkers || 0)) return false
-    if (_activeFilters.has('understaffed') && (s.assignments?.length || 0) >= (s.requiredWorkers || 0)) return false
+    // Coverage is a GROUP, OR'd within itself and AND'ed with the rest — the
+    // same shape the time-of-day filters below already use. The two used to
+    // carry byte-identical predicates (`assigned >= required`), so they were
+    // one filter wearing two chips.
+    //
+    // The states are the ones coverageState() already draws in the grid, which
+    // is also why the chips are red and amber:
+    //   needs_workers — nobody on it at all
+    //   understaffed  — someone on it, but not enough
+    // Disjoint, so picking both means "anything not fully staffed" rather than
+    // the empty intersection an AND would have produced.
+    const coverage = ['needs_workers', 'understaffed'].filter(k => _activeFilters.has(k))
+    if (coverage.length > 0) {
+      const assigned = s.assignments?.length || 0
+      const required = s.requiredWorkers || 0
+      // required === 0 is fully staffed by definition, never "needs nobody".
+      const state = required === 0 ? 'ok'
+        : assigned === 0 ? 'needs_workers'
+        : assigned < required ? 'understaffed'
+        : 'ok'
+      if (!coverage.includes(state)) return false
+    }
     const timeFilters = ['morning', 'afternoon', 'evening'].filter(k => _activeFilters.has(k))
     if (timeFilters.length > 0) {
       const hour = parseInt(s.startTime?.substring(0, 2) || '0', 10)
