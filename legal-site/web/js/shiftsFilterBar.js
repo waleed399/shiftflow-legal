@@ -127,7 +127,12 @@ export function renderFilterBar(dayShifts) {
        </div>`
     : ''
 
+  // Carried across the rebuild: picking a department re-renders the bar, and
+  // without this the row jumps back to the start each time.
+  const prevScroll = bar.querySelector('.filter-bar-scroll')?.scrollLeft ?? 0
   bar.innerHTML = `<div class="filter-bar-scroll">${clearBtn}${understaffedChip}${chips}${deptPicker}</div>`
+  const scroller = bar.querySelector('.filter-bar-scroll')
+  if (scroller && prevScroll) scroller.scrollLeft = prevScroll
   syncFilterRow()
   // Deferred a frame on purpose. Callers finish laying the page out AFTER this
   // returns — renderTableView calls renderFilterBar near the top and
@@ -198,13 +203,32 @@ let _deptMenuOpen = false
 export function toggleDeptMenu(e) {
   e?.stopPropagation()
   _deptMenuOpen = !_deptMenuOpen
-  _rerenderFilterBar()
+  applyDeptMenuState()
 }
 
 export function closeDeptMenu() {
   if (!_deptMenuOpen) return
   _deptMenuOpen = false
-  _rerenderFilterBar()
+  applyDeptMenuState()
+}
+
+/**
+ * Show or hide the menu in place, WITHOUT re-rendering the bar.
+ *
+ * Rebuilding innerHTML destroys `.filter-bar-scroll` and with it its
+ * scrollLeft. The picker sits at the far end of the chip row, so every open and
+ * close scrolled the row back to the start and moved the button out from under
+ * the pointer — you had to scroll back to it before it would sit right.
+ *
+ * Nothing else in the bar depends on the open state, so there is nothing to
+ * re-render: only `hidden` and aria-expanded change.
+ */
+function applyDeptMenuState() {
+  const menu = document.querySelector('.filter-dd-menu')
+  if (!menu) { _rerenderFilterBar(); return }
+  menu.hidden = !_deptMenuOpen
+  document.querySelector('.filter-dd-btn')?.setAttribute('aria-expanded', String(_deptMenuOpen))
+  if (_deptMenuOpen) requestAnimationFrame(positionDeptMenu)
 }
 
 /** Re-render in place from the shifts the bar was last given. */
