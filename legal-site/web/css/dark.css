@@ -15,6 +15,7 @@
   --text:          #f1f5f9;
   --muted:         #94a3b8;
   --border:        #2c3a52;
+  --row-hover:     rgba(148,163,184,0.10);
   --border-strong: #44546f;
   /* State scale: the hues hold, the soft grounds become tints of the dark
      surface instead of near-white washes that would glare here. */

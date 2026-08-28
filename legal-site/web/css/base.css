@@ -54,6 +54,10 @@
   --thin-soft: #fffbeb;
   --short: #dc2626;
   --short-soft: #fef2f2;
+  /* The single hover wash. A tint of the brand rather than a grey, because the
+     greys in this palette already MEAN something (--surface-sunken is a rest
+     day) and a hover that borrows a semantic colour reads as a state change. */
+  --row-hover: rgba(26,45,79,0.055);
 
   /* ── Typography ── */
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Roboto, sans-serif;

@@ -153,6 +153,7 @@ export default {
       needsStaff: 'Needs staff',
       scheduled: 'Scheduled',
       needs: 'needs {{n}}',
+      legendColour: 'Colour = department',
       legendNeeds: 'needs N = places still to fill',
       legendBlank: 'A blank cell = not working',
     },

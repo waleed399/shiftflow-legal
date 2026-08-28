@@ -153,6 +153,7 @@ export default {
       needsStaff: 'חסרים עובדים',
       scheduled: 'משובצים',
       needs: 'חסרים {{n}}',
+      legendColour: 'צבע = מחלקה',
       legendNeeds: 'חסרים N = מקומות שנותרו לאייש',
       legendBlank: 'תא ריק = לא עובד',
     },

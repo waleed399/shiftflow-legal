@@ -1605,34 +1605,41 @@ body.dt-focus #shifts-content { height: 100%; }
   border-inline-end: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
 }
-/* A rest day. Tinting the empty cells rather than the working ones means the
-   assigned hours are what stands out white against the week. */
-.rt-cell-off { background: var(--surface-sunken); }
+/* A rest day is blank. It used to carry --surface-sunken, which meant most of
+   the grid was grey — most cells ARE rest days — and it collided with the row
+   hover, which was the same grey. Nothing is painted now except actual work. */
 
-.rt-row:hover .rt-cell { background: var(--surface-sunken); }
-/* Brightness rather than a background swap, so the axis stays in its own
-   colour family while still responding. */
-.rt-row:hover .rt-worker { filter: brightness(1.35); }
+/* ONE hover mechanic: the row washes. There were four — a background swap
+   here, brightness up on the navy axis, brightness down on gap rows, and a
+   shadow on chips — so a single gesture produced four different reactions.
+   The axis gets --navy-mid, a designed colour rather than a filter. */
+.rt-row:hover .rt-cell { background: var(--row-hover); }
+.rt-row:hover .rt-worker { background: var(--navy-mid); }
 
+/* A soft field of the department's colour, and nothing else. It used to carry
+   a fill AND a 1px border AND a 3px stripe AND a status dot — four pieces of
+   furniture around four characters of text, inside a cell that was already a
+   bordered box. The fill alone says which department; the grid says who and
+   when. Draft is the SAME colour, outlined instead of filled, so status is one
+   mechanic rather than a second colour scale. */
 .rt-chip {
-  position: relative; display: flex; flex-direction: column; gap: 1px;
+  display: flex; flex-direction: column; gap: 1px;
   width: 100%; text-align: start; font: inherit; color: inherit; cursor: pointer;
   background: var(--dept-tint, var(--white));
-  border: 1px solid var(--border);
-  border-inline-start: 3px solid var(--dept, var(--navy));
-  border-radius: 8px; padding: 5px 7px; padding-inline-end: 16px;
-  transition: box-shadow 0.12s;
+  border: 1px solid transparent;   /* holds the draft outline's space */
+  border-radius: 8px; padding: 5px 8px;
+  transition: background 0.12s;
 }
-.rt-chip:hover { box-shadow: 0 2px 8px rgba(15,23,42,0.13); }
+/* The chip deepens under the pointer — same mechanic as the row wash, a
+   designed colour rather than a shadow or a filter. */
+.rt-chip:hover { background: var(--dept-tint-strong, var(--row-hover)); }
 .rt-chip:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
-.rt-chip + .rt-chip { margin-top: 5px; }
-/* Status is a dot rather than a colour on the chip itself: the stripe already
-   belongs to the department, which is the more useful thing to scan for. */
-.rt-chip::after {
-  content: ''; position: absolute; top: 7px; inset-inline-end: 6px;
-  width: 6px; height: 6px; border-radius: 50%; background: var(--status, var(--navy));
+.rt-chip + .rt-chip { margin-top: 4px; }
+.rt-chip-draft {
+  background: transparent;
+  border-color: var(--dept, var(--navy)); border-style: dashed;
 }
-.rt-chip-draft { border-style: dashed; }
+.rt-chip-draft:hover { background: var(--dept-tint, transparent); }
 .rt-chip-time {
   font-size: 0.76rem; font-weight: 800; white-space: nowrap;
   font-variant-numeric: tabular-nums; color: var(--text);
@@ -1673,7 +1680,7 @@ body.dt-focus #shifts-content { height: 100%; }
 .rt-gap-row .rt-worker,
 .rt-gap-row .rt-worker-name { color: var(--text); }
 .rt-gap-row:hover .rt-cell,
-.rt-gap-row:hover .rt-worker { background: var(--dept-tint, var(--short-soft)); filter: brightness(0.97); }
+.rt-gap-row:hover .rt-worker { background: var(--dept-tint-strong, var(--short-soft)); }
 .rt-gap-row .rt-cell-off { opacity: 0.55; }
 /* The department is the row's identity here, so it gets the stripe the chips
    carry in the roster half. */
@@ -1687,11 +1694,20 @@ body.dt-focus #shifts-content { height: 100%; }
   background: var(--white); border-color: var(--cov); border-style: dashed;
   padding-inline-end: 7px;
 }
-.rt-chip-gap::after { display: none; }
 .rt-chip-gap .rt-chip-time { color: var(--text); }
 .rt-chip-need {
   font-size: 0.66rem; font-weight: 800; color: var(--cov);
   text-transform: uppercase; letter-spacing: 0.03em;
 }
+
+/* Legend keys, drawn as the chips are: filled is scheduled, outlined is draft.
+   Neutral here because the legend explains the SHAPE — the colour it would
+   otherwise pick would imply one department stands for all of them. */
+.rt-key {
+  display: inline-block; width: 18px; height: 11px; border-radius: 3px;
+  vertical-align: -1px; margin-inline-end: 5px;
+}
+.rt-key-filled { background: var(--navy); }
+.rt-key-outlined { border: 1px dashed var(--navy); }
 
 @media (prefers-reduced-motion: reduce) { .rt-chip { transition: none; } }

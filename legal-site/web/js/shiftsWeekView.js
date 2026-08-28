@@ -29,7 +29,6 @@ import { DAYS, isSameDay, toYMD, esc, getInitials, applyAvatars } from './utils.
 import { t } from './i18n.js'
 import {
   getDeptColor, getWeekViewDays, applyShiftFilters,
-  STATUS_COLORS,
 } from './shifts.js'
 import { renderFilterBar } from './shiftsFilterBar.js'
 import { syncViewChrome } from './shifts.js'
@@ -150,12 +149,14 @@ export async function renderWeekView() {
 
   // ── Worker rows ──
   const chip = ({ shift, block }) => {
-    const color  = getDeptColor(shift.department?.id)
-    const sColor = STATUS_COLORS[shift.status] || '#94a3b8'
-    const dept   = shift.department?.name || t('shifts.noDepartment')
+    const color = getDeptColor(shift.department?.id)
+    const dept  = shift.department?.name || t('shifts.noDepartment')
+    // Two alphas of the one department colour: the resting field and the same
+    // field deepened for hover. Status is carried by fill-vs-outline, not by a
+    // second colour, so no status colour is passed any more.
     return `
       <button class="rt-chip${shift.status === 'DRAFT' ? ' rt-chip-draft' : ''}"
-              style="--dept:${color};--dept-tint:${color}24;--status:${sColor}"
+              style="--dept:${color};--dept-tint:${color}26;--dept-tint-strong:${color}40"
               title="${esc(dept)} · ${t(`shifts.status.${shift.status}`)}"
               onclick="openShiftModal('${shift.id}')">
         <span class="rt-chip-time">${esc(hhmm(block.start))} – ${esc(hhmm(block.end))}</span>
@@ -241,7 +242,7 @@ export async function renderWeekView() {
     }).join('')
 
     return `
-      <tr class="rt-row rt-gap-row" style="--dept:${g.color};--dept-tint:${g.color}1c">
+      <tr class="rt-row rt-gap-row" style="--dept:${g.color};--dept-tint:${g.color}1c;--dept-tint-strong:${g.color}2e">
         <th class="rt-worker rt-gap-dept" scope="row">
           <span class="rt-worker-inner">
             <span class="rt-dept-swatch"></span>
@@ -274,10 +275,10 @@ export async function renderWeekView() {
         </table>
       </div>
       <div class="dt-legend">
-        <span class="dt-legend-item"><span class="dt-legend-dot" style="background:#1a2d4f"></span>${t('shifts.legend.published')}</span>
-        <span class="dt-legend-item"><span class="dt-legend-dot" style="background:#94a3b8"></span>${t('shifts.legend.draft')}</span>
-        <span class="dt-legend-item"><span class="dt-legend-dot" style="background:#f59e0b"></span>${t('shifts.legend.active')}</span>
+        <span class="dt-legend-item"><span class="rt-key rt-key-filled"></span>${t('shifts.legend.published')}</span>
+        <span class="dt-legend-item"><span class="rt-key rt-key-outlined"></span>${t('shifts.legend.draft')}</span>
         <span class="dt-legend-sep">·</span>
+        <span class="dt-legend-item">${t('shifts.rota.legendColour')}</span>
         <span class="dt-legend-item" style="color:#d97706">${t('shifts.rota.legendNeeds')}</span>
         <span class="dt-legend-item">${t('shifts.rota.legendBlank')}</span>
       </div>
