@@ -307,6 +307,12 @@ export function toggleShiftFilter(key) {
   _rerenderCurrentView()
 }
 
+/** Clears only the department keys, leaving coverage and time-of-day alone. */
+export function clearDeptFilters() {
+  for (const k of [..._activeFilters]) if (k.startsWith('dept:')) _activeFilters.delete(k)
+  _rerenderCurrentView()
+}
+
 export function clearShiftFilters() {
   _activeFilters = new Set()
   _rerenderCurrentView()
@@ -321,6 +327,7 @@ function _rerenderCurrentView() {
 
 
 window.changeWeek       = changeWeek
+window.clearDeptFilters = clearDeptFilters
 window.publishDay       = publishDay
 window.unpublishDay     = unpublishDay
 window.publishWeek      = publishWeek

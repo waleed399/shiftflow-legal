@@ -1560,9 +1560,15 @@ body.dt-focus #shifts-content { height: 100%; }
 }
 .rt-day-num { font-size: 1.05rem; font-weight: 800; color: #fff; line-height: 1.2; }
 .rt-day-cov {
-  font-size: 0.68rem; font-weight: 800; color: var(--cov);
+  display: flex; align-items: center; gap: 5px; margin-top: 5px;
+  font-size: 0.68rem; font-weight: 700; color: var(--cov);
   font-variant-numeric: tabular-nums;
 }
+.rt-cov-num { font-weight: 800; color: #fff; }
+.rt-cov-dot {
+  width: 6px; height: 6px; border-radius: 50%; flex: none; background: var(--cov);
+}
+.rt-cov-word { white-space: nowrap; }
 .rt-day-cov-none { color: rgba(255,255,255,0.55); font-weight: 600; }
 
 /* The one coverage scale, bound on the day header and inherited by its meter
@@ -1570,11 +1576,6 @@ body.dt-focus #shifts-content { height: 100%; }
 .wb-state-ok    { --cov: var(--ok);    --cov-soft: var(--ok-soft); }
 .wb-state-thin  { --cov: var(--thin);  --cov-soft: var(--thin-soft); }
 .wb-state-short { --cov: var(--short); --cov-soft: var(--short-soft); }
-.wb-meter {
-  height: 4px; border-radius: 2px; margin: 6px 0 3px;
-  background: rgba(255,255,255,0.22); overflow: hidden;
-}
-.wb-meter > i { display: block; height: 100%; border-radius: 2px; background: var(--cov); }
 
 /* Three grounds, three meanings: navy is an axis, --white is a day someone
    works, --surface-sunken is a rest day. The worker column used to be --white,
@@ -1595,9 +1596,14 @@ body.dt-focus #shifts-content { height: 100%; }
   color: var(--navy); background: rgba(255,255,255,0.92);
 }
 .rt-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.rt-worker-text { display: flex; flex-direction: column; min-width: 0; }
 .rt-worker-name {
   font-size: 0.82rem; font-weight: 700; color: #fff;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.rt-worker-hours {
+  font-size: 0.68rem; font-weight: 600; color: rgba(255,255,255,0.62);
+  font-variant-numeric: tabular-nums;
 }
 
 .rt-cell {
@@ -1625,8 +1631,13 @@ body.dt-focus #shifts-content { height: 100%; }
 .rt-chip {
   display: flex; flex-direction: column; gap: 1px;
   width: 100%; text-align: start; font: inherit; color: inherit; cursor: pointer;
+  /* Saturation lives in the 3px stripe; the fill stays near-white. The fill
+     alone was carrying the department at 15% across the whole card, which put
+     strong colour on the largest area on screen — a small saturated edge and a
+     pale field is the same information, far quieter. */
   background: var(--dept-tint, var(--white));
-  border: 1px solid transparent;   /* holds the draft outline's space */
+  border: 1px solid var(--dept-line, var(--border));
+  border-inline-start: 3px solid var(--dept, var(--navy));
   border-radius: 8px; padding: 5px 8px;
   transition: background 0.12s;
 }
@@ -1635,9 +1646,12 @@ body.dt-focus #shifts-content { height: 100%; }
 .rt-chip:hover { background: var(--dept-tint-strong, var(--row-hover)); }
 .rt-chip:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
 .rt-chip + .rt-chip { margin-top: 4px; }
+/* Draft keeps the stripe — department is still the thing you scan for — and
+   loses the fill, so status is fill-vs-outline and never a second colour. */
 .rt-chip-draft {
   background: transparent;
-  border-color: var(--dept, var(--navy)); border-style: dashed;
+  border-color: var(--dept-line, var(--border)); border-style: dashed;
+  border-inline-start-style: solid; border-inline-start-color: var(--dept, var(--navy));
 }
 .rt-chip-draft:hover { background: var(--dept-tint, transparent); }
 .rt-chip-time {
@@ -1708,6 +1722,10 @@ body.dt-focus #shifts-content { height: 100%; }
   vertical-align: -1px; margin-inline-end: 5px;
 }
 .rt-key-filled { background: var(--navy); }
+.rt-key-dot {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  margin-inline-end: 5px; vertical-align: 0;
+}
 .rt-key-outlined { border: 1px dashed var(--navy); }
 
 @media (prefers-reduced-motion: reduce) { .rt-chip { transition: none; } }

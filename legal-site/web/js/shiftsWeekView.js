@@ -25,7 +25,7 @@
 //   renderWeekView
 
 import { state, ensureOrgWorkers } from './state.js'
-import { DAYS, isSameDay, toYMD, esc, getInitials, applyAvatars } from './utils.js'
+import { DAYS, isSameDay, toYMD, esc, getInitials, applyAvatars, toMins, normEnd } from './utils.js'
 import { t } from './i18n.js'
 import {
   getDeptColor, getWeekViewDays, applyShiftFilters,
@@ -38,12 +38,24 @@ const coverageState = (assigned, required) =>
 
 const hhmm = (s) => (s || '').substring(0, 5)
 
+function fmtMins(mins) {
+  const h = Math.floor(mins / 60)
+  const m = mins % 60
+  return m === 0 ? `${h}h` : `${h}h ${m}m`
+}
+
 // The hours a worker actually works, which is not always the shift's own span:
 // an assignment may carry a narrower block. Those are the hours the manager
 // assigned, so those are the hours the cell shows.
 function assignedBlock(shift, assignment) {
-  if (!assignment.blockStart) return { start: shift.startTime, end: shift.endTime }
-  return { start: assignment.blockStart, end: assignment.blockEnd || shift.endTime }
+  const sStart = toMins(shift.startTime)
+  const sEnd   = normEnd(sStart, toMins(shift.endTime))
+  if (!assignment.blockStart) {
+    return { start: shift.startTime, end: shift.endTime, mins: sEnd - sStart }
+  }
+  const aStart = toMins(assignment.blockStart)
+  const aEnd   = assignment.blockEnd ? normEnd(aStart, toMins(assignment.blockEnd)) : sEnd
+  return { start: assignment.blockStart, end: assignment.blockEnd || shift.endTime, mins: aEnd - aStart }
 }
 
 export async function renderWeekView() {
@@ -114,6 +126,7 @@ export async function renderWeekView() {
 
   // workerId|ymd → [{ shift, block }], the grid's cell contents.
   const cells = new Map()
+  const weekMins = new Map()
   for (const s of shifts) {
     const ymd = s.date.substring(0, 10)
     for (const a of s.assignments || []) {
@@ -123,6 +136,7 @@ export async function renderWeekView() {
       const k = `${wid}|${ymd}`
       if (!cells.has(k)) cells.set(k, [])
       cells.get(k).push({ shift: s, block })
+      weekMins.set(wid, (weekMins.get(wid) || 0) + block.mins)
     }
   }
   for (const list of cells.values()) list.sort((a, b) => a.block.start.localeCompare(b.block.start))
@@ -141,8 +155,13 @@ export async function renderWeekView() {
         <div class="rt-day-name">${DAYS[date.getDay()]}</div>
         <div class="rt-day-num">${date.getDate()}</div>
         ${required > 0
-          ? `<div class="wb-meter"><i style="width:${pct}%"></i></div>
-             <div class="rt-day-cov">${assigned}/${required}</div>`
+          ? `<div class="rt-day-cov">
+               <span class="rt-cov-num">${assigned}/${required}</span>
+               <span class="rt-cov-dot"></span>
+               <span class="rt-cov-word">${assigned >= required
+                 ? t('shifts.rota.fullyStaffed')
+                 : t('shifts.rota.understaffed')}</span>
+             </div>`
           : '<div class="rt-day-cov rt-day-cov-none">—</div>'}
       </th>`
   }).join('')
@@ -156,7 +175,7 @@ export async function renderWeekView() {
     // second colour, so no status colour is passed any more.
     return `
       <button class="rt-chip${shift.status === 'DRAFT' ? ' rt-chip-draft' : ''}"
-              style="--dept:${color};--dept-tint:${color}26;--dept-tint-strong:${color}40"
+              style="--dept:${color};--dept-tint:${color}12;--dept-line:${color}33;--dept-tint-strong:${color}24"
               title="${esc(dept)} · ${t(`shifts.status.${shift.status}`)}"
               onclick="openShiftModal('${shift.id}')">
         <span class="rt-chip-time">${esc(hhmm(block.start))} – ${esc(hhmm(block.end))}</span>
@@ -165,6 +184,7 @@ export async function renderWeekView() {
   }
 
   const workerRows = workers.map(w => {
+    const mins = weekMins.get(w.id) || 0
     const dayCells = days.map(({ ymd }) => {
       const list = cells.get(`${w.id}|${ymd}`) || []
       // A blank cell is the rest day. Nothing is drawn in it on purpose.
@@ -176,7 +196,10 @@ export async function renderWeekView() {
         <th class="rt-worker" scope="row">
           <span class="rt-worker-inner">
             <span class="rt-avatar" data-avatar="${esc(w.avatarUrl || '')}">${esc(getInitials(w.name))}</span>
-            <span class="rt-worker-name">${esc(w.name)}</span>
+            <span class="rt-worker-text">
+              <span class="rt-worker-name">${esc(w.name)}</span>
+              ${mins > 0 ? `<span class="rt-worker-hours">${esc(fmtMins(mins))}</span>` : ''}
+            </span>
           </span>
         </th>
         ${dayCells}
@@ -206,11 +229,13 @@ export async function renderWeekView() {
         name:  s.department?.name || t('shifts.noDepartment'),
         color: getDeptColor(s.department?.id),
         days:  new Map(),
+        total: 0,
       })
     }
     const g = gapsByDept.get(id)
     if (!g.days.has(ymd)) g.days.set(ymd, [])
     g.days.get(ymd).push({ shift: s, assigned, required, missing })
+    g.total += missing
   }
   const gapDepts = [...gapsByDept.values()].sort((a, b) => a.name.localeCompare(b.name))
   for (const g of gapDepts) {
@@ -237,7 +262,7 @@ export async function renderWeekView() {
                 title="${esc(g.name)} · ${assigned}/${required}"
                 onclick="openShiftModal('${shift.id}')">
           <span class="rt-chip-time">${esc(hhmm(shift.startTime))} – ${esc(hhmm(shift.endTime))}</span>
-          <span class="rt-chip-need">${t('shifts.rota.needs', { n: missing })}</span>
+          <span class="rt-chip-need">${missing === 1 ? t('shifts.rota.needsOne') : t('shifts.rota.needsMany', { n: missing })}</span>
         </button>`).join('')}</td>`
     }).join('')
 
@@ -257,9 +282,18 @@ export async function renderWeekView() {
   // there ARE gaps: with nothing below it, a "scheduled" label is a header for
   // the one thing on screen, and the whole point of the pair is to divide.
   const gapBlock = gapDepts.length === 0 ? ''
-    : bandRow('rt-band-gap', `⚠ ${t('shifts.rota.needsStaff')}`) + gapRows
+    : bandRow('rt-band-gap', `⚠ ${t('shifts.rota.needsStaff')} · ${t('shifts.rota.openCount', { n: gapDepts.reduce((n, g) => n + g.total, 0) })}`) + gapRows
   const scheduledBand = gapDepts.length === 0 ? ''
     : bandRow('rt-band-scheduled', t('shifts.rota.scheduled'))
+
+  const deptKey = [...new Map(shifts
+    .filter(sh => sh.department?.id)
+    .map(sh => [sh.department.id, sh.department.name])).entries()]
+    .sort((a, b) => a[1].localeCompare(b[1]))
+    .map(([id, name]) => `
+      <span class="dt-legend-item">
+        <span class="rt-key-dot" style="background:${getDeptColor(id)}"></span>${esc(name)}
+      </span>`).join('')
 
   el.innerHTML = `
     <div class="wv-outer">
@@ -278,7 +312,7 @@ export async function renderWeekView() {
         <span class="dt-legend-item"><span class="rt-key rt-key-filled"></span>${t('shifts.legend.published')}</span>
         <span class="dt-legend-item"><span class="rt-key rt-key-outlined"></span>${t('shifts.legend.draft')}</span>
         <span class="dt-legend-sep">·</span>
-        <span class="dt-legend-item">${t('shifts.rota.legendColour')}</span>
+        ${deptKey}
         <span class="dt-legend-item" style="color:#d97706">${t('shifts.rota.legendNeeds')}</span>
         <span class="dt-legend-item">${t('shifts.rota.legendBlank')}</span>
       </div>

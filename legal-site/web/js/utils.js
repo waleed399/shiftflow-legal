@@ -24,7 +24,30 @@ export const AVAIL_ICONS = {
 }
 // Index-based proxy so legacy `MONTHS[i]` callers transparently get the current locale.
 export const MONTHS = new Proxy([], { get(_, k) { const i = Number(k); if (!Number.isInteger(i)) return undefined; const arr = t('months.short'); return Array.isArray(arr) ? arr[i] : undefined } })
-export const DEPT_COLORS = ['#1a2d4f', '#f59e0b', '#0ea5e9', '#22c55e', '#ec4899', '#f97316', '#8b5cf6', '#14b8a6']
+// Eight hues at even spacing around the wheel and near-uniform lightness, so
+// no department shouts louder than another. Interleaved rather than sequential:
+// getDeptColor hashes to an index, so consecutive indices should be maximally
+// different, not neighbouring hues.
+//
+// What this replaced and why it mattered:
+//   • [0] was #1a2d4f — the brand --navy exactly. That department wore the same
+//     colour as the axes and read as chrome rather than as a department.
+//   • #f59e0b sat a hair from --thin (#d97706, "understaffed") and #22c55e from
+//     --ok (#059669, "fully staffed"), so two departments wore the coverage
+//     colours.
+//   • #f59e0b and #f97316 were adjacent hues, and lightness ran from L≈27% to
+//     L≈62% across the set.
+// Keep those three constraints if you ever re-pick these.
+export const DEPT_COLORS = [
+  '#2563eb', // blue
+  '#ea580c', // orange
+  '#7c3aed', // violet
+  '#16a34a', // green
+  '#db2777', // pink
+  '#0891b2', // cyan
+  '#ca8a04', // gold
+  '#c026d3', // fuchsia
+]
 
 export function getWeekStartOf(date, weekStartsOn = 'MONDAY') {
   const d = new Date(date)
