@@ -170,12 +170,19 @@ export async function renderWeekView() {
   const chip = ({ shift, block }) => {
     const color = getDeptColor(shift.department?.id)
     const dept  = shift.department?.name || t('shifts.noDepartment')
-    // Two alphas of the one department colour: the resting field and the same
-    // field deepened for hover. Status is carried by fill-vs-outline, not by a
-    // second colour, so no status colour is passed any more.
+    // Three alphas of the one department colour, no second hue anywhere:
+    //   --dept        the 3px stripe, full strength
+    //   --dept-line   the hairline edge
+    //   --dept-tint   the field, which has to be strong enough to separate the
+    //                 cell from the table's white ground. It sat at 0x12 (~7%)
+    //                 and read as plain white — the stripe was doing all the
+    //                 work. 0x1e (~12%) registers as "this cell is Kitchen"
+    //                 while staying far below the stripe.
+    //   --dept-tint-strong  the same field under the pointer
+    // Status stays fill-vs-outline, so no status colour is passed.
     return `
       <button class="rt-chip${shift.status === 'DRAFT' ? ' rt-chip-draft' : ''}"
-              style="--dept:${color};--dept-tint:${color}12;--dept-line:${color}33;--dept-tint-strong:${color}24"
+              style="--dept:${color};--dept-tint:${color}1e;--dept-line:${color}3d;--dept-tint-strong:${color}30"
               title="${esc(dept)} · ${t(`shifts.status.${shift.status}`)}"
               onclick="openShiftModal('${shift.id}')">
         <span class="rt-chip-time">${esc(hhmm(block.start))} – ${esc(hhmm(block.end))}</span>

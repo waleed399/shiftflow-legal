@@ -1632,10 +1632,11 @@ body.dt-focus #shifts-content { height: 100%; }
 .rt-chip {
   display: flex; flex-direction: column; gap: 1px;
   width: 100%; text-align: start; font: inherit; color: inherit; cursor: pointer;
-  /* Saturation lives in the 3px stripe; the fill stays near-white. The fill
-     alone was carrying the department at 15% across the whole card, which put
-     strong colour on the largest area on screen — a small saturated edge and a
-     pale field is the same information, far quieter. */
+  /* Full saturation lives in the 3px stripe; the fill is the same colour at
+     roughly a tenth of it — enough to separate the cell from the table's white
+     ground and say which department without shouting. Carrying the department
+     in the FILL alone (at 15%, no stripe) put strong colour on the largest area
+     on screen; stripe-plus-pale-field is the same information, far quieter. */
   background: var(--dept-tint, var(--white));
   border: 1px solid var(--dept-line, var(--border));
   border-inline-start: 3px solid var(--dept, var(--navy));
@@ -1647,14 +1648,16 @@ body.dt-focus #shifts-content { height: 100%; }
 .rt-chip:hover { background: var(--dept-tint-strong, var(--row-hover)); }
 .rt-chip:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
 .rt-chip + .rt-chip { margin-top: 4px; }
-/* Draft keeps the stripe — department is still the thing you scan for — and
-   loses the fill, so status is fill-vs-outline and never a second colour. */
+/* Draft is the DASHED EDGE, nothing else — it keeps the stripe and the fill.
+   It used to drop the fill, on the assumption that published is the normal
+   state and draft the exception. In a schedule still being built it is the
+   other way round: nearly everything is a draft, so nearly every chip lost its
+   department colour and the tint appeared only on hover. Status is a border
+   style, department is the colour; neither borrows the other's channel. */
 .rt-chip-draft {
-  background: transparent;
   border-color: var(--dept-line, var(--border)); border-style: dashed;
   border-inline-start-style: solid; border-inline-start-color: var(--dept, var(--navy));
 }
-.rt-chip-draft:hover { background: var(--dept-tint, transparent); }
 .rt-chip-time {
   font-size: 0.76rem; font-weight: 800; white-space: nowrap;
   font-variant-numeric: tabular-nums; color: var(--text);
@@ -1720,11 +1723,15 @@ body.dt-focus #shifts-content { height: 100%; }
   display: inline-block; width: 18px; height: 11px; border-radius: 3px;
   vertical-align: -1px; margin-inline-end: 5px;
 }
-.rt-key-filled { background: var(--navy); }
+.rt-key-filled,
+.rt-key-outlined {
+  border: 1px solid var(--navy);
+  background: color-mix(in srgb, var(--navy) 14%, transparent);
+}
 .rt-key-dot {
   display: inline-block; width: 8px; height: 8px; border-radius: 50%;
   margin-inline-end: 5px; vertical-align: 0;
 }
-.rt-key-outlined { border: 1px dashed var(--navy); }
+.rt-key-outlined { border-style: dashed; }
 
 @media (prefers-reduced-motion: reduce) { .rt-chip { transition: none; } }
