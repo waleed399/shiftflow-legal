@@ -31,6 +31,9 @@ export function renderFilterBar(dayShifts) {
   const bar = document.getElementById('shift-filter-bar')
   if (!bar) return
   _lastShifts = dayShifts
+  // Drop any menu portalled to <body> by the previous render — rebuilding the
+  // bar cannot remove it, since it is no longer inside the bar.
+  document.querySelectorAll('body > .filter-dd-menu').forEach(el => el.remove())
   if (dayShifts.length === 0) { bar.style.display = 'none'; syncFilterRow(); return }
   bar.style.display = ''
 
@@ -143,6 +146,21 @@ function positionDeptMenu() {
   if (!btn || !menu || menu.hidden) return
 
   const r = btn.getBoundingClientRect()
+
+  // Moved to <body> before positioning, and this is not optional.
+  //
+  // position:fixed is relative to the viewport ONLY while no ancestor has a
+  // transform, filter or will-change — any of those makes that ancestor the
+  // containing block instead. #view-shifts carries `.view-enter`, whose
+  // animation has `fill-mode: both`, so it keeps `transform: translateY(0)`
+  // forever after the entrance finishes. The menu was being measured against
+  // the viewport and painted relative to the view, landing low and to the side
+  // by exactly the sidebar width and topbar height.
+  //
+  // Portalling sidesteps the whole class of problem rather than compensating
+  // for this one ancestor.
+  if (menu.parentElement !== document.body) document.body.appendChild(menu)
+
   menu.style.top = `${Math.round(r.bottom + 6)}px`
 
   // RTL anchors the menu's right edge to the button's, LTR its left.
